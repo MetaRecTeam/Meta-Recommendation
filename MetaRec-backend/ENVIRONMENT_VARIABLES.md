@@ -20,11 +20,14 @@
     - `METAREC_TOOL_TEXT_CAP` (default `240`) — max characters kept per bounded free-text string
 
 - product ranking (WP4)
-    - `METAREC_PRODUCT_RANKER` (default `b0`) — selects the `product` domain ranker:
-      `b0` = pre-WP4 generic order (rating, reviews, popularity), no change;
-      `m2` = constraint-aware — enforces the stated hard constraints (budget,
-      brand, category, model) before ranking and drops or explains violations.
-      `b1` (classical relevance + popularity) is reserved and not yet implemented.
+    - `METAREC_PRODUCT_RANKER` (accepts exactly `legacy|domain_v1`, default
+      `legacy`; an unrecognised value falls back to `legacy`) — selects the
+      `product` domain ranker: `legacy` = pre-WP4 generic order (rating,
+      reviews, popularity), byte-identical to B0, no network/ranker access;
+      `domain_v1` (M2) = constraint-aware — enforces the stated hard
+      constraints (budget, brand, category, model) before ranking and drops or
+      explains violations. Flag name and values per the WP4 proposal's runtime
+      contract.
 
 - for live task-progress streaming (`GET /api/status/{task_id}/stream`, used in `main.py`)
     - The frontend watches in-flight recommendation tasks over Server-Sent Events

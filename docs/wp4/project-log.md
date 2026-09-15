@@ -8,7 +8,7 @@ This file is the running work log; `D0-interim-report.md` is the deliverable.
 **Models:** B0 = existing generic order (`_item_score`). B1 = classical BM25 +
 calibrated popularity (+ CF) — *not started*. M2 = constraint-aware hybrid: hard
 eligibility gate → relevance + user affinity + calibrated popularity / head-tail.
-Selected at runtime by `METAREC_PRODUCT_RANKER` (default `b0`).
+Selected at runtime by `METAREC_PRODUCT_RANKER` (accepts `legacy|domain_v1`, default `legacy`).
 
 **Deliverables:** D0 audit + B0 repro + constraint/price analysis · D1 frozen
 dataset + data sheet + parser + missingness report · D2 B0/B1 tuning · D3 M2
@@ -180,7 +180,7 @@ New module `langgraph_metarec/product_constraints.py` (Phase 0's
   empty + `exhausted`.
 
 Wired into `generic_graph.normalize_and_rank`: **only when
-`METAREC_PRODUCT_RANKER` != `b0`** (acceptance criterion 1 — feature-off is
+`METAREC_PRODUCT_RANKER` != `legacy`** (acceptance criterion 1 — feature-off is
 byte-identical to B0, proven by `test_feature_off_matches_b0_ordering`). Filters
 the ranked candidates before the top-10 cut; records the outcome in
 `metadata["constraint_filter"]`; appends an "explained empty" error when

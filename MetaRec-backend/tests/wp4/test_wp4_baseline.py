@@ -41,9 +41,9 @@ def test_labels_match_checker():
 
 
 @pytest.mark.backend_unit
-@pytest.mark.parametrize("flag", [None, "b0"])
+@pytest.mark.parametrize("flag", [None, "legacy"])
 def test_feature_off_matches_b0_ordering(monkeypatch, flag):
-    """Acceptance criterion 1: with METAREC_PRODUCT_RANKER unset or 'b0', the
+    """Acceptance criterion 1: with METAREC_PRODUCT_RANKER unset or 'legacy', the
     product output is exactly the pre-WP4 generic ranking — no filtering."""
     if flag is None:
         monkeypatch.delenv("METAREC_PRODUCT_RANKER", raising=False)

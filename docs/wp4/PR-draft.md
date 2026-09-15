@@ -2,7 +2,7 @@
 
 Draft. First slice of WP4 (Constraint-Aware Product Recommendation,
 [proposal](https://github.com/Hanny658/FYP26-Proposals/tree/main/WP4-product-recommendation)).
-Everything here is **off by default** — `METAREC_PRODUCT_RANKER` defaults to `b0`
+Everything here is **off by default** — `METAREC_PRODUCT_RANKER` defaults to `legacy`
 and product output is unchanged.
 
 ## What's in this PR
@@ -20,7 +20,7 @@ and product output is unchanged.
   so an all-over-budget pool returns empty + an explained error.
 
 Wired into `generic_graph.normalize_and_rank`, **only when
-`METAREC_PRODUCT_RANKER != "b0"`**. Outcome is recorded in
+`METAREC_PRODUCT_RANKER != "legacy"`**. Outcome is recorded in
 `metadata["constraint_filter"]` (`dropped`, `relaxed`, `exhausted`).
 
 **D0 / D1 groundwork.** `tests/wp4/`:

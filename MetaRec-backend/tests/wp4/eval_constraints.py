@@ -217,8 +217,8 @@ def _product_ranker(mode: str):
 
 
 def evaluate() -> Report:
-    """Run every case through the real graph with the M2 constraint filter on."""
-    with _product_ranker("m2"):
+    """Run every case through the real graph with the M2 (domain_v1) constraint filter on."""
+    with _product_ranker("domain_v1"):
         cases = load_cases()
         return Report(cases=[asyncio.run(_run_case(c)) for c in cases])
 

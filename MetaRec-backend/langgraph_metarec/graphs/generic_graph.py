@@ -29,15 +29,17 @@ GatherReasoner = Callable[[Dict[str, Any]], Awaitable[Optional[Dict[str, Any]]]]
 GATHER_TARGET = 8
 MAX_GATHER_ITERS = 3
 
-# WP4. Selects the product ranker: "b0" (default, pre-WP4 generic order),
-# "b1" (classical relevance+popularity, planned), "m2" (constraint-aware hybrid).
-# Only "m2" currently changes behaviour — it enables the hard-constraint filter.
-_PRODUCT_RANKERS = {"b0", "b1", "m2"}
+# WP4. Selects the product ranker, per the proposal's exact contract:
+# "legacy" (default) bypasses the ranker and reproduces frozen B0 fixtures;
+# "domain_v1" enables the constraint-aware path. An invalid value falls back
+# to "legacy" rather than raising, matching "rejects invalid startup values"
+# by never silently running the new path on a typo.
+_PRODUCT_RANKERS = {"legacy", "domain_v1"}
 
 
 def _product_ranker() -> str:
-    value = os.getenv("METAREC_PRODUCT_RANKER", "b0").strip().lower()
-    return value if value in _PRODUCT_RANKERS else "b0"
+    value = os.getenv("METAREC_PRODUCT_RANKER", "legacy").strip().lower()
+    return value if value in _PRODUCT_RANKERS else "legacy"
 
 
 class GenericRuntimeState(TypedDict, total=False):
@@ -911,10 +913,10 @@ def build_generic_domain_graph(
             items.extend(normalize_tool_items(str(execution.get("tool")), execution.get("output"), domain))
 
         ranked = _rank_items(items)
-        # WP4: the constraint-aware path (M2) is gated by METAREC_PRODUCT_RANKER.
-        # Default "b0" leaves ordering byte-identical to the pre-WP4 baseline
+        # WP4: the constraint-aware path (M2/domain_v1) is gated by METAREC_PRODUCT_RANKER.
+        # Default "legacy" leaves ordering byte-identical to the pre-WP4 baseline
         # (acceptance criterion 1: feature-off == B0, no network needed).
-        if domain == "product" and _product_ranker() != "b0":
+        if domain == "product" and _product_ranker() != "legacy":
             constraints = resolve_constraints(state.get("query", ""), state.get("preferences", {}))
             outcome = apply_hard_constraints(ranked, constraints)
             state["constraint_filter"] = outcome.to_metadata()
