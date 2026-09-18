@@ -1,0 +1,176 @@
+{
+  "case_id": "case_02_keyboard_live",
+  "query": "quiet mechanical keyboard under 120 USD for Mac",
+  "items": [
+    {
+      "id": "product_4a31e13d8f2de32c",
+      "domain": "product",
+      "title": "KiiBoom Phantom98 Lite 96% Wireless Mechanical Gaming Keyboard, VIA Custom | Creamy Keyboard with Gasket, 8000mAh Battery, Hot Swap, RGB Backlits, NKRO for Win/Mac (Clear, Mossy Silent Switch)",
+      "subtitle": "$87.19",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61r4BTsQJKL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/KiiBoom-Phantom98-Wireless-Mechanical-Programmable/dp/B0GCFHZC7S/",
+      "rating": 4.7,
+      "reviews_count": 75,
+      "source": "Amazon",
+      "tags": [
+        "$87.19"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_3ef6ce08fa3f58a8",
+      "domain": "product",
+      "title": "Logitech Alto Keys K98M Wireless Mechanical Gasket Keyboard - Graphite | Customizable, clicky, vibration absorbing gasket, white backlit keys, Bluetooth, USB-C charging, for PC, Mac, Laptops",
+      "subtitle": "$109.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/613zl8HXvqL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Logitech-Mechanical-Customizable-Vibration-Absorbing/dp/B0FMD1DGS8/",
+      "rating": 4.4,
+      "reviews_count": 282,
+      "source": "Amazon",
+      "tags": [
+        "$109.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_15896aea1177dd4a",
+      "domain": "product",
+      "title": "SOLAKAKA KI99 Pro Wireless Mechanical Keyboard with Quiet Switch, Hot Swappable Pre-Lubed Switches with RGB Backlit, Gasket Structure Computer Gaming Keyboard (BlackBlue, Silent Switch)",
+      "subtitle": "$79.89",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61tA+J22rYL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/SOLAKAKA-Mechanical-Swappable-Pre-Lubed-Structure/dp/B0FWCG4NDG/",
+      "rating": 4.4,
+      "reviews_count": 119,
+      "source": "Amazon",
+      "tags": [
+        "$79.89"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_9fdd83ecc968fda5",
+      "domain": "product",
+      "title": "KINESIS mWave Quiet Ergonomic Keyboard for Mac (White) | Quiet Mechanical Switches | Bluetooth & USB | Programmable | Backlit | macOS Modifiers & Hotkeys",
+      "subtitle": "$124.95",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61GCR3OZMJL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/KINESIS-Ergonomic-Mechanical-Bluetooth-Programmable/dp/B0G772BRRL/",
+      "rating": 4.4,
+      "reviews_count": 10,
+      "source": "Amazon",
+      "tags": [
+        "$124.95"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_a2506998ce0fae85",
+      "domain": "product",
+      "title": "AUSDOM Wireless Mechanical Silent Office Keyboard, Low-Profile Linear Switches, Tri-Mode BT/2.4G/USB-C Computer Keyboard with Number Pad, Hot Swappable Illuminated Performance Keyboard",
+      "subtitle": "$59.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61TFVB2dQQL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/AUSDOM-Mechanical-Low-Profile-Illuminated-Performance/dp/B0H1BR6687/",
+      "rating": 4.3,
+      "reviews_count": 21,
+      "source": "Amazon",
+      "tags": [
+        "$59.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_7cefc4259cdb9ed4",
+      "domain": "product",
+      "title": "Logitech MX Mechanical Wireless Illuminated Keyboard Tactile - Graphite | Low-profile full-size, 3 device Bluetooth pairing, Smart backlight auto-adjusts, USB-C rechargeable, Up to 15 day battery",
+      "subtitle": "$152.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61++ok6AqtL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Logitech-Mechanical-Illuminated-Performance-Bluetooth/dp/B09LK1P1RD/",
+      "rating": 4.2,
+      "reviews_count": 2200,
+      "source": "Amazon",
+      "tags": [
+        "$152.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_9b35888188a09110",
+      "domain": "product",
+      "title": "Keychron K3 Version 2 QMK 75% Wireless Low-Profile Mechanical Keyboard | Bluetooth 5.1 for 3 devices, USB-C wired, Keychron Launcher, White LED backlight, Brown switches, Compatible with Mac Windows",
+      "subtitle": "$84.00",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61x3nRatR9L._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Keychron-Profile-Wireless-Mechanical-Keyboard/dp/B08LSJ4RHH/",
+      "rating": 4.2,
+      "reviews_count": 805,
+      "source": "Amazon",
+      "tags": [
+        "$84.00"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_b34c11f875f4e02a",
+      "domain": "product",
+      "title": "Logitech MX Mechanical Mini Mac Wireless Keyboard Low-Profile - Space Grey | Tactile quiet mechanical switches, Smart backlit keys, Bluetooth pairs with 3 devices, USB-C rechargeable, 15 days",
+      "subtitle": "$139.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61+6kI9ATAL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Logitech-Mechanical-Illuminated-Low-Profile-Performance/dp/B09LK3JCHX/",
+      "rating": 4.2,
+      "reviews_count": 530,
+      "source": "Amazon",
+      "tags": [
+        "$139.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_20d748fe1db2764c",
+      "domain": "product",
+      "title": "Keychron K8 Wireless Mechanical Keyboard – Silent Red Switch for Quiet Office and Gaming, TKL 87 Keys, Soft White LED Backlight, Bluetooth & USB-C Wired Connectivity, Compatible with Mac and Windows",
+      "subtitle": "$72.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61dBqSe5-bL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Keychron-Wireless-Mechanical-Keyboard-Connectivity/dp/B0DT3F35D4/",
+      "rating": 4.1,
+      "reviews_count": 36,
+      "source": "Amazon",
+      "tags": [
+        "$72.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_8e98661ca370f585",
+      "domain": "product",
+      "title": "X9 Slim Mechanical Keyboard Wireless – Low Profile Red Switches, Triple Mode (Bluetooth + 2.4GHz + USB), Full Size 107-Key with Number Pad, Backlit, Rechargeable – Quiet Typing for Mac and PC",
+      "subtitle": "$32.79",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71sWvvbHlmL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/X9-Performance-Mechanical-Keyboard-Wireless/dp/B0FN7N22YM/",
+      "rating": 4.1,
+      "reviews_count": 33,
+      "source": "Amazon",
+      "tags": [
+        "$32.79"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    }
+  ]
+}

@@ -43,3 +43,12 @@ then label. Synthetic pools are fine for coverage but note it in `notes`.
 `test_no_hard_constraint_violation_is_surfaced` — with the filter on, zero
 labeled violators reach the user. B0 (no filter) leaked 52/52; B1 leaks 0/52.
 `test_filter_does_not_drop_compliant_items` guards the other direction.
+
+## D0 audit and B0 freeze
+
+| file | role |
+|---|---|
+| `audit_candidates.py` | measures field presence, price format, brand, and ASIN recoverability over the live captures |
+| `recheck_stability.py` | re-runs captured queries live (spends SerpApi credits) and compares with the frozen copies |
+| `freeze_b0.py` | writes the B0 strict-API payload for every case to `golden/` |
+| `test_b0_golden.py` | feature-off output must equal `golden/`; also proves the fixtures detect a change |

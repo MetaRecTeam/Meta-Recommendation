@@ -33,6 +33,16 @@ split and constraint fixtures.*
 
 **B0 = `_rank_items(normalize_tool_items("amazon.product.search", <serpapi output>, "product"))[:10]`** — steps 9–11 with the M2 flag off. Nothing between the provider and the strict API touches price or any stated constraint.
 
+### Where the result reaches the screen (frontend)
+
+- `MetaRec-ui/src/ui/Chat.tsx`, `GenericItemsSection` renders items **in the order received**. There is no client-side sorting, so the ranker's order is exactly what the user sees and a ranking change needs no UI change.
+- Each card shows the image, title, domain badge, `subtitle`, rating, review count, source, up to 8 `tags`, `description`, `why`, and a "View source" link (`url`).
+- **There is no price field on the card.** For products, price reaches the screen only as text: as the `subtitle` when the brand is empty (91 % of candidates) and again as a tag chip. The strict API has no numeric price or currency field, and the proposal adds none.
+- The `why` line is the only free-text explanation slot. Today it always reads "Matched the product search query."
+- The Save / Not interested / Purchased chips (`ItemInteractionControls.tsx`) appear for registered users only. Each chip posts `item_id = item.id`, the title-hashed id from section 3.1, plus a small snapshot (`title`, `subtitle`, `source`, `url`).
+- On load, each card fetches existing interactions for the ids on screen (`listItemInteractions`, keyed by item id). By code reading, if a product's id changes between searches its earlier "Saved" state would not show. This has not been observed live.
+- Because the snapshot stores `url` and the ASIN sits inside the url, stored interactions could be re-keyed to ASIN offline if the id scheme changes.
+
 ---
 
 ## 2. B0 reproduction
@@ -46,6 +56,8 @@ split and constraint fixtures.*
 | cases with a violator in the top 3 | 9 / 15 |
 
 Cause: `_item_score` rewards rating + review count, so a well-reviewed item that is 55 % over budget (or the wrong category, or an excluded brand) outranks cheaper compliant items. This is the exact failure the proposal's acceptance criterion 2 targets.
+
+B0 is also frozen at the **strict-API level**, which is what acceptance criterion 1 compares against. `tests/wp4/golden/*.json` holds, for each of the 15 cases, the exact items a client would receive today: the internal `raw` payload removed the way `main._client_safe_item` does it, and every item validated against `RecommendationItemAPI`. `tests/wp4/test_b0_golden.py` checks that with the ranker flag unset or `legacy` the output equals those files, and that switching the ranker on changes at least one of them, so the fixtures are able to detect a change. Regenerate them only if B0 is meant to change: `python -m tests.wp4.freeze_b0`.
 
 ---
 
@@ -102,6 +114,7 @@ Category and brand constraints can therefore only be checked against the title t
 | Item-interaction contract | **frozen** | `ItemInteractionV1` (`business_models.to_interaction_v1`) |
 | Generic-graph metadata shape | **frozen** (+`constraint_filter`) | `generic_graph.recommendation_result` |
 | Constraint fixtures | **frozen — 15 cases** | `tests/wp4/cases/*.json` (12 constraint queries + 3 clean controls, 52 labelled violators; case_01 was transcribed from a log, the other 14 are live SerpApi captures) |
+| B0 strict-API output | **frozen, 15 golden files** | `tests/wp4/golden/` |
 | Ranking dataset (Amazon Reviews 2023 subset) | **not selected**, needs a supervisor decision | — |
 | Split (chronological per the proposal) | **cutoff date not set**, needs a supervisor decision | — |
 | Graded relevance judgements | **not started** — needed for NDCG@10 (D5) | — |
@@ -110,7 +123,7 @@ Category and brand constraints can therefore only be checked against the title t
 
 ## 5. Status
 
-- **Done:** server-side pipeline trace, B0 reproduced offline from frozen candidates and measured, field / ID / price audit measured (section 3), 15 constraint fixtures frozen.
-- **Still open in D0:** trace the frontend leg (`Chat.tsx`, `ItemInteractionControls.tsx`); freeze B0 output at the strict-API level as golden fixtures (acceptance criterion 1 compares against strict API fixtures, whereas the reproduction here compares at the ranking-function level); settle the dataset, the split cutoff and the statistical thresholds with the supervisor.
+- **Done:** server-side and frontend pipeline trace; B0 reproduced offline from frozen candidates and frozen at the strict-API level (15 golden files); field, ID and price audit measured (section 3); 15 constraint fixtures frozen.
+- **Still open, and needs the supervisor:** which Amazon Reviews 2023 category and subset size to use; the chronological split cutoff; the statistical thresholds (bootstrap minimum effect, complex-query margin); the evaluation currency; the missing-price policy; whether the ASIN change counts as in scope.
 - **Corrections to the first draft of this report:** missing prices are 2 %, not "about 10 %"; no price ranges were observed; the "observed ID drift" was unsupported when first written and is now measured (section 3.1); brand is populated for 9 % of candidates and only when the query names a brand.
 - A prototype of the hard-constraint gate exists behind the flag (`product_constraints.py`). It is not part of D0.
