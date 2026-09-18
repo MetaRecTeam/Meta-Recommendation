@@ -55,6 +55,8 @@ split and constraint fixtures.*
 | cases with a violator at rank 1 | 6 / 15 |
 | cases with a violator in the top 3 | 9 / 15 |
 
+**How to read the 100 %.** It is true by construction and should not be quoted as a finding. Each pool holds at most 10 products, B0 shows the top 10, and B0 removes nothing, so every violating product necessarily reaches the user. The evidence that matters is different: 52 of the 146 products (36 %) that the provider returned break the user's own stated constraints, and in 9 of 15 queries a violating product ranks in the top 3 (rank 1 in 6). The labels behind these counts were assigned by applying each query's stated constraints to the returned titles and prices; they are a judgment and should be spot-checked against the case files in `tests/wp4/cases/`.
+
 Cause: `_item_score` rewards rating + review count, so a well-reviewed item that is 55 % over budget (or the wrong category, or an excluded brand) outranks cheaper compliant items. This is the exact failure the proposal's acceptance criterion 2 targets.
 
 B0 is also frozen at the **strict-API level**, which is what acceptance criterion 1 compares against. `tests/wp4/golden/*.json` holds, for each of the 15 cases, the exact items a client would receive today: the internal `raw` payload removed the way `main._client_safe_item` does it, and every item validated against `RecommendationItemAPI`. `tests/wp4/test_b0_golden.py` checks that with the ranker flag unset or `legacy` the output equals those files, and that switching the ranker on changes at least one of them, so the fixtures are able to detect a change. Regenerate them only if B0 is meant to change: `python -m tests.wp4.freeze_b0`.
