@@ -51,35 +51,37 @@ Cause: `_item_score` rewards rating + review count, so a well-reviewed item that
 
 ## 3. Audit
 
-### 3.1 IDs — **synthetic, not catalogue-stable**
+### 3.1 IDs: derived from title and link, and the title changes between runs
 
 The strict-API `id` for a product is `"product_" + sha1("amazon.product.search|" + title + "|" + link)[:16]`.
 
-- The SerpApi Amazon `asin` **is available upstream** but `_amazon_product_search_adapter` does not keep it, so `raw.product_id`/`raw.asin` are always absent and the synthetic hash is always used.
-- Stability depends on `title` **and** `link` being byte-identical across SerpApi responses. Observed drift: `" (Renewed)"` suffixes, tracking params on `link`, `link_clean` vs `link`.
-- The item-interaction seam keys on this `item_id`. A product the user *Saved* or marked *Not interested* will silently fail to re-match if its title or link drifts → affinity/exclusion signals are lost.
-- Acceptance criterion "every ranked or excluded ID comes from input" is *technically* met (the hash is derived from input fields) but the ID is not a stable product key.
-- **→ D1 action:** add `asin` passthrough in the adapter; use `asin` as `item_id` when present, hash only as fallback.
+- The SerpApi Amazon result carries an ASIN, but `_amazon_product_search_adapter` does not keep it, so `raw.product_id` / `raw.asin` are always absent and the hash is always used.
+- **The ASIN is recoverable anyway.** All 140 captured links contain `/dp/<ASIN>` (`python -m tests.wp4.audit_candidates`).
+- **Measured stability** (`python -m tests.wp4.recheck_stability`, three queries re-run live on 18 Sep 2026, 12 products present in both runs): the link never changed (0 of 12), but the title changed for 4 of 12 (33 %). Because the id hashes the title, about one product in three would get a different id on a repeat search. An ASIN-based id would have been identical for 12 of 12.
+- The item-interaction seam keys on this `item_id`, so an item a user saved or hid could fail to match on a later search. That follows from the measurement above; it has not been observed end to end.
+- The sample is small (3 queries), so read 33 % as an indication rather than a rate.
+- **D1 action:** derive the ASIN from the link (or keep it from the provider) and use it as `item_id`, with the hash only as a fallback.
 
-### 3.2 Prices — display strings, no currency, ~10 % missing
+### 3.2 Prices: display strings with a currency symbol, 2 % missing, and they move between runs
 
-- `price` is a formatted string: `"$129.99"`, ranges `"$10.99 - $20.99"`, or **absent**. No `extracted_price`, no currency field.
-- Currency must be inferred from the symbol; `$` is ambiguous (the app treats `$` as SGD elsewhere, SerpApi Amazon is USD).
-- **~1 in 10 results have no price** (frozen fixtures `case_05`, `case_11`). B0 ignores price entirely, so this is invisible today; M2 must declare a policy (current gate: unknown price → not a budget violation).
-- Ranges: taking the low end is defensible (a buyable variant under budget makes the listing satisfiable) — implemented in `product_constraints.parse_price`.
+- Present for 137 of 140 candidates (98 %); the 3 missing come from two queries. All 137 parse to a number and all use the `$` symbol. No ranges (`"$a - $b"`) appeared in this sample, although `product_constraints.parse_price` handles them.
+- There is no currency field, so currency is inferred from the symbol. `$` is ambiguous: the app treats `$` as SGD elsewhere, while SerpApi Amazon returns USD.
+- **Prices move between runs.** Of the 12 products seen in both runs, the price changed for 7 (58 %), for example $118.99 to $139.99 and $49.99 to $39.99. A budget constraint could pass on one run and fail on the next, so evaluation has to run on frozen snapshots rather than live calls.
+- A policy is still needed for the missing 2 %. The prototype gate currently treats an unknown price as "not a budget violation".
 
-### 3.3 Missing / unreliable fields
+### 3.3 Missing and unreliable fields (measured over 140 live candidates)
 
-| field | availability |
+| field | present |
 |---|---|
-| `title`, `link`, `thumbnail` | present |
-| `rating`, `reviews` | usually present |
-| `price` | ~90 % |
-| `brand` | **inconsistent — null on most rows, populated on some, within the same response** |
-| category / `type` | **never — SerpApi Amazon `organic_results` has no category and the adapter keeps none** |
-| `asin` | present upstream, **dropped by the adapter** |
+| `title`, `rating`, `reviews`, `link`, `thumbnail` | 140 / 140 (100 %) |
+| `price` | 137 / 140 (98 %) |
+| `brand` | 12 / 140 (9 %). Populated in only 2 of 14 queries, the two whose query named a brand (Sony, Logitech); empty for all others |
+| category / `type` | never. No candidate carries such a field |
+| `asin` | not returned as a field, but present in the link for 140 / 140 |
 
-Category and brand constraints can therefore only be checked against the **title** today (M2 does this, conservatively). D1 should evaluate adding `categories`/`asin` from a SerpApi Amazon *product* call or the Amazon Reviews 2023 metadata.
+Two further findings from the live re-run. Only 12 of 30 items (40 %) appeared in both the frozen and the re-run result for the same query, and the relative order of the shared items differed in all three queries. Live retrieval is therefore not repeatable, which is why B0 has to be reproduced from frozen candidate snapshots (acceptance criterion 1 requires no network).
+
+Category and brand constraints can therefore only be checked against the title today. D1 should evaluate the Amazon Reviews 2023 metadata as a source of category and brand.
 
 ### 3.4 Item feedback seam
 
@@ -99,16 +101,16 @@ Category and brand constraints can therefore only be checked against the **title
 | OpenAPI contract | **frozen** | `contracts/metarec-openapi.json` |
 | Item-interaction contract | **frozen** | `ItemInteractionV1` (`business_models.to_interaction_v1`) |
 | Generic-graph metadata shape | **frozen** (+`constraint_filter`) | `generic_graph.recommendation_result` |
-| Constraint fixtures | **frozen — 15 cases** | `tests/wp4/cases/*.json` (12 constraint queries + 3 clean controls, 52 labelled violators; live SerpApi pools) |
-| Ranking dataset (Amazon Reviews 2023 subset) | **not selected** — D1 | — |
-| Leakage-safe split | **not defined** — D1 | — |
+| Constraint fixtures | **frozen — 15 cases** | `tests/wp4/cases/*.json` (12 constraint queries + 3 clean controls, 52 labelled violators; case_01 was transcribed from a log, the other 14 are live SerpApi captures) |
+| Ranking dataset (Amazon Reviews 2023 subset) | **not selected**, needs a supervisor decision | — |
+| Split (chronological per the proposal) | **cutoff date not set**, needs a supervisor decision | — |
 | Graded relevance judgements | **not started** — needed for NDCG@10 (D5) | — |
 
 ---
 
-## 5. Status vs. the plan
+## 5. Status
 
-- **D0 objectives met:** pipeline traced, B0 reproduced and measured, IDs/prices/fields/feedback audited, contracts + constraint fixtures frozen.
-- **Built ahead of sequence (behind a flag, B0 unchanged):** the M2 *hard-eligibility gate* (`product_constraints.py`, `METAREC_PRODUCT_RANKER`) — proposal D3 part 1. Kept because it is in-scope and inert by default; the remaining D1 → D2 → D3 work proceeds in order.
-- **Next (D1):** choose the Amazon Reviews 2023 category, build the ID/price parser + missingness report + leakage-safe split, formalise the 15 fixtures into the frozen evaluation dataset.
-- **Open question for supervisor:** proceed to D1/D2, or continue hardening the D3 gate first? PR target — team-repo branch or fork?
+- **Done:** server-side pipeline trace, B0 reproduced offline from frozen candidates and measured, field / ID / price audit measured (section 3), 15 constraint fixtures frozen.
+- **Still open in D0:** trace the frontend leg (`Chat.tsx`, `ItemInteractionControls.tsx`); freeze B0 output at the strict-API level as golden fixtures (acceptance criterion 1 compares against strict API fixtures, whereas the reproduction here compares at the ranking-function level); settle the dataset, the split cutoff and the statistical thresholds with the supervisor.
+- **Corrections to the first draft of this report:** missing prices are 2 %, not "about 10 %"; no price ranges were observed; the "observed ID drift" was unsupported when first written and is now measured (section 3.1); brand is populated for 9 % of candidates and only when the query names a brand.
+- A prototype of the hard-constraint gate exists behind the flag (`product_constraints.py`). It is not part of D0.

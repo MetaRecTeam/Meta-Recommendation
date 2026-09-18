@@ -143,10 +143,11 @@ cases.
   either add a category/`type` passthrough or accept title-substring matching.
 - SerpApi amazon frequently returns `brand: null`; don't rely on it for the
   brand constraint — fall back to title.
-- `price` is a display string (`"$129.99"`, sometimes a `"$x - $y"` range) —
-  needs parsing; there is no `extracted_price` passthrough. ~1 in 10 results
-  has **no price at all** (cases 05, 11) — policy decision needed: hide, or
-  show flagged as "price unavailable".
+- `price` is a display string (`"$129.99"`) that needs parsing; there is no
+  `extracted_price` passthrough. Measured over 140 live candidates: 3 (2 %)
+  have **no price** (cases 05, 11) and no `"$x - $y"` ranges appeared. A policy
+  decision is still needed: hide, or show flagged as "price unavailable".
+  (Corrected 18 Sep 2026: an earlier draft said "~1 in 10" without measuring.)
 - The current product `PreferenceSpec` (preference_specs.py) is 6 free-text
   fields. Phase 1 needs structured extraction: `budget_range {max, currency}`,
   `category`, `brand_in` / `brand_not_in`, `required_attributes`.
@@ -215,5 +216,5 @@ harness. Still open on the WP4 plan:
 - **D5** — one-command eval reporting Recall@10 / NDCG@10 / MRR@10, p50/p95
   latency, per-slice (complex/keyword, cold/warm, budget/brand/model, missing
   price). Current harness reports violation rate + false-drop only.
-- Price-missing items (~1 in 10) are treated as "unknown → allowed" — confirm
+- Price-missing items (2 %, measured) are treated as "unknown → allowed" — confirm
   this is the intended policy or surface them flagged.
