@@ -1,0 +1,8 @@
+# WP4 D1 dataset: the raw/processed data files themselves never go into git
+# (too large, and the proposal's own reproducibility story is "checksums +
+# the exact processing script", not the data). Checksums, the data sheet, and
+# the scripts that produce/verify this data ARE meant to be tracked normally.
+data/wp4/raw/*.gz
+data/wp4/processed/*.tsv
+data/wp4/processed/*.jsonl
+data/wp4/processed/split/*.tsv
