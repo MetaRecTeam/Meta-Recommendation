@@ -13,9 +13,15 @@
   hand-built constraint test cases already use (keyboards, webcams, monitors
   are routinely listed under Office Products on Amazon), so the hard
   constraints (budget/brand/category/model) are meaningfully testable here.
-- **Licence / access:** publicly downloadable for research use directly from
-  the dataset's own site, no signup or agreement required at the time of
-  download (7 Oct 2026).
+- **Licence and terms.** Checked on 20 Oct 2026. The dataset's homepage
+  (https://amazon-reviews-2023.github.io/) states no licence and no terms of use; it
+  asks users to cite the paper and offers the files for download without a signup. The
+  dataset's Hugging Face listing could not be reached when checked (connection reset),
+  so its licence field was not read. Until that is confirmed, the data is used for
+  academic research only: not redistributed, not published, only derived counts and
+  scores are reported. To confirm with the supervisor.
+- **Citation requested by the dataset.** Hou, Li, He, Yan, Chen, McAuley, "Bridging
+  Language and Items for Retrieval and Recommendation", arXiv:2403.03952, 2024.
 
 ## Raw files and checksums
 
@@ -131,6 +137,30 @@ Separately, 43 items hold `"from 8.99"`-style variant-pricing text, which the
 parser correctly extracts a real number from — those are genuinely priced,
 not missing, and were already (if accidentally) counted correctly before.
 
+### 6. Star ratings, leak-free item features and graded labels (added 20 Oct 2026)
+
+Two gaps in the first pass were closed without changing any file above (their
+checksums below are unchanged).
+
+- **The star rating was not kept.** `extract` wrote only user, item and timestamp. The new
+  `ratings` stage re-streams the raw reviews and writes `ratings_5core.tsv`
+  (user, item, timestamp, rating): 12,845,712 raw lines read, 1,888,667 rows written, none
+  without a rating. Each row is checked against `interactions_5core.tsv` as it is
+  written, so the two files line up row for row.
+- **The catalogue's `rating_number` and `average_rating` leak.** They count reviews through
+  2023, so for a development-period case they include reviews written later, and the
+  target review itself. The `leakfree_features` stage computes what was knowable at each
+  cutoff instead: `item_features_train.tsv` (per item, interactions and mean star rating
+  from train rows only, for scoring dev) and `item_features_train_dev.tsv` (train plus dev,
+  for scoring the locked test when it is opened). 32,289 of the 80,181 items (40.3%) have
+  no train rows yet, because they were first reviewed after the train cutoff.
+- **Graded relevance labels for dev.** `split/dev_graded_relevance.tsv` has one row per dev
+  interaction with the rule decided in the Project Plan: 5 stars = 2, 4 stars = 1, below 4
+  = 0. Of 534,128 dev rows: 406,502 (76.1%) are 2, 55,753 (10.4%) are 1, 71,873 (13.5%) are 0.
+- **What this stage did with the test window.** The ratings file contains the test rows too.
+  Rows whose timestamp falls in the test window (443,817) are counted and skipped; their
+  ratings are not read into any output.
+
 ## Processed outputs and checksums
 
 All in `data/wp4/processed/` (gitignored; checksums below are the
@@ -144,10 +174,56 @@ processing script" requirement).
 | `split/dev.tsv` | 534,128 | `042fb8d487cd1c2556682ff271eab5c65a341a5fd2e19984cce137abc5d4d1ca` |
 | `split/test.tsv` | 443,817 | `79eaf5ff4443aed555e9969b59cc8853b7ea377eb9f48a26eb18645753e79c0c` |
 | `items_5core.jsonl` | 80,181 | `2b35a60e9ec65a814f678670f7c8d79c1ece6658c875613895413e3ece911304` |
+| `ratings_5core.tsv` | 1,888,667 | `4bd9c17684d80710df05aedfc09c18f9c28977a07be10777e1f79e07ddc1b66c` |
+| `item_features_train.tsv` | 80,181 | `b70eb55535dfb73bfaad362e7c3ff020d6e7ede794fc1df2d373271d6119b923` |
+| `item_features_train_dev.tsv` | 80,181 | `720b15599e4582a4fe84192123df96daa9453a06aaae84ec712b71b647f7c1da` |
+| `split/dev_graded_relevance.tsv` | 534,128 | `f41705739dc870f2a4f47c37779106e5f46a0cdac469aeccca9f466d9009ce09` |
 
 Re-running the full pipeline against the raw files above (same checksums)
 reproduces these exact outputs — nothing here depends on live data or
 non-deterministic steps.
+
+## Evaluation candidate pools (the "provider-style candidates")
+
+The proposal asks for frozen provider-style candidates. There are two sets.
+
+- **Live provider candidates.** The 15 captured SerpApi searches in `tests/wp4/cases/` and
+  B0's exact output on them in `tests/wp4/golden/` (frozen in D0).
+- **Candidate pools for the Amazon data.** `scripts/wp4_build_eval_cases.py` makes one case
+  per development interaction: the real next item plus 99 random items that user never
+  touched in train, dev or test, drawn with seed 42. At scoring time each candidate is
+  rendered as a provider-style card (title, price, rating, reviews, brand, category) with
+  `price_missing`, `price_provenance`, `brand_missing` and `main_category_missing` flags.
+  The resulting file `eval/product_dev_v1.jsonl` (534,128 cases, about 1 GB) is not in git.
+  Its SHA-256, in `eval/checksums.sha256`, is
+  `85a5d9536f57cdfdea6ef6372bd5bb22b9ade011adb52d00ee24610a8c46d92b`. It was rebuilt from
+  scratch on 20 Oct 2026 and came out byte-identical.
+- **A known limit.** Negatives are drawn from the whole catalogue, which includes the 32,289
+  items with no train rows (first reviewed after the train cutoff). A candidate can
+  therefore be an item that had no reviews yet at the time of the case.
+- No test-split pools have been built; they are made only when the test is opened.
+
+## Data handling
+
+- **Personal data.** The raw files hold pseudonymous reviewer ids supplied by the dataset,
+  review text and ratings. No names or contact details. MetaRec user data is not used and
+  not published (its interaction table is empty).
+- **Minimization.** Of the 10 fields in a review, the processed files keep user id, product
+  id, timestamp and rating. Of the 14 catalogue fields, 9 are kept, for the 80,181 items
+  that survive the 5-core filter. Review text, images and helpful votes are not copied.
+- **Access.** The files sit in `data/wp4/` on the student's laptop and are gitignored. The
+  repository holds only the scripts, this sheet and the checksums.
+- **Retention.** Kept until the Final Report and oral examination are finished (late
+  November 2026). The raw files can be downloaded again and checked against the checksums
+  above, so they can be deleted earlier. To confirm with the supervisor.
+- **Deletion.** Deleting `data/wp4/raw/`, `data/wp4/processed/` and `eval/*.jsonl` removes
+  every copy the project holds; there is no copy elsewhere.
+- **Locked-test custody.** `split/test.tsv` (443,817 rows, the last 10% of the timeline;
+  SHA-256 `79eaf5ff4443aed555e9969b59cc8853b7ea377eb9f48a26eb18645753e79c0c`) is not used to
+  score, tune or inspect any system. It is opened once, at the end, for the final numbers.
+  Two reads happen that use no test outcome: building dev cases reads it to exclude a user's
+  later items from that user's negatives, and the ratings stages skip its rows. The
+  checksum makes any later change detectable.
 
 ## ID and price parser
 
@@ -178,10 +254,10 @@ with parser provenance. Missing/failed parse is unknown, never zero.").
 
 ## Still open / not yet done
 
-- **ID/identity reconciliation** — this dataset's `parent_asin` and the live
-  SerpApi adapter's ASIN-from-link both refer to the same kind of Amazon
-  identifier, but no code yet maps between "an item in this frozen dataset"
-  and "an item the live system might surface." Whether that mapping is
-  needed depends on how D3/D5 end up using this data.
-- **Graded relevance judgements for NDCG@10** — the recorded scheme (5★→2,
-  4★→1, below→0) is decided but not yet applied to the split files.
+- **ID reconciliation with the live system.** `parent_asin` and the live SerpApi adapter's
+  ASIN-from-link are the same kind of identifier, but no code yet maps a frozen-dataset item
+  to an item the live system might surface. It depends on how D4 uses this data.
+- **The graded labels are not yet used.** `dev_graded_relevance.tsv` exists, but the
+  evaluation scripts still report NDCG with binary relevance, and the leak-free item
+  features are not yet what the runner reads by default.
+- **Licence.** Confirm the licence status with the supervisor (see Source).

@@ -14,6 +14,10 @@ Stages (run via --stage, in order):
   split     - chronological split of the filtered interactions: last 10% of
               the timeline (by time, not by row count) is the locked test
               set, the 10% before that is development, the rest is history.
+  join / missingness - attach catalogue metadata and report what is missing.
+  ratings   - re-stream the raw reviews to keep the star rating, row-aligned with the 5-core file.
+  leakfree_features - item count and mean rating from TRAIN only (and TRAIN+DEV), plus graded
+              relevance labels for dev; the leak-free replacements for the catalogue's rating_number.
   checksum  - SHA-256 every processed output file.
 
 Each stage reads the previous stage's output and writes its own; re-run a
@@ -41,6 +45,15 @@ FILTERED_TSV = PROC_DIR / "interactions_5core.tsv"
 SPLIT_DIR = PROC_DIR / "split"
 ITEMS_JSONL = PROC_DIR / "items_5core.jsonl"
 MIN_CORE = 5
+
+# Added after the first D1 pass, without touching any file above: the star rating was
+# not kept by `extract`, and the catalogue's rating_number / average_rating are counted
+# through 2023 (they include reviews written after the dev period). These are the
+# leak-free replacements, computed only from rows that existed at each cutoff.
+RATINGS_TSV = PROC_DIR / "ratings_5core.tsv"
+FEATURES_TRAIN_TSV = PROC_DIR / "item_features_train.tsv"
+FEATURES_TRAIN_DEV_TSV = PROC_DIR / "item_features_train_dev.tsv"
+DEV_GRADED_TSV = SPLIT_DIR / "dev_graded_relevance.tsv"
 
 
 def log(msg: str) -> None:
@@ -335,11 +348,150 @@ def stage_missingness() -> None:
     log(f"-> {out_path}")
 
 
+def stage_ratings() -> None:
+    """Re-stream the raw reviews and write (user, item, timestamp, rating) for exactly the rows
+    that survived the 5-core filter, in the same order as interactions_5core.tsv.
+
+    A row survives the filter iff its user and its item both survive, so keeping raw rows whose
+    user and item are in the final sets reproduces the filtered file. Every row is checked
+    against interactions_5core.tsv as it is written; any mismatch stops the stage.
+    """
+    for p in (REVIEW_GZ, FILTERED_TSV):
+        if not p.exists():
+            sys.exit(f"missing {p}")
+
+    users, items = set(), set()
+    with open(FILTERED_TSV, encoding="utf-8") as f:
+        for line in f:
+            u, i, _ts = line.rstrip("\n").split("\t")
+            users.add(u)
+            items.add(i)
+    log(f"{len(users):,} users and {len(items):,} items in {FILTERED_TSV.name}")
+
+    n_in = n_out = n_no_rating = 0
+    with gzip.open(REVIEW_GZ, "rt", encoding="utf-8") as fin, \
+         open(FILTERED_TSV, encoding="utf-8") as expected, \
+         open(RATINGS_TSV, "w", encoding="utf-8", newline="\n") as fout:
+        for line in fin:
+            n_in += 1
+            if n_in % 2_000_000 == 0:
+                log(f"  ... {n_in:,} raw lines read, {n_out:,} kept")
+            try:
+                obj = json.loads(line)
+                u, i, ts = obj["user_id"], obj["parent_asin"], int(obj["timestamp"])
+            except (KeyError, ValueError, json.JSONDecodeError):
+                continue  # same rows `extract` skipped
+            if u not in users or i not in items:
+                continue
+            want = expected.readline().rstrip("\n").split("\t")
+            if want != [u, i, str(ts)]:
+                sys.exit(f"row {n_out + 1}: raw gives {[u, i, str(ts)]} but {FILTERED_TSV.name} has {want}")
+            rating = obj.get("rating")
+            if rating is None:
+                n_no_rating += 1
+                rating_text = ""
+            else:
+                rating_text = str(float(rating))
+            fout.write(f"{u}\t{i}\t{ts}\t{rating_text}\n")
+            n_out += 1
+        if expected.readline():
+            sys.exit(f"{FILTERED_TSV.name} has more rows than were found in the raw file")
+    log(f"done: {n_in:,} raw lines read, {n_out:,} rows written ({n_no_rating:,} without a rating)")
+    log(f"-> {RATINGS_TSV} (row-for-row aligned with {FILTERED_TSV.name}: verified)")
+
+
+def _relevance(rating: float | None) -> str:
+    """Graded relevance decided in Project Plan section 6: 5 stars = 2, 4 stars = 1, below 4 = 0."""
+    if rating is None:
+        return ""
+    return "2" if rating >= 5 else "1" if rating >= 4 else "0"
+
+
+def stage_leakfree_features() -> None:
+    """Item features as they stood at each cutoff, plus graded relevance labels for dev.
+
+    item_features_train.tsv      - per item: interactions and mean star rating in TRAIN only
+                                   (what was knowable when scoring dev cases)
+    item_features_train_dev.tsv  - same over TRAIN + DEV (what was knowable when scoring the
+                                   locked test; written now, used only when the test is opened)
+    split/dev_graded_relevance.tsv - for each dev row: user, item, timestamp, rating, relevance
+
+    The ratings file contains the test rows too. Rows whose timestamp falls in the test window are
+    counted and skipped; their ratings are never read into any output.
+    """
+    for p in (RATINGS_TSV, SPLIT_DIR / "split_meta.json", SPLIT_DIR / "train.tsv", SPLIT_DIR / "dev.tsv", ITEMS_JSONL):
+        if not p.exists():
+            sys.exit(f"missing {p} — run the earlier stages first")
+    meta = json.loads((SPLIT_DIR / "split_meta.json").read_text(encoding="utf-8"))
+    dev_cut, test_cut = meta["dev_cutoff_ms"], meta["test_cutoff_ms"]
+
+    all_items = []
+    with open(ITEMS_JSONL, encoding="utf-8") as f:
+        for line in f:
+            all_items.append(json.loads(line)["parent_asin"])
+
+    tr_n, tr_s, td_n, td_s = Counter(), Counter(), Counter(), Counter()
+    counts = {"train": 0, "dev": 0, "test_skipped": 0}
+    n_dev_no_rating = 0
+    rel_counts = Counter()
+    with open(RATINGS_TSV, encoding="utf-8") as fin, \
+         open(SPLIT_DIR / "train.tsv", encoding="utf-8") as train_ref, \
+         open(SPLIT_DIR / "dev.tsv", encoding="utf-8") as dev_ref, \
+         open(DEV_GRADED_TSV, "w", encoding="utf-8", newline="\n") as dev_out:
+        for line in fin:
+            u, i, ts_text, r_text = line.rstrip("\n").split("\t")
+            ts = int(ts_text)
+            if ts >= test_cut:
+                counts["test_skipped"] += 1
+                continue
+            rating = float(r_text) if r_text != "" else None
+            if ts < dev_cut:
+                counts["train"] += 1
+                if train_ref.readline().rstrip("\n").split("\t") != [u, i, ts_text]:
+                    sys.exit("ratings file and train.tsv are out of step")
+                if rating is not None:
+                    tr_n[i] += 1
+                    tr_s[i] += rating
+                    td_n[i] += 1
+                    td_s[i] += rating
+            else:
+                counts["dev"] += 1
+                if dev_ref.readline().rstrip("\n").split("\t") != [u, i, ts_text]:
+                    sys.exit("ratings file and dev.tsv are out of step")
+                if rating is None:
+                    n_dev_no_rating += 1
+                else:
+                    td_n[i] += 1
+                    td_s[i] += rating
+                rel = _relevance(rating)
+                rel_counts[rel] += 1
+                dev_out.write(f"{u}\t{i}\t{ts_text}\t{r_text}\t{rel}\n")
+        if train_ref.readline() or dev_ref.readline():
+            sys.exit("train.tsv or dev.tsv has rows the ratings file did not account for")
+
+    for key, want in (("train", meta["counts"]["train"]), ("dev", meta["counts"]["dev"])):
+        if counts[key] != want:
+            sys.exit(f"{key}: {counts[key]:,} rows here, {want:,} in split_meta.json")
+
+    for path, n_c, s_c in ((FEATURES_TRAIN_TSV, tr_n, tr_s), (FEATURES_TRAIN_DEV_TSV, td_n, td_s)):
+        with open(path, "w", encoding="utf-8", newline="\n") as out:
+            for asin in all_items:
+                n = n_c.get(asin, 0)
+                mean = f"{s_c[asin] / n:.4f}" if n else ""
+                out.write(f"{asin}\t{n}\t{mean}\n")
+        log(f"-> {path.name}: {len(all_items):,} items, {sum(1 for a in all_items if n_c.get(a, 0) == 0):,} with no rows yet")
+    log(f"train rows {counts['train']:,} (match split_meta), dev rows {counts['dev']:,} (match split_meta), "
+        f"test-window rows skipped {counts['test_skipped']:,}")
+    log(f"dev relevance labels: {dict(sorted(rel_counts.items()))} ({n_dev_no_rating:,} dev rows without a rating)")
+    log(f"-> {DEV_GRADED_TSV}")
+
+
 def stage_checksum() -> None:
     """SHA-256 every processed output, appended to processed/checksums.sha256."""
     targets = [
         FILTERED_TSV, SPLIT_DIR / "train.tsv", SPLIT_DIR / "dev.tsv", SPLIT_DIR / "test.tsv",
         ITEMS_JSONL,
+        RATINGS_TSV, FEATURES_TRAIN_TSV, FEATURES_TRAIN_DEV_TSV, DEV_GRADED_TSV,
     ]
     out_path = PROC_DIR / "checksums.sha256"
     with open(out_path, "w", encoding="utf-8") as out:
@@ -363,6 +515,8 @@ STAGES = {
     "split": stage_split,
     "join": stage_join,
     "missingness": stage_missingness,
+    "ratings": stage_ratings,
+    "leakfree_features": stage_leakfree_features,
     "checksum": stage_checksum,
 }
 
