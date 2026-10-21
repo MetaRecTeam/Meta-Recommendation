@@ -155,7 +155,7 @@ Full detail and every checksum are in `docs/wp4/D1-data-sheet.md`. The short ver
 - **Parser.** `scripts/wp4_dataset_parser.py` follows the proposal's contract: identity is the ASIN and never the title, price is a typed amount and currency with provenance, and a missing or failed parse is unknown, never zero. It has 9 unit tests.
 - **Star ratings, leak-free features and graded labels.** The first pass dropped the star rating. A second pass re-read the raw reviews and kept it in a new file, checked row for row against the 5-core file, without changing any existing file. From it come per-item counts and mean ratings computed from train rows only (what was knowable at the train cutoff), and a graded relevance label for each dev row (76.1% are 2, 10.4% are 1, 13.5% are 0). 40.3% of items have no train rows yet because they were first reviewed later. All of it was recounted independently with no mismatch.
 - **Candidate pools.** The 100-candidate pools used in section 6 are frozen by checksum. Rebuilding all 534,128 cases from scratch gave a byte-identical file.
-- **Data sheet.** It now states the licence position (the dataset's homepage gives no licence or terms, only a citation request, so this is flagged to confirm with the supervisor), what personal data is held, minimization, access, retention, deletion and custody of the sealed test set.
+- **Data sheet.** It now states the licence position (neither the dataset's homepage nor its Hugging Face card gives a licence or terms, only a citation request, so this is flagged to confirm with the supervisor), what personal data is held, minimization, access, retention, deletion and custody of the sealed test set.
 - **Reproducibility.** The raw and processed files are not in git. Their SHA-256 checksums, the data sheet and the scripts that produce them are.
 
 ## 6. D2: baselines on development data
@@ -518,7 +518,7 @@ Popularity carries almost all of the result, and removing it halves NDCG. The te
 
 **The enriched text.** Adding brand, category and store to the text (the change described above) is worth less than it looked. On warm held-out users, text alone scores NDCG@10 0.1429 with the enriched text against 0.1383 for B1's title-only text (+3.3%). But putting the enriched text into the same 0.25 text, 0.75 popularity mix gives 0.2347 against B1's 0.2350, so the gain does not reach the final ranking. The earlier +7.1% to +11.1% were measured on a non-random sample while popularity leaked and should not be quoted.
 
-**Latency** (ranker-only: scoring 100 candidates for the first 500 development cases, cards built beforehand, one process, Windows 11, Intel64 Family 6 Model 140 as Python reports it, Python 3.10.11; `scripts/wp4_latency.py`). Three runs of the same script, all in ms:
+**Latency** (ranker-only: scoring 100 candidates for the first 500 development cases, cards built beforehand, one process; declared hardware: 11th Gen Intel Core i7-1185G7 at 3.00 GHz, 4 cores and 8 threads, 15.7 GB RAM, Windows 11 Home 10.0.26200, Python 3.10.11; `scripts/wp4_latency.py`). Three runs of the same script, all in ms:
 
 | run | B0 p50 / p95 | B1 p50 / p95 | ItemKNN p50 / p95 | M2 p50 / p95 / max |
 |---|---|---|---|---|
@@ -532,14 +532,21 @@ The run-to-run spread is large (M2 p95 from 15.4 to 32.6 ms), so it is not yet e
 
 ## 8. Status, open items and what comes next
 
-**Decisions recorded in the Project Plan (§6), not yet confirmed by the supervisor:**
+**Decisions recorded in the Project Plan (§6) from the project lead's twelve points and one correction, with their status here (none yet confirmed by the supervisor):**
 
-- statistical thresholds: user-bootstrap 95% lower bound above zero, point estimate of at least 3% relative conditional NDCG@10, and a 2% relative margin for the complex-query slice;
-- NDCG relevance: 5 stars = 2, 4 stars = 1, below 4 = 0 (decided; applied in section 6.4 as NDCG normalised by the ideal ranking, which with one rated item per case reduces to binary NDCG with grade-0 cases scored 0);
-- evaluation currency: USD, since the dataset is priced in USD;
-- missing price: unknown, never zero; excluded when the request has a budget (reason code `UNKNOWN_PRICE_STRICT_MODE`), kept and flagged when it does not;
-- ASIN identity is in scope, as an additive change to the adapter; with the flag off the output must stay identical to B0, which the golden fixture tests already check;
-- head items are the top 20% by review count (a threshold of 868 reviews in this category by the metadata counts; 12 reviews by the train-only counts used in the leak-free runs, section 7.1), the rest are tail.
+1. Dataset and cutoff: one mid-size category (not Electronics), 5-core filtered, frozen with checksums; chronological split with the last 10% of the timeline as the locked test and the 10% before it as development. Done (section 5).
+2. Frozen thresholds: user-bootstrap 95% lower bound above zero, point estimate of at least 3% relative conditional NDCG@10, and a 2% relative non-inferiority margin for the complex-query slice. Both are frozen and do not move after the locked test is opened. Status: not met for the 3% (+0.81%, section 7.1); the complex-query slice cannot be computed on this data (gaps below, question 5).
+3. Success for one semester: D0 to D3 complete, M2 integrated behind the flag, and a point-estimate evaluation with zero hard-constraint violations. Status: D0 to D2 done, D3 mostly, integration (D4) not started; zero violations holds on the 15 frozen searches (Appendix B).
+4. Pull requests: a branch on the team repository named like `fyp/wp4/<topic>`, or a fork with a work-in-progress pull request. This work is on a fork with draft pull request #17; the branch name differs (question 7).
+5. Missing or unparseable price: unknown, never zero; excluded when the request has a budget (reason code `UNKNOWN_PRICE_STRICT_MODE`), kept and flagged when it does not. Parser done (section 5); the reason code is not yet in the code (D4).
+6. Currency: USD for the offline evaluator, since the dataset is priced in USD. Done.
+7. ASIN identity: in scope, as an additive change to the adapter; with the flag off the output must stay identical to B0, proved by a fixture test. The golden fixture tests exist (section 2); the ASIN change in the live adapter is not built (D4).
+8. Latency: ranker-only p95 at most 25 ms for 100 candidates on declared hardware. Measured and not yet settled (section 7.1).
+9. B1: BM25 plus calibrated popularity is enough; ItemKNN only if D1 shows the interaction data supports it. Checked, and it does (section 6, item 3 under "What this changes").
+10. NDCG relevance: graded labels from the review rating, 5 stars = 2, 4 stars = 1, below 4 = 0, written into D0. Applied in section 6.4 as NDCG normalised by the ideal ranking, which with one rated item per case reduces to binary NDCG with grade-0 cases scored 0 (question 4).
+11. Head and tail: the top 20% of items by review count within the frozen category are head, the rest tail; any documented threshold is acceptable if it is fixed before evaluation. The report currently has two values (868 reviews by the metadata counts, 12 by the train-only counts used in the leak-free runs, section 7.1); one has to be fixed before the final evaluation.
+12. Dataset access: read the terms in week 1, record them in the data sheet, and raise it at once if an agreement is needed. Done: no licence or terms were found (data sheet; question 2).
+13. Correction: do not count on live MetaRec interaction data. The `item_interactions` table starts empty, so the evaluation stands on the frozen public dataset; any live history would be a separate, clearly labelled slice, and MetaRec users are never fabricated. Followed: no live interaction data is used.
 
 **Known gaps, so nobody has to find them:**
 
@@ -548,7 +555,7 @@ The run-to-run spread is large (M2 p95 from 15.4 to 32.6 ms), so it is not yet e
 - Item-side popularity leaked future reviews (section 6). All results in sections 6.3, 6.4 and 7.1 use train-only popularity, and M2 has been re-tuned under it. Negatives are drawn from the whole catalogue, which includes items with no train reviews yet.
 - M2's latency is not settled: three runs gave a p95 of 15.4, 21.1 and 32.6 ms against the 25 ms limit (section 7.1). Baselines and re-tuned M2 have user-level bootstrap intervals on held-out users; the M2 weights were chosen on 1 in 10 users and the B1 weight on all users.
 - Reason-code tests and the flag-contract fallback for M2 are not written yet.
-- Head/tail, missing-price and complex-query slices are not reported yet (the Plan sets a 2% margin on the complex-query slice).
+- Head/tail and missing-price slices are not reported yet. The complex-query slice cannot be computed on this data: the Plan freezes a 2% non-inferiority margin for it, but nothing defines a complex query or says where such queries come from, and the evaluation cases have no real search queries (each query is the user's past purchases joined together). See question 5 below.
 - The missing-price policy and ASIN-first identity are decided but not in the live app: `UNKNOWN_PRICE_STRICT_MODE` appears only in documents, and the SerpApi adapter still drops the ASIN.
 - Evaluation takes two scripts and prints aggregate numbers only. A one-command evaluator with per-case output is a D5 item.
 - The working branch name does not follow the `fyp/wp4/<topic>` convention in the shared guidance.
@@ -576,14 +583,17 @@ python scripts/wp4_latency.py 500 0.25,0,0.05,0.65,0.05
 2. D4: attach M2 at the seam in `generic_graph.py` through the adapter, behind `METAREC_PRODUCT_RANKER`, keep the ASIN in the adapter, and prove flag-off equals B0 with network-free tests.
 3. Point-estimate evaluation, and the zero-violation check on the labelled constraint fixtures. The sealed test split is opened once, at the end.
 4. Final report, due 16 November. If time runs short, the bootstrap intervals and extra slices are the first things to cut (Plan §7); feature-off parity and zero hard-constraint violations stay.
+5. Oral, 23 to 28 November: slides, then a live demo in the UI with the ranker flag off and on, which needs D4.
 
 **Questions for the supervisor:**
 
 1. Do the Plan §6 decisions stand, in particular the 3% point estimate? Re-tuned M2 is at +0.81% NDCG@10 over B1 (95% interval +0.69% to +0.94%) on this dataset. Is that reported as it is, or should a further signal be tried?
-2. The dataset's homepage states no licence or terms of use, only a citation request. Is academic use on that basis acceptable?
+2. Neither the dataset's homepage nor its Hugging Face card states a licence or terms of use, only a citation request (checked 20 and 21 Oct). Is academic use on that basis acceptable?
 3. Is there a required format or template for the interim and final reports?
 4. Graded NDCG: with one rated item per case, normalised NDCG cannot tell a 5-star item from a 4-star one (section 6.4). Is that acceptable, or should unnormalised gains (2 and 1) be used?
-5. Which latency does the 25 ms p95 limit refer to: the ranker alone for 100 candidates (as measured here), or the whole request?
+5. Complex-query slice: the Plan freezes a 2% non-inferiority margin for it, but neither the proposal nor the Plan defines "complex" or says where those queries come from. The dataset holds no search queries, so complex against keyword cannot be defined on this data. How should the slice be defined?
+6. Demo: is a live UI demo expected at the oral, and if so, who provides the SerpApi key and quota?
+7. The fork branch is `feat/wp4-constraint-aware-product`, not `fyp/wp4/<topic>`. Is it fine to keep it with the WIP pull request, or should it be renamed?
 
 ## References
 

@@ -13,13 +13,18 @@
   hand-built constraint test cases already use (keyboards, webcams, monitors
   are routinely listed under Office Products on Amazon), so the hard
   constraints (budget/brand/category/model) are meaningfully testable here.
-- **Licence and terms.** Checked on 20 Oct 2026. The dataset's homepage
+- **Licence and terms.** Checked on 20 and 21 Oct 2026. The dataset's homepage
   (https://amazon-reviews-2023.github.io/) states no licence and no terms of use; it
   asks users to cite the paper and offers the files for download without a signup. The
-  dataset's Hugging Face listing could not be reached when checked (connection reset),
-  so its licence field was not read. Until that is confirmed, the data is used for
-  academic research only: not redistributed, not published, only derived counts and
-  scores are reported. To confirm with the supervisor.
+  dataset card on Hugging Face (McAuley-Lab/Amazon-Reviews-2023), read on 21 Oct 2026
+  after a failed attempt on 20 Oct, has no licence field and no terms section either:
+  its metadata header holds only language, tags, size category and the file configs,
+  and a search of the whole raw README (30,335 characters) for "licence", "license" and
+  "terms" finds nothing. It asks for the paper to be cited. So no licence text for the
+  data exists to record. The data is therefore used for academic
+  research only: not redistributed, not published, only derived counts and scores are
+  reported. To confirm with the supervisor, as Project Plan Section 6 requires for any
+  access condition.
 - **Citation requested by the dataset.** Hou, Li, He, Yan, Chen, McAuley, "Bridging
   Language and Items for Retrieval and Recommendation", arXiv:2403.03952, 2024.
 
