@@ -54,6 +54,7 @@ if str(SCRIPTS_DIR) not in sys.path:
 if str(BACKEND_DIR) not in sys.path:
     sys.path.insert(0, str(BACKEND_DIR))
 from wp4_dataset_parser import parse_item_price  # noqa: E402
+from langgraph_metarec import product_ranker_m2  # noqa: E402
 
 EVAL_DIR = BACKEND_DIR / "eval"
 PROC_DIR = BACKEND_DIR / "data" / "wp4" / "processed"
@@ -151,6 +152,7 @@ def item_card(asin: str, items: Dict[str, dict]) -> dict:
         "brand_missing": not meta.get("brand"),
         "main_category": meta.get("main_category"),
         "main_category_missing": not meta.get("main_category"),
+        "store": meta.get("store"),
     }
 
 
@@ -212,13 +214,26 @@ def metrics_for_rank(rank: int, k: int = 10) -> dict:
     }
 
 
-def run(system: str, split: str, limit: Optional[int], bm25_weight: float = 0.5) -> None:
+def run(system: str, split: str, limit: Optional[int], bm25_weight: float = 0.5, m2_weights: Optional[Dict[str, float]] = None, leakage_safe: bool = False) -> None:
     path = EVAL_DIR / f"product_{split}_v1.jsonl"
     if not path.exists():
         sys.exit(f"missing {path} — run wp4_build_eval_cases.py --split {split} first")
 
     items = load_items()
-    item_users = load_item_users() if system == "itemknn" else None
+    item_users = load_item_users() if (system in ("itemknn", "m2") or leakage_safe) else None
+    if leakage_safe:
+        # The metadata's rating_number / average_rating are counted through 2023, i.e. they include reviews
+        # written after the dev period (and the target review itself). Replace them with what was knowable
+        # at the train cutoff: the item's train interaction count; no rating is available from train.
+        for asin, meta in items.items():
+            meta["rating_number"] = len(item_users.get(asin, ()))
+            meta["average_rating"] = None
+        print("[wp4_run_baselines] leakage-safe mode: popularity = train interaction count, average_rating dropped", flush=True)
+    head_threshold = None
+    if system == "m2":
+        counts = sorted(it.get("rating_number") or 0 for it in items.values())
+        head_threshold = counts[int(len(counts) * 0.80)]
+        print(f"[wp4_run_baselines] m2 head/tail threshold: rating_number >= {head_threshold}", flush=True)
 
     totals = {"all": [], "warm": [], "cold": []}
     n = 0
@@ -239,8 +254,23 @@ def run(system: str, split: str, limit: Optional[int], bm25_weight: float = 0.5)
             elif system == "itemknn":
                 history_asins = [h["parent_asin"] for h in case["history"]]
                 scores = itemknn_scores(history_asins, candidates, item_users)
+            elif system == "m2":
+                history_asins = [h["parent_asin"] for h in case["history"]]
+                history_categories = {items[a]["main_category"] for a in history_asins if items.get(a, {}).get("main_category")}
+                history_brands = {items[a]["brand"] for a in history_asins if items.get(a, {}).get("brand")}
+                m2_results = product_ranker_m2.score_candidates(
+                    history_asins=history_asins,
+                    history_categories=history_categories,
+                    history_brands=history_brands,
+                    candidates=candidates,
+                    items=items,
+                    item_users=item_users,
+                    head_threshold=head_threshold,
+                    weights=m2_weights,
+                )
+                scores = [r.score for r in m2_results]
             else:
-                sys.exit("system must be 'b0', 'b1' or 'itemknn'")
+                sys.exit("system must be 'b0', 'b1', 'itemknn' or 'm2'")
 
             rank = rank_of_target(scores, candidates, target)
             m = metrics_for_rank(rank)
@@ -264,9 +294,22 @@ def run(system: str, split: str, limit: Optional[int], bm25_weight: float = 0.5)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--system", required=True, choices=["b0", "b1", "itemknn"])
+    parser.add_argument("--system", required=True, choices=["b0", "b1", "itemknn", "m2"])
     parser.add_argument("--split", required=True, choices=["dev", "test"])
     parser.add_argument("--limit", type=int, default=None, help="only score the first N cases (for a quick check)")
+    parser.add_argument("--leakage-safe", action="store_true", help="use train-only popularity instead of end-of-period metadata counts")
     parser.add_argument("--bm25-weight", type=float, default=0.5, help="weight on the BM25 term vs popularity (b1 only)")
+    parser.add_argument(
+        "--m2-weights",
+        type=str,
+        default=None,
+        help="m2 only: 'text_relevance=0.25,attribute_match=0.1,collaborative=0.15,popularity=0.45,tail_adjustment=0.05'",
+    )
     args = parser.parse_args()
-    run(args.system, args.split, args.limit, args.bm25_weight)
+    m2_weights = None
+    if args.m2_weights:
+        m2_weights = {}
+        for pair in args.m2_weights.split(","):
+            k, v = pair.split("=")
+            m2_weights[k.strip()] = float(v)
+    run(args.system, args.split, args.limit, args.bm25_weight, m2_weights, args.leakage_safe)
