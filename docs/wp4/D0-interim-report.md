@@ -4,7 +4,7 @@ Ong Chuan Hau (C240087) · MetaRec `feat/wp4-constraint-aware-product` · base c
 
 **Objective.** WP4 makes MetaRec's product recommendations respect what the user asked for (budget, brand, category, compatibility) while ranking the remaining products by relevance. The target is a ranker, M2, that is shown offline to do better than the current sort (B0) and than a text-plus-popularity baseline (B1), with a point estimate of at least 3% relative NDCG@10 (Project Plan §6), and that leaves the live output identical to B0 when its feature flag is off. The evidence comes from a frozen Amazon Reviews 2023 dataset [1], a development split used for tuning, and a sealed test split opened once at the end.
 
-This report covers the D0 audit in full (sections 1 to 4), then what has been built since: the frozen dataset (D1, section 5), the baselines (D2, section 6) and the M2 ranker so far (D3, section 7). Section 8 lists what is still open and what comes next.
+This report covers the D0 audit in full (sections 1 to 4), then what has been built since: the frozen dataset (D1, section 5), the baselines (D2, section 6) and the M2 ranker (D3, section 7). Section 8 lists what is still open and what comes next.
 
 D0 scope (proposal): *trace router → product tool parameters → providers/enrichment
 → normalisation/deduplication → generic rank → strict API/UI; reproduce B0; audit
@@ -18,7 +18,7 @@ split and constraint fixtures.*
 | D0 audit and B0 | **done** | sections 1 to 4; 15 frozen fixtures and golden files in `tests/wp4/` |
 | D1 data and features | **done**, including the star ratings, leak-free item features and a complete data sheet | section 5; `docs/wp4/D1-data-sheet.md` |
 | D2 baselines | **done** on development data; a popularity leak was found and the numbers re-run; confidence intervals, weight sweep and leak-free legacy B0 added (section 6) | section 6; `scripts/wp4_build_eval_cases.py`, `scripts/wp4_run_baselines.py`, `scripts/wp4_sweep_ranks.py` |
-| D3 M2 ranker | **in progress**: re-tuned with train-only popularity; on held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), short of the 3% target, but +2.91% on the long-history slice (section 7.2); latency p95 measured at 15 to 33 ms against a 25 ms limit, not settled; reason-code tests and fallback still to do | section 7; `langgraph_metarec/product_ranker_m2.py`, `scripts/wp4_m2_*.py` |
+| D3 M2 ranker | **done**: built, re-tuned with train-only popularity, tested (63 WP4 tests pass), ranker-only p95 11 to 19 ms against the 25 ms limit; on held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), short of the 3% target, but +2.91% on the long-history slice (section 7.2) | section 7; `langgraph_metarec/product_ranker_m2.py`, `scripts/wp4_m2_*.py` |
 | D4 integration | not started (the hard-constraint gate already sits behind the flag) | section 8 |
 | D5 evaluation | not started; the sealed test split has not been scored | section 8 |
 
@@ -98,7 +98,7 @@ The strict-API `id` for a product is `"product_" + sha1("amazon.product.search|"
 - Present for 137 of 140 candidates (98 %); the 3 missing come from two queries. All 137 parse to a number and all use the `$` symbol. No ranges (`"$a - $b"`) appeared in this sample, although `product_constraints.parse_price` handles them.
 - There is no currency field, so currency is inferred from the symbol. `$` is ambiguous: the app treats `$` as SGD elsewhere, while SerpApi Amazon returns USD.
 - **Prices move between runs.** Of the 12 products seen in both runs, the price changed for 7 (58 %), for example $118.99 to $139.99 and $49.99 to $39.99. A budget constraint could pass on one run and fail on the next, so evaluation has to run on frozen snapshots rather than live calls.
-- **A policy has since been decided but not yet built.** Project Plan §6 ("Missing price policy") records: unknown price is never treated as zero; when the request states a budget, strict mode excludes the item under a new `UNKNOWN_PRICE_STRICT_MODE` reason code; with no budget stated, the item is kept and flagged. As of this writing that reason code exists only in planning documents — a repo-wide search finds it nowhere in actual code. The live `product_constraints.violations()` check (`if price is not None and price > c.budget_max`) still silently skips unknown-price items with no reason code and no distinction for whether a budget was even stated. Implementing the decided policy is outstanding work, not yet assigned to a specific D-phase.
+- **A policy has since been decided, and built in the M2 module only.** Project Plan §6 ("Missing price policy") records: unknown price is never treated as zero; when the request states a budget, strict mode excludes the item under a new `UNKNOWN_PRICE_STRICT_MODE` reason code; with no budget stated, the item is kept and flagged. At the time of this audit that reason code existed only in planning documents — a repo-wide search found it nowhere in actual code. The live `product_constraints.violations()` check (`if price is not None and price > c.budget_max`) still silently skips unknown-price items with no reason code and no distinction for whether a budget was even stated. Since then the policy has been implemented and tested in the M2 module (section 7.3); applying it in the live path is part of D4.
 
 ### 3.3 Missing and unreliable fields (measured over 140 live candidates)
 
@@ -435,11 +435,11 @@ The comparison below is on the held-out users: the 134,481 users (479,889 cases)
 
 **Graded NDCG.** Every graded figure is about 87% of the binary one (for B1, 0.2041 against 0.2350), in line with 86.5% of dev cases having a positive grade. The ranking of the four systems is the same under both.
 
-## 7. D3: the M2 ranker, in progress
+## 7. D3: the M2 ranker
 
-**What is built.** `langgraph_metarec/product_ranker_m2.py` computes the six components the proposal names: `eligibility`, `text_relevance`, `attribute_match`, `collaborative`, `popularity` and `tail_adjustment`, and assigns reason codes from the proposal's allow-list. Eligibility reuses the hard-constraint gate (`product_constraints.py`). On the 15 labelled fixtures, that gate removes all 52 labelled violators and none of the 94 compliant products. On the Amazon dataset it passes everything through, because that data has no stated budget or brand, so it cannot be tested there. The collaborative component is the ItemKNN score, which is the only affinity signal this dataset offers; the project lead's note says not to rely on live MetaRec interaction data, since that table starts empty.
+**What is built.** `langgraph_metarec/product_ranker_m2.py` computes the six components the proposal names: `eligibility`, `text_relevance`, `attribute_match`, `collaborative`, `popularity` and `tail_adjustment`, and assigns reason codes from the proposal's allow-list. Eligibility reuses the hard-constraint gate (`product_constraints.py`) and adds the missing-price policy (section 7.3). On the 15 labelled fixtures, the live gate removes all 52 labelled violators and none of the 94 compliant products; M2's own gate also removes all 52 and keeps 91 of the 94, because the strict policy excludes the 3 compliant products that have no price (section 7.3). On the Amazon dataset it passes everything through, because that data has no stated budget or brand, so it cannot be tested there. The collaborative component is the ItemKNN score, which is the only affinity signal this dataset offers; the project lead's note says not to rely on live MetaRec interaction data, since that table starts empty.
 
-**How each component is computed.** Inside a case, every component except `eligibility` is z-scored over the 100 candidates (same z-score as B1, population standard deviation; a list with zero spread becomes all zeros). The M2 score is the weighted sum of the five z-scores. A candidate that fails the hard-constraint gate gets score −∞ and the reason code of its violation.
+**How each component is computed.** Inside a case, every component except `eligibility` is z-scored over the candidates that pass the gate, which in the offline evaluation is all 100 (same z-score as B1, population standard deviation; a list with zero spread becomes all zeros). The M2 score is the weighted sum of the five z-scores. A candidate that fails the hard-constraint gate gets score −∞ and the reason code of its violation.
 
 | component | what it computes | notes |
 |---|---|---|
@@ -450,7 +450,7 @@ The comparison below is on the held-out users: the 134,481 users (479,889 cases)
 | `popularity` | ln(1 + review count) | Train-only count in the leak-free runs. |
 | `tail_adjustment` | 1 if the candidate has fewer reviews than the head threshold, otherwise 0 | Head = top 20% of items by review count (868 reviews by the metadata counts, 12 by the train-only counts used in the leak-free runs). A boost for less-reviewed items; weight 0.05 after re-tuning. |
 
-**Reason codes** (the proposal's allow-list). For a user with history, an included candidate gets `USE_CASE_MATCH` if its text z > 0, `ATTRIBUTE_MATCH` if its attribute z > 0 and `HISTORY_AFFINITY` if its collaborative z > 0. A user with no history gets `POPULAR_FALLBACK`. A candidate removed by the gate gets `OVER_BUDGET`, `WRONG_BRAND`, `WRONG_CATEGORY` or `WRONG_MODEL` (compatibility and exclusion failures both map to `WRONG_MODEL`, since the allow-list has no further code). `UNKNOWN_PRICE_STRICT_MODE` is on the allow-list but is not produced by this module yet.
+**Reason codes** (the proposal's allow-list). For a user with history, an included candidate gets `USE_CASE_MATCH` if its text z > 0, `ATTRIBUTE_MATCH` if its attribute z > 0 and `HISTORY_AFFINITY` if its collaborative z > 0. A user with no history gets `POPULAR_FALLBACK`. A candidate removed by the gate gets `OVER_BUDGET`, `WRONG_BRAND`, `WRONG_CATEGORY` or `WRONG_MODEL` (compatibility and exclusion failures both map to `WRONG_MODEL`, since the allow-list has no further code). A candidate whose price cannot be compared with a stated budget gets `UNKNOWN_PRICE_STRICT_MODE` (section 7.3). All nine allow-listed codes are produced, and a test checks that nothing outside the list is.
 
 **What the tuning showed.** Weights were first searched on 2,000 cases. That pointed at `attribute_match` and `tail_adjustment` as the useful additions. Repeating the search on 30,000 cases reversed it: `collaborative` was the best single addition, `tail_adjustment` slightly hurt, and `attribute_match` barely mattered. The 2,000-case result was noise, so all later tuning used 30,000 cases. These samples are the first 2,000 and first 30,000 lines of the development file (`--limit N`). The file is almost entirely grouped by user (150,200 runs of consecutive rows for 149,788 users), not shuffled, so the first 30,000 cases come from only 5,680 users, and the first 3,000 from 381. They are not a random sample: on the first 3,000 cases B1 scores Recall@10 = 0.202 against 0.371 on the full set. The 30,000-case results quoted in this part are therefore indicative of direction, not of level; the per-weight tables of the M2 searches were not kept; the search was redone on the full set in section 7.1.
 
@@ -518,17 +518,17 @@ Popularity carries almost all of the result, and removing it halves NDCG. The te
 
 **The enriched text.** Adding brand, category and store to the text (the change described above) is worth less than it looked. On warm held-out users, text alone scores NDCG@10 0.1429 with the enriched text against 0.1383 for B1's title-only text (+3.3%). But putting the enriched text into the same 0.25 text, 0.75 popularity mix gives 0.2347 against B1's 0.2350, so the gain does not reach the final ranking. The earlier +7.1% to +11.1% were measured on a non-random sample while popularity leaked and should not be quoted.
 
-**Latency** (ranker-only: scoring 100 candidates for the first 500 development cases, cards built beforehand, one process; declared hardware: 11th Gen Intel Core i7-1185G7 at 3.00 GHz, 4 cores and 8 threads, 15.7 GB RAM, Windows 11 Home 10.0.26200, Python 3.10.11; `scripts/wp4_latency.py`). Three runs of the same script, all in ms:
+**Latency** (ranker-only: scoring 100 candidates, cards built beforehand, one process; declared hardware: 11th Gen Intel Core i7-1185G7 at 3.00 GHz, 4 cores and 8 threads, 15.7 GB RAM, Windows 11 Home 10.0.26200, Python 3.10.11; `scripts/wp4_latency.py`). Two samples of 500 development cases were used, so the answer does not depend on which users happen to be picked: the *first 500 cases* (from only a few users, with long histories, so the heavier case) and *500 cases spread over the whole file* (every 1,000th case, 295 of them with a history). The laptop was plugged in on the Balanced power plan with ordinary background applications open (about 21% CPU load when checked before the runs); neither was changed. The p95 in milliseconds, as the range over the repeated runs:
 
-| run | B0 p50 / p95 | B1 p50 / p95 | ItemKNN p50 / p95 | M2 p50 / p95 / max |
-|---|---|---|---|---|
-| 1 | 0.07 / 0.10 | 12.23 / 21.02 | 1.35 / 2.18 | 13.48 / 32.59 / 73.39 |
-| 2 | 0.05 / 0.11 | 8.87 / 12.64 | 1.04 / 1.95 | 13.57 / 21.14 / 29.27 |
-| 3 | 0.07 / 0.16 | 8.45 / 10.67 | 1.04 / 1.72 | 12.75 / 15.35 / 17.02 |
+| system | first 500 cases (8 runs) | spread sample (5 runs) | spread sample, users with a history only (5 runs) |
+|---|---|---|---|
+| B0 | 0.11 to 0.21 | 0.10 to 0.18 | 0.10 to 0.16 |
+| B1 | 11.40 to 13.01 | 7.18 to 8.87 | 8.51 to 10.29 |
+| ItemKNN | 1.70 to 2.28 | 1.10 to 1.45 | 1.30 to 1.59 |
+| **M2** | **16.41 to 18.92** | **10.93 to 12.53** | **12.15 to 14.68** |
 
-The run-to-run spread is large (M2 p95 from 15.4 to 32.6 ms), so it is not yet established whether M2 meets the 25 ms p95 limit: it was over in run 1 and under in runs 2 and 3. A controlled benchmark (fixed power plan, nothing else running, repeated) is still to do. The cost is almost all in `text_relevance`: in a separate component-by-component run its mean was 15.8 ms (p95 37.9 ms), while every other component averaged 1.6 ms or less. Users with no history skip the BM25 step (p50 1.1 ms, p95 1.7 ms for 69 such cases of the 500, against p50 13.0 ms, p95 29.7 ms for the 431 with history).
+M2's p95 was below the 25 ms limit in all 13 runs on both samples, at most 18.92 ms. The slowest single case was 27.5 ms (first-500 sample), but the limit applies to the p95. Most of the time is in `text_relevance` (a component-by-component run measured a mean of 15.8 ms for it against 1.6 ms or less for each of the others). An earlier set of three runs, taken straight after the long evaluation jobs when the laptop was probably at its busiest, gave 32.6, 21.1 and 15.4 ms, which shows how much the figure depends on background load. The check should be repeated on the final machine before the final report.
 
-**Still to do for D3:** a controlled latency benchmark and, if M2 stays near the limit, a cheaper text step (any change alters the text scores, so M2 would have to be scored again); tests for each reason code; the fallback required by the flag contract (error, timeout, empty output or duplicate id returns the original order); and the live-system side of M2 (D4).
 
 ### 7.2 Complex-versus-keyword-like slices (a stand-in for the Plan's complex-query slice)
 
@@ -548,18 +548,34 @@ The Plan freezes a 2% non-inferiority margin for a complex-query slice, but the 
 
 **Reading it.** M2 helps most where the history gives it something to work with, because its text and collaborative ingredients need purchases to compare against. For cold users M2 and B1 are the same by construction (both rank by popularity). That also explains the small overall figure in section 7.1: 39.5% of the held-out cases are cold and a further 30.4% have short histories. The 3% acceptance criterion applies to the overall NDCG@10 and is still not met; the long-history slice (+2.91%) is supporting evidence about where the gain is, not a replacement for it. The result comes from `python scripts/wp4_slices.py dist`, which prints only the length distribution, followed by `python scripts/wp4_slices.py run <m2_prefix> <sweep_ranks.npz> 51`.
 
+### 7.3 Finishing D3: eligibility first, the missing-price policy, the fallback, and tests
+
+D3 asks for a hard-constraint engine, the hybrid score, a cold fallback, reason codes and ablations. The score, cold fallback, reason codes and ablations were built earlier; this step added what was still missing and tested all of it (`langgraph_metarec/product_ranker_m2.py`, `tests/wp4/test_product_ranker_m2.py`).
+
+1. **Eligibility first.** Every candidate goes through the gate before any scoring, and the five ranking components are z-scored over the survivors only. Before, they were z-scored over the whole pool, so a candidate the gate removed could still shift the scores of the others.
+2. **The gate now sees a dataset card's price and brand.** It used to read only live-shaped items, so on a card a budget or brand rule would have passed silently.
+3. **Missing-price policy** (Plan §6, point 5). When a maximum budget is stated, a candidate whose price is unknown, or is in a different currency from the budget, is excluded with `UNKNOWN_PRICE_STRICT_MODE` (never called "over budget", never treated as free). With no budget stated it is kept and the request carries a `PRICE_MISSING` warning.
+4. **Result contract.** `rank_candidates` returns the ranked items (rank, score, the six components, reason codes), the excluded items with their reason codes, warnings and the ranker-only latency. Every input id appears exactly once in the ranked or the excluded list.
+5. **Fallback.** An error, a timeout, an empty output, or a duplicate, unknown or missing id in the output (or a duplicate id in the input) returns the candidates in their original order with a `FALLBACK_*` warning. If the gate removes every candidate, the empty ranking is valid and is not a fallback. The timeout returns without waiting for the slow call, which keeps running in the background until it ends. The live adapter will choose the timeout (D4).
+
+**Nothing changed for the evaluation.** The offline Amazon cases state no constraints, so the gate removes nothing there. On 3,000 development cases every one of the five component values is identical to the saved ones (largest difference 0), and the official runner gives the same Recall, NDCG and MRR@10 on 2,000 cases as before (0.2615, 0.1647, 0.1349).
+
+**Tests.** 25 new tests, 63 WP4 tests in all, all passing (`python -m pytest tests/wp4`). They cover: each of the nine allow-listed reason codes being produced, and nothing outside the list; an unknown price with and without a budget; a currency that cannot be compared; eligibility first (an extreme item that the gate removes does not change the survivors' scores); scores equal to the plain weighted sum when nothing is stated; ties keeping the input order; each fallback case; and the gate on the 15 labelled fixtures. To check that the tests can fail, the code was deliberately broken in six ways (the gate blind to price and brand, the price policy switched off, z-scores over the whole pool, the output never validated, the timeout not enforced, ties reversed), and each break was caught.
+
+**On the fixtures.** M2's gate removes all 52 labelled violators and keeps 91 of the 94 compliant products. The other 3 (one in the Sony search, two in the speaker search) have no price while a budget is stated, so the strict policy excludes them. The live gate in Appendix B has no missing-price policy and keeps all 94. With this, D3 is complete as a build; what remains for M2 is D4, wiring it into the live path.
+
 ## 8. Status, open items and what comes next
 
 **Decisions recorded in the Project Plan (§6) from the project lead's twelve points and one correction, with their status here (none yet confirmed by the supervisor):**
 
 1. Dataset and cutoff: one mid-size category (not Electronics), 5-core filtered, frozen with checksums; chronological split with the last 10% of the timeline as the locked test and the 10% before it as development. Done (section 5).
 2. Frozen thresholds: user-bootstrap 95% lower bound above zero, point estimate of at least 3% relative conditional NDCG@10, and a 2% relative non-inferiority margin for the complex-query slice. Both are frozen and do not move after the locked test is opened. Status: the 3% is not met (+0.81%, section 7.1); the complex-query slice is computed with a history-length proxy, where M2 is non-inferior to B1 and +2.91% ahead on long histories (section 7.2).
-3. Success for one semester: D0 to D3 complete, M2 integrated behind the flag, and a point-estimate evaluation with zero hard-constraint violations. Status: D0 to D2 done, D3 mostly, integration (D4) not started; zero violations holds on the 15 frozen searches (Appendix B).
+3. Success for one semester: D0 to D3 complete, M2 integrated behind the flag, and a point-estimate evaluation with zero hard-constraint violations. Status: D0 to D3 done, integration (D4) not started; zero violations holds on the 15 frozen searches, with the live gate (Appendix B) and with M2's gate (section 7.3).
 4. Pull requests: a branch on the team repository named like `fyp/wp4/<topic>`, or a fork with a work-in-progress pull request. This work is on a fork with draft pull request #17; the branch name differs (kept, see 8.1).
-5. Missing or unparseable price: unknown, never zero; excluded when the request has a budget (reason code `UNKNOWN_PRICE_STRICT_MODE`), kept and flagged when it does not. Parser done (section 5); the reason code is not yet in the code (D4).
+5. Missing or unparseable price: unknown, never zero; excluded when the request has a budget (reason code `UNKNOWN_PRICE_STRICT_MODE`), kept and flagged when it does not. Parser done (section 5); the policy and the reason code are implemented and tested in the M2 module (section 7.3); the live gate still lets an unknown price through, and wiring the policy into it is D4.
 6. Currency: USD for the offline evaluator, since the dataset is priced in USD. Done.
 7. ASIN identity: in scope, as an additive change to the adapter; with the flag off the output must stay identical to B0, proved by a fixture test. The golden fixture tests exist (section 2); the ASIN change in the live adapter is not built (D4).
-8. Latency: ranker-only p95 at most 25 ms for 100 candidates on declared hardware. Measured and not yet settled (section 7.1).
+8. Latency: ranker-only p95 at most 25 ms for 100 candidates on declared hardware. Met on this laptop: M2's p95 was 11 to 19 ms in 13 runs (section 7.1); to be repeated on the final machine.
 9. B1: BM25 plus calibrated popularity is enough; ItemKNN only if D1 shows the interaction data supports it. Checked, and it does (section 6, item 3 under "What this changes").
 10. NDCG relevance: graded labels from the review rating, 5 stars = 2, 4 stars = 1, below 4 = 0, written into D0. Applied in section 6.4 as NDCG normalised by the ideal ranking, which with one rated item per case reduces to binary NDCG with grade-0 cases scored 0 (both versions are reported, see 8.1).
 11. Head and tail: the top 20% of items by review count within the frozen category are head, the rest tail; any documented threshold is acceptable if it is fixed before evaluation. Fixed at 12 train reviews (see 8.1); the earlier 868, from the metadata counts, includes future reviews and is not used.
@@ -571,10 +587,10 @@ The Plan freezes a 2% non-inferiority margin for a complex-query slice, but the 
 - **The 3% NDCG target is not met.** Re-tuned M2 beats B1 by +0.81% NDCG@10 on held-out users (section 7.1). Most of the ranking quality comes from popularity.
 - The shared runner `wp4_run_baselines.py` still reports binary NDCG and uses the reviews-only B0. Graded NDCG and the leak-free legacy B0 come from the separate passes in sections 6.4 and 7.1, not from the runner.
 - Item-side popularity leaked future reviews (section 6). All results in sections 6.3, 6.4 and 7.1 use train-only popularity, and M2 has been re-tuned under it. Negatives are drawn from the whole catalogue, which includes items with no train reviews yet.
-- M2's latency is not settled: three runs gave a p95 of 15.4, 21.1 and 32.6 ms against the 25 ms limit (section 7.1). Baselines and re-tuned M2 have user-level bootstrap intervals on held-out users; the M2 weights were chosen on 1 in 10 users and the B1 weight on all users.
-- Reason-code tests and the flag-contract fallback for M2 are not written yet.
+- Baselines and re-tuned M2 have user-level bootstrap intervals on held-out users; the M2 weights were chosen on 1 in 10 users and the B1 weight on all users. The latency check (section 7.1) should be repeated on the final machine.
+- The M2 module, its reason codes, price policy and fallback are built and tested (section 7.3), but not connected to the live request path, which still calls the old ranker (D4).
 - Head/tail and missing-price slices are not reported yet. The complex-query slice is computed only with a proxy (history-text length, section 7.2): the Plan freezes a 2% non-inferiority margin for it, but nothing defines a complex query or says where such queries come from, and the evaluation cases have no real search queries.
-- The missing-price policy and ASIN-first identity are decided but not in the live app: `UNKNOWN_PRICE_STRICT_MODE` appears only in documents, and the SerpApi adapter still drops the ASIN.
+- The missing-price policy exists in the M2 module (section 7.3) but not in the live gate, which still lets an unknown price through. ASIN-first identity is decided but not in the live app: the SerpApi adapter still drops the ASIN.
 - Evaluation takes two scripts and prints aggregate numbers only. A one-command evaluator with per-case output is a D5 item.
 - The working branch name does not follow the `fyp/wp4/<topic>` convention in the shared guidance.
 
@@ -592,18 +608,19 @@ python scripts/wp4_sweep_ranks.py all sweep_ranks.npz      # about 12 minutes
 python scripts/wp4_bootstrap_ci.py sweep_ranks.npz
 python scripts/wp4_m2_components.py all m2full             # about 14 minutes
 python scripts/wp4_m2_tune.py m2full sweep_ranks.npz       # about 12 minutes
-python scripts/wp4_latency.py 500 0.25,0,0.05,0.65,0.05
+python scripts/wp4_latency.py 500 0.25,0,0.05,0.65,0.05            # first 500 cases
+python scripts/wp4_latency.py 500 0.25,0,0.05,0.65,0.05 1000       # spread sample
+python -m pytest tests/wp4                                         # 63 tests
 python scripts/wp4_slices.py dist                         # length distribution only
 python scripts/wp4_slices.py run m2full sweep_ranks.npz 51  # slices, a few minutes
 ```
 
 **Remaining work, in order:**
 
-1. Finish D3: a controlled latency benchmark (and a cheaper text step if M2 stays near 25 ms), reason-code tests, fallback behaviour, and a decision with the supervisor on what to do about the +0.81% against the 3% target. Fold graded NDCG and the leak-free legacy B0 into the shared runner.
-2. D4: attach M2 at the seam in `generic_graph.py` through the adapter, behind `METAREC_PRODUCT_RANKER`, keep the ASIN in the adapter, and prove flag-off equals B0 with network-free tests.
-3. Point-estimate evaluation, and the zero-violation check on the labelled constraint fixtures. The sealed test split is opened once, at the end.
-4. Final report, due 16 November. If time runs short, the bootstrap intervals and extra slices are the first things to cut (Plan §7); feature-off parity and zero hard-constraint violations stay.
-5. Oral, 23 to 28 November: slides, then a live demo in the UI with the ranker flag off and on, which needs D4.
+1. D4: attach M2 at the seam in `generic_graph.py` through the adapter, behind `METAREC_PRODUCT_RANKER`, keep the ASIN in the adapter, and prove flag-off equals B0 with network-free tests.
+2. Point-estimate evaluation, and the zero-violation check on the labelled constraint fixtures. Fold graded NDCG and the leak-free legacy B0 into the shared runner. The sealed test split is opened once, at the end.
+3. Final report, due 16 November. If time runs short, the bootstrap intervals and extra slices are the first things to cut (Plan §7); feature-off parity and zero hard-constraint violations stay.
+4. Oral, 23 to 28 November: slides, then a live demo in the UI with the ranker flag off and on, which needs D4.
 
 ### 8.1 Decisions taken on my own judgement
 
@@ -743,9 +760,9 @@ Candidates are numbered by their position in the stored candidate list. Ties kee
 
 The searches are live captures of the Amazon search provider (SerpApi) taken in D0 (case 1 was transcribed from a log; the other 14 are captures) and stored in `tests/wp4/cases/`. Each product was labelled by hand by applying the constraints stated in the query to the returned title and price. The labels are a judgement. Violation types: *budget* = price above the stated limit; *category* = wrong type of product; *brand* = an excluded brand; *compat* = lacks a required word such as wireless, waterproof or RTX.
 
-**Per-search summary.** "B0 first violator" is the position (1 to 10) of the first labelled violator in B0's top 10; "after the M2 gate" is what the hard-constraint gate shows. Run with `python -m tests.wp4.eval_constraints`.
+**Per-search summary.** "B0 first violator" is the position (1 to 10) of the first labelled violator in B0's top 10; "after the gate" is what the live hard-constraint gate shows, without the missing-price policy of section 7.3. Run with `python -m tests.wp4.eval_constraints`.
 
-| search | query | stated constraints | products returned | violators | B0: first violator at rank | after the M2 gate: violators / products shown |
+| search | query | stated constraints | products returned | violators | B0: first violator at rank | after the live gate: violators / products shown |
 |---|---|---|---|---|---|---|
 | case_01_keyboard | recommend me a quiet mechanical keyboard under $120 for Mac | budget ≤ 120 USD; category: mechanical; not: membrane | 6 | 3 | 3 | 0 / 3 |
 | case_02_keyboard_live | quiet mechanical keyboard under 120 USD for Mac | budget ≤ 120 USD; category: mechanical; not: membrane | 10 | 3 | 4 | 0 / 7 |
@@ -764,7 +781,7 @@ The searches are live captures of the Amazon search provider (SerpApi) taken in 
 | case_15_studio_headphones | over-ear wired studio headphones under 50 USD | budget ≤ 50 USD; category: headphone | 10 | 1 | 1 | 0 / 9 |
 | **total** | | | **146** | **52** | | **0 / 94** |
 
-In searches 9 (SSD) and 13 (gaming laptop) all 10 returned products break a constraint, so the gate shows nothing; in the other 13 it keeps every compliant product (94 of 94) and removes every violator (52 of 52). The gate and the hand labels disagree on none of the 146 products.
+In searches 9 (SSD) and 13 (gaming laptop) all 10 returned products break a constraint, so the gate shows nothing; in the other 13 it keeps every compliant product (94 of 94) and removes every violator (52 of 52). M2's own gate, which adds the missing-price policy, also removes all 52 and keeps 91 of the 94 (section 7.3). The gate and the hand labels disagree on none of the 146 products.
 
 **The 52 violators.**
 

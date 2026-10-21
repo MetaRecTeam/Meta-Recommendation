@@ -1,8 +1,10 @@
 """WP4 D3: ranker-only latency (p50 / p95 / max, milliseconds) for B0, B1, ItemKNN and M2.
 
 Times only the call that turns 100 candidate cards plus the user's history into scores; cards are built
-beforehand and are not timed. Single process, first N dev cases, leak-safe popularity (train counts).
-Run on an otherwise idle machine, from MetaRec-backend/:  python scripts/wp4_latency.py [N]
+beforehand and are not timed. Single process, leak-safe popularity (train counts). Takes N dev cases, every
+STRIDE-th case of the file (stride 1 = the first N cases, which come from only a few users; a large stride
+spreads the sample over the whole file). Also prints p95 for users with a history only.
+Run on an otherwise idle machine, from MetaRec-backend/:  python scripts/wp4_latency.py [N] [m2_weights] [STRIDE]
 """
 import json
 import platform
@@ -23,7 +25,7 @@ def pct(xs, q):
     return xs[min(len(xs) - 1, int(round(q * (len(xs) - 1))))]
 
 
-def main(n_cases, m2_weights):
+def main(n_cases, m2_weights, stride=1):
     items = R.load_items()
     iu = R.load_item_users()
     for a, m in items.items():
@@ -34,9 +36,10 @@ def main(n_cases, m2_weights):
     cases = []
     with open("eval/product_dev_v1.jsonl", encoding="utf-8") as f:
         for i, line in enumerate(f):
-            if i >= n_cases:
+            if len(cases) >= n_cases:
                 break
-            cases.append(json.loads(line))
+            if i % stride == 0:
+                cases.append(json.loads(line))
     prepared = []
     for c in cases:
         cands = [R.item_card(a, items) for a in c["candidates"]]
@@ -44,6 +47,7 @@ def main(n_cases, m2_weights):
         cats = {items[a]["main_category"] for a in hist if items.get(a, {}).get("main_category")}
         brands = {items[a]["brand"] for a in hist if items.get(a, {}).get("brand")}
         prepared.append((c["query"], cands, hist, cats, brands))
+    warm_mask = [bool(p[2]) for p in prepared]
 
     runners = {
         "B0": lambda q, cands, h, ca, br: R.b0_scores(cands),
@@ -62,11 +66,13 @@ def main(n_cases, m2_weights):
             t0 = time.perf_counter()
             fn(*p)
             times.append((time.perf_counter() - t0) * 1000)
-        print(f"{name:8s} p50 {pct(times, .5):7.2f} ms  p95 {pct(times, .95):7.2f} ms  max {max(times):7.2f} ms  mean {statistics.fmean(times):7.2f} ms")
+        warm = [t for t, w in zip(times, warm_mask) if w]
+        print(f"{name:8s} p50 {pct(times, .5):7.2f} ms  p95 {pct(times, .95):7.2f} ms  max {max(times):7.2f} ms  mean {statistics.fmean(times):7.2f} ms"
+              f"  | warm users only ({len(warm)}): p95 {pct(warm, .95):7.2f} ms")
 
 
 if __name__ == "__main__":
     w = dict(W_M2)
-    if len(sys.argv) > 2:
+    if len(sys.argv) > 2 and sys.argv[2] != "default":
         w = dict(zip(M.DEFAULT_WEIGHTS.keys(), (float(x) for x in sys.argv[2].split(","))))
-    main(int(sys.argv[1]) if len(sys.argv) > 1 else 500, w)
+    main(int(sys.argv[1]) if len(sys.argv) > 1 else 500, w, int(sys.argv[3]) if len(sys.argv) > 3 else 1)
