@@ -18,7 +18,7 @@ split and constraint fixtures.*
 | D0 audit and B0 | **done** | sections 1 to 4; 15 frozen fixtures and golden files in `tests/wp4/` |
 | D1 data and features | **done**, including the star ratings, leak-free item features and a complete data sheet | section 5; `docs/wp4/D1-data-sheet.md` |
 | D2 baselines | **done** on development data; a popularity leak was found and the numbers re-run; confidence intervals, weight sweep and leak-free legacy B0 added (section 6) | section 6; `scripts/wp4_build_eval_cases.py`, `scripts/wp4_run_baselines.py`, `scripts/wp4_sweep_ranks.py` |
-| D3 M2 ranker | **in progress**: re-tuned with train-only popularity; on held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), short of the 3% target; latency p95 measured at 15 to 33 ms against a 25 ms limit, not settled; reason-code tests and fallback still to do | section 7; `langgraph_metarec/product_ranker_m2.py`, `scripts/wp4_m2_*.py` |
+| D3 M2 ranker | **in progress**: re-tuned with train-only popularity; on held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), short of the 3% target, but +2.91% on the long-history slice (section 7.2); latency p95 measured at 15 to 33 ms against a 25 ms limit, not settled; reason-code tests and fallback still to do | section 7; `langgraph_metarec/product_ranker_m2.py`, `scripts/wp4_m2_*.py` |
 | D4 integration | not started (the hard-constraint gate already sits behind the flag) | section 8 |
 | D5 evaluation | not started; the sealed test split has not been scored | section 8 |
 
@@ -530,22 +530,40 @@ The run-to-run spread is large (M2 p95 from 15.4 to 32.6 ms), so it is not yet e
 
 **Still to do for D3:** a controlled latency benchmark and, if M2 stays near the limit, a cheaper text step (any change alters the text scores, so M2 would have to be scored again); tests for each reason code; the fallback required by the flag contract (error, timeout, empty output or duplicate id returns the original order); and the live-system side of M2 (D4).
 
+### 7.2 Complex-versus-keyword-like slices (a stand-in for the Plan's complex-query slice)
+
+The Plan freezes a 2% non-inferiority margin for a complex-query slice, but the evaluation cases have no real search queries: each case's "query" is the user's last purchases joined together (section 6). So the length of that history text is used here as a proxy for how much detail the request carries. This is my own decision; the proposal does not define the slice. It separates long histories from short ones, not complex wording from simple wording.
+
+**Definition, fixed before any slice result was computed.** Users with a history (at least one word of history text) are split at the median length of that text over all 322,454 such development cases, which is **51 words** (quartiles 27 and 95 words; the longest is 500, because a history holds at most 20 purchases). *Keyword-like* means 1 to 51 words and *complex* means more than 51 words. Users with no history are a third slice, *cold*. The cut was taken from the length distribution alone, before M2 and B1 were compared on any slice. A user's cases all share one history, so the three slices contain different users (39,145, 43,725 and 51,611, which add up to the 134,481 held-out users).
+
+**Result** (held-out users, NDCG@10; 2,000 user-level bootstrap resamples, seed 42). M2 counts as non-inferior to B1 on a slice if the lower end of the 95% interval of its relative NDCG@10 difference is above -2%.
+
+| slice | cases | B0 reviews only | ItemKNN | B1 | M2 | M2 over B1, 95% interval | non-inferior at 2%? |
+|---|---|---|---|---|---|---|---|
+| cold (no history) | 189,450 | 0.2282 | 0.2282 | 0.2282 | 0.2282 | -0.01% [-0.03%, +0.00%] | yes |
+| keyword-like (1 to 51 words) | 145,681 | 0.2274 | 0.1033 | 0.2396 | 0.2390 | -0.24% [-0.50%, +0.02%] | yes |
+| **complex (more than 51 words)** | 144,758 | 0.2121 | 0.1530 | 0.2391 | **0.2461** | **+2.91% [+2.62%, +3.21%]** | yes |
+
+**Sensitivity, as a check and not the headline.** The same comparison at the tercile cuts gives, for keyword-like and complex users: cut at 33 words, -0.84% [-1.17%, -0.52%] and +2.40% [+2.15%, +2.66%]; cut at 76 words, +0.22% [-0.02%, +0.45%] and +3.67% [+3.28%, +4.04%]. The pattern does not depend on the cut: M2's edge over B1 grows with the length of the history, and short histories never fall below the -2% margin.
+
+**Reading it.** M2 helps most where the history gives it something to work with, because its text and collaborative ingredients need purchases to compare against. For cold users M2 and B1 are the same by construction (both rank by popularity). That also explains the small overall figure in section 7.1: 39.5% of the held-out cases are cold and a further 30.4% have short histories. The 3% acceptance criterion applies to the overall NDCG@10 and is still not met; the long-history slice (+2.91%) is supporting evidence about where the gain is, not a replacement for it. The result comes from `python scripts/wp4_slices.py dist`, which prints only the length distribution, followed by `python scripts/wp4_slices.py run <m2_prefix> <sweep_ranks.npz> 51`.
+
 ## 8. Status, open items and what comes next
 
 **Decisions recorded in the Project Plan (§6) from the project lead's twelve points and one correction, with their status here (none yet confirmed by the supervisor):**
 
 1. Dataset and cutoff: one mid-size category (not Electronics), 5-core filtered, frozen with checksums; chronological split with the last 10% of the timeline as the locked test and the 10% before it as development. Done (section 5).
-2. Frozen thresholds: user-bootstrap 95% lower bound above zero, point estimate of at least 3% relative conditional NDCG@10, and a 2% relative non-inferiority margin for the complex-query slice. Both are frozen and do not move after the locked test is opened. Status: not met for the 3% (+0.81%, section 7.1); the complex-query slice cannot be computed on this data (gaps below, question 5).
+2. Frozen thresholds: user-bootstrap 95% lower bound above zero, point estimate of at least 3% relative conditional NDCG@10, and a 2% relative non-inferiority margin for the complex-query slice. Both are frozen and do not move after the locked test is opened. Status: the 3% is not met (+0.81%, section 7.1); the complex-query slice is computed with a history-length proxy, where M2 is non-inferior to B1 and +2.91% ahead on long histories (section 7.2).
 3. Success for one semester: D0 to D3 complete, M2 integrated behind the flag, and a point-estimate evaluation with zero hard-constraint violations. Status: D0 to D2 done, D3 mostly, integration (D4) not started; zero violations holds on the 15 frozen searches (Appendix B).
-4. Pull requests: a branch on the team repository named like `fyp/wp4/<topic>`, or a fork with a work-in-progress pull request. This work is on a fork with draft pull request #17; the branch name differs (question 7).
+4. Pull requests: a branch on the team repository named like `fyp/wp4/<topic>`, or a fork with a work-in-progress pull request. This work is on a fork with draft pull request #17; the branch name differs (kept, see 8.1).
 5. Missing or unparseable price: unknown, never zero; excluded when the request has a budget (reason code `UNKNOWN_PRICE_STRICT_MODE`), kept and flagged when it does not. Parser done (section 5); the reason code is not yet in the code (D4).
 6. Currency: USD for the offline evaluator, since the dataset is priced in USD. Done.
 7. ASIN identity: in scope, as an additive change to the adapter; with the flag off the output must stay identical to B0, proved by a fixture test. The golden fixture tests exist (section 2); the ASIN change in the live adapter is not built (D4).
 8. Latency: ranker-only p95 at most 25 ms for 100 candidates on declared hardware. Measured and not yet settled (section 7.1).
 9. B1: BM25 plus calibrated popularity is enough; ItemKNN only if D1 shows the interaction data supports it. Checked, and it does (section 6, item 3 under "What this changes").
-10. NDCG relevance: graded labels from the review rating, 5 stars = 2, 4 stars = 1, below 4 = 0, written into D0. Applied in section 6.4 as NDCG normalised by the ideal ranking, which with one rated item per case reduces to binary NDCG with grade-0 cases scored 0 (question 4).
-11. Head and tail: the top 20% of items by review count within the frozen category are head, the rest tail; any documented threshold is acceptable if it is fixed before evaluation. The report currently has two values (868 reviews by the metadata counts, 12 by the train-only counts used in the leak-free runs, section 7.1); one has to be fixed before the final evaluation.
-12. Dataset access: read the terms in week 1, record them in the data sheet, and raise it at once if an agreement is needed. Done: no licence or terms were found (data sheet; question 2).
+10. NDCG relevance: graded labels from the review rating, 5 stars = 2, 4 stars = 1, below 4 = 0, written into D0. Applied in section 6.4 as NDCG normalised by the ideal ranking, which with one rated item per case reduces to binary NDCG with grade-0 cases scored 0 (both versions are reported, see 8.1).
+11. Head and tail: the top 20% of items by review count within the frozen category are head, the rest tail; any documented threshold is acceptable if it is fixed before evaluation. Fixed at 12 train reviews (see 8.1); the earlier 868, from the metadata counts, includes future reviews and is not used.
+12. Dataset access: read the terms in week 1, record them in the data sheet, and raise it at once if an agreement is needed. Done: no licence or terms were found (data sheet; still to confirm, 8.2).
 13. Correction: do not count on live MetaRec interaction data. The `item_interactions` table starts empty, so the evaluation stands on the frozen public dataset; any live history would be a separate, clearly labelled slice, and MetaRec users are never fabricated. Followed: no live interaction data is used.
 
 **Known gaps, so nobody has to find them:**
@@ -555,7 +573,7 @@ The run-to-run spread is large (M2 p95 from 15.4 to 32.6 ms), so it is not yet e
 - Item-side popularity leaked future reviews (section 6). All results in sections 6.3, 6.4 and 7.1 use train-only popularity, and M2 has been re-tuned under it. Negatives are drawn from the whole catalogue, which includes items with no train reviews yet.
 - M2's latency is not settled: three runs gave a p95 of 15.4, 21.1 and 32.6 ms against the 25 ms limit (section 7.1). Baselines and re-tuned M2 have user-level bootstrap intervals on held-out users; the M2 weights were chosen on 1 in 10 users and the B1 weight on all users.
 - Reason-code tests and the flag-contract fallback for M2 are not written yet.
-- Head/tail and missing-price slices are not reported yet. The complex-query slice cannot be computed on this data: the Plan freezes a 2% non-inferiority margin for it, but nothing defines a complex query or says where such queries come from, and the evaluation cases have no real search queries (each query is the user's past purchases joined together). See question 5 below.
+- Head/tail and missing-price slices are not reported yet. The complex-query slice is computed only with a proxy (history-text length, section 7.2): the Plan freezes a 2% non-inferiority margin for it, but nothing defines a complex query or says where such queries come from, and the evaluation cases have no real search queries.
 - The missing-price policy and ASIN-first identity are decided but not in the live app: `UNKNOWN_PRICE_STRICT_MODE` appears only in documents, and the SerpApi adapter still drops the ASIN.
 - Evaluation takes two scripts and prints aggregate numbers only. A one-command evaluator with per-case output is a D5 item.
 - The working branch name does not follow the `fyp/wp4/<topic>` convention in the shared guidance.
@@ -575,6 +593,8 @@ python scripts/wp4_bootstrap_ci.py sweep_ranks.npz
 python scripts/wp4_m2_components.py all m2full             # about 14 minutes
 python scripts/wp4_m2_tune.py m2full sweep_ranks.npz       # about 12 minutes
 python scripts/wp4_latency.py 500 0.25,0,0.05,0.65,0.05
+python scripts/wp4_slices.py dist                         # length distribution only
+python scripts/wp4_slices.py run m2full sweep_ranks.npz 51  # slices, a few minutes
 ```
 
 **Remaining work, in order:**
@@ -585,15 +605,24 @@ python scripts/wp4_latency.py 500 0.25,0,0.05,0.65,0.05
 4. Final report, due 16 November. If time runs short, the bootstrap intervals and extra slices are the first things to cut (Plan §7); feature-off parity and zero hard-constraint violations stay.
 5. Oral, 23 to 28 November: slides, then a live demo in the UI with the ranker flag off and on, which needs D4.
 
-**Questions for the supervisor:**
+### 8.1 Decisions taken on my own judgement
 
-1. Do the Plan §6 decisions stand, in particular the 3% point estimate? Re-tuned M2 is at +0.81% NDCG@10 over B1 (95% interval +0.69% to +0.94%) on this dataset. Is that reported as it is, or should a further signal be tried?
-2. Neither the dataset's homepage nor its Hugging Face card states a licence or terms of use, only a citation request (checked 20 and 21 Oct). Is academic use on that basis acceptable?
-3. Is there a required format or template for the interim and final reports?
-4. Graded NDCG: with one rated item per case, normalised NDCG cannot tell a 5-star item from a 4-star one (section 6.4). Is that acceptable, or should unnormalised gains (2 and 1) be used?
-5. Complex-query slice: the Plan freezes a 2% non-inferiority margin for it, but neither the proposal nor the Plan defines "complex" or says where those queries come from. The dataset holds no search queries, so complex against keyword cannot be defined on this data. How should the slice be defined?
-6. Demo: is a live UI demo expected at the oral, and if so, who provides the SerpApi key and quota?
-7. The fork branch is `feat/wp4-constraint-aware-product`, not `fyp/wp4/<topic>`. Is it fine to keep it with the WIP pull request, or should it be renamed?
+These points were left open by the Plan or the proposal. Each is decided here, with the reason, so the work can go on; the project lead's feedback on the Plan said that on several of them the choice is mine as long as it is recorded.
+
+| topic | decision | reason | where |
+|---|---|---|---|
+| **Complex-query slice** | A proxy: users with a history are split at the median length of their history text (51 words) into keyword-like and complex; users with no history are a separate cold slice. | The data has no real search queries. The cut was fixed from the length distribution before any result was seen, and the result holds at other cuts. | 7.2 |
+| **Head and tail threshold** | Head = top 20% of items by review count, with the count taken from train only: **12 reviews**. Fixed now, before the final evaluation. | The leak-free runs use train counts. The metadata count (868) includes reviews written after the case. | 7.1 |
+| **The 3% target** | The frozen threshold is not changed. The overall result (+0.81%) is reported as it is, with the ablations and the slice result beside it. | Thresholds are frozen once the locked test is opened; the evidence shows where the gain is and is not. | 7.1, 7.2 |
+| **Graded NDCG** | Both versions are reported: binary, and graded (normalised by the ideal ranking). | With one rated item per case, the difference between a 5-star and a 4-star item cancels in the normalised version. | 6.4 |
+| **Demo** | Slides first, then a live demo in the UI with the ranker flag off and on, with a frozen replay as backup. | Live search results change from run to run. | 8, remaining work |
+| **Branch name** | Keep `feat/wp4-constraint-aware-product` on the fork, with draft pull request #17. | The project lead allowed a fork with a work-in-progress pull request. | 8, point 4 |
+
+### 8.2 Still to confirm with the supervisor
+
+1. **Licence.** Neither the dataset's homepage nor its Hugging Face card states a licence or terms of use, only a citation request (checked 20 and 21 Oct). Is academic use on that basis acceptable?
+2. **Format.** Is there a required format or template for the interim and final reports? None was found.
+3. **Demo key.** If a live demo is expected, who provides the SerpApi key and quota?
 
 ## References
 
