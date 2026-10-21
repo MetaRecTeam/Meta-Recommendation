@@ -20,7 +20,7 @@ split and constraint fixtures.*
 | D2 baselines | **done** on development data; a popularity leak was found and the numbers re-run; confidence intervals, weight sweep and leak-free legacy B0 added (section 6) | section 6; `scripts/wp4_build_eval_cases.py`, `scripts/wp4_run_baselines.py`, `scripts/wp4_sweep_ranks.py` |
 | D3 M2 ranker | **done**: built, re-tuned with train-only popularity, tested (63 WP4 tests pass), ranker-only p95 11 to 19 ms against the 25 ms limit; on held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), short of the 3% target, but +2.91% on the long-history slice (section 7.2) | section 7; `langgraph_metarec/product_ranker_m2.py`, `scripts/wp4_m2_*.py` |
 | D4 integration | not started (the hard-constraint gate already sits behind the flag) | section 8 |
-| D5 evaluation | not started; the sealed test split has not been scored | section 8 |
+| D5 evaluation | **partly done on development data**: confidence intervals, the weight sweep, slices and latency (sections 6.3, 7.1, 7.2); the one-command evaluator is not built and the sealed test split has not been scored | sections 6, 7 and 8 |
 
 ---
 
