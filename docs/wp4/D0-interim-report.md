@@ -1,8 +1,22 @@
 # WP4 · Interim Report
 
-Ong Chuan Hau (C240087) · MetaRec `feat/wp4-constraint-aware-product` · base commit `9c09346` · status as of 21 October 2026
+Ong Chuan Hau (C240087) · MetaRec `feat/wp4-constraint-aware-product` · base commit `9c09346` · status as of 22 October 2026
 
 **Objective.** WP4 makes MetaRec's product recommendations respect what the user asked for (budget, brand, category, compatibility) while ranking the remaining products by relevance. The target is a ranker, M2, that is shown offline to do better than the current sort (B0) and than a text-plus-popularity baseline (B1), with a point estimate of at least 3% relative NDCG@10 (Project Plan §6), and that leaves the live output identical to B0 when its feature flag is off. The evidence comes from a frozen Amazon Reviews 2023 dataset [1], a development split used for tuning, and a sealed test split opened once at the end.
+
+**Key results so far** (development data; every figure is explained and sourced in the section named):
+
+| finding | value | where |
+|---|---|---|
+| The current sort (B0) shows products that break the user's own constraints | 52 of 146 frozen search results (36%) break a stated constraint; B0 surfaces all 52, with a violator at rank 1 in 6 of 15 searches | section 2, Appendix B |
+| A data leak inflated the first baseline numbers | B1 Recall@10 0.5140 with the leak, 0.3711 corrected | section 6 |
+| B1 (text + popularity) against a reviews-only sort | NDCG@10 0.2348 against 0.2231, +5.28% (95% interval +5.08% to +5.48%) | section 6.3 |
+| The existing rating-first order, scored without the leak | Recall@10 0.0776, below the 0.10 of a random ranking | section 6.4 |
+| M2 against B1, overall | NDCG@10 +0.81% (95% interval +0.69% to +0.94%); the 3% target is **not** met | section 7.1 |
+| M2 against B1, users with long histories | +2.91% (+2.62% to +3.21%); on short histories -0.24% (-0.50% to +0.02%), within the 2% margin | section 7.2 |
+| M2's hard-constraint gate on the 15 frozen searches | removes 52 of 52 violators, keeps 91 of 94 compliant products (the other 3 have no price while a budget is stated) | section 7.3 |
+| M2 speed | ranker-only p95 10.9 to 18.9 ms over 13 runs, limit 25 ms | section 7.1 |
+| Test split | sealed, not scored | section 4 |
 
 This report covers the D0 audit in full (sections 1 to 4), then what has been built since: the frozen dataset (D1, section 5), the baselines (D2, section 6) and the M2 ranker (D3, section 7). Section 8 lists what is still open and what comes next.
 
@@ -59,6 +73,23 @@ split and constraint fixtures.*
 - The Save / Not interested / Purchased chips (`ItemInteractionControls.tsx`) appear for registered users only. Each chip posts `item_id = item.id`, the title-hashed id from section 3.1, plus a small snapshot (`title`, `subtitle`, `source`, `url`).
 - On load, each card fetches existing interactions for the ids on screen (`listItemInteractions`, keyed by item id). By code reading, if a product's id changes between searches its earlier "Saved" state would not show. This has not been observed live.
 - Because the snapshot stores `url` and the ASIN sits inside the url, stored interactions could be re-keyed to ASIN offline if the id scheme changes.
+
+**Live capture of the current system.** The three figures below were taken from the running app on 22 October 2026 at about 23:10 (Singapore time): signed in as a guest, service type locked to ProductRec, the online agent switched on, and the ranker flag left unset, so the legacy sort (B0) was in use. The query was `quiet mechanical keyboard under 120 USD for Mac`, the same query as the frozen search `case_02_keyboard_live` in Appendix B. This is a live search, so its products differ from the frozen ones.
+
+![Figure 1b. The confirmation step, before any search runs](figures/ui/ui_01_preferences_confirm_crop.png#w=17)
+
+![Figure 1c. The ten results in the order the app shows them (five screenshots joined; the label above each card was added and repeats the card's own rating, review count and price; the red and orange outlines were added)](figures/ui/ui_02_results_all10.png#w=14.5)
+
+![Figure 1d. The first two result cards as they appear on screen](figures/ui/ui_03_card_closeup_crop.png#w=12)
+
+What the captures show:
+
+1. **The budget is text.** Before searching, the app restates the request ("product: mechanical keyboard, category: keyboard, use case: Mac, budget: <= 120 USD") and waits for Confirm (Figure 1b; pipeline steps 2 and 5). The budget is the string `<= 120 USD`, not a number.
+2. **The order is rating, then review count, and nothing else.** The first result has rating 5.0 from 5 reviews and the second has 4.8 from 51; the 4.4-rated results at ranks 5 and 6 have 3,800 and 153 reviews (Figure 1c; step 11).
+3. **One result breaks the budget.** Rank 8, the Logitech MX Mechanical at $149.99 (rating 4.2, 2,200 reviews), is over the $120 limit and still sits above the $69.34 Keychron K8 at rank 10.
+4. **One result has no price.** Rank 9, the Logitech MX Mechanical Mini, shows no price line and no price chip, so a user cannot see its price and a budget check has nothing to compare (section 3.2).
+5. **What a card carries** (Figure 1d). The picture, the title, a Product badge, the price as text under the title (the subtitle, because the brand is empty) and again as a chip, the rating, the review count, the source (Amazon), the line "Matched the product search query." and a View source link. There is no price field and no explanation beyond that one line.
+6. **Guests have no feedback controls.** No Save, Not interested or Purchased controls appear on the cards when signed in as a guest (section 3.4).
 
 ---
 
@@ -162,7 +193,14 @@ Full detail and every checksum are in `docs/wp4/D1-data-sheet.md`. The short ver
 
 ![Figure 2. From the frozen dataset to the baseline and M2 numbers](figures/fig2_eval_flow.png)
 
-**How a test case is built.** The frozen data holds interactions and an item catalogue, with no search queries and no candidate lists, so the evaluation cases had to be constructed. These choices are mine; the proposal does not dictate them. Each development interaction becomes one case. "The real next item" in this report means the item of that interaction; a user with several development interactions gets one case for each, all with the same train-only history, and the item of a given case is not necessarily the first one the user bought after the cutoff. The "query" is the titles of the user's last 20 train items (fewer if the user has fewer), oldest first, joined with single spaces. For B1, query and candidate titles are lowercased and split into runs of letters and digits (regular expression `[a-z0-9]+`), so "0.7 mm" becomes `0`, `7`, `mm`. The candidates are the real next item plus 99 random items that user never touched in train, dev or test, so there are 100 candidates, shuffled, drawn with a fixed seed (42). The size of 100 (the real item and `NUM_NEGATIVES = 99` random items) and the history cap of 20 are settings of the case builder `scripts/wp4_build_eval_cases.py`. Ranking the whole catalogue of 80,181 items in each of 534,128 cases would need about 800 times as much scoring; 100 candidates is a common size for sampled evaluation and gives a clear floor, since a random ranking then scores Recall@10 = 0.10. The price is that every value is a sampled metric (see item 5 under "What this changes"). A system is scored on where the real item lands in its ranking. Users with no train history (39.6% of the dev cases) have no profile text, so every system falls back to popularity for them.
+**How a test case is built.** The frozen data holds interactions and an item catalogue, with no search queries and no candidate lists, so the evaluation cases had to be constructed. These choices are mine; the proposal does not dictate them.
+
+- **One case per development interaction.** "The real next item" in this report means the item of that interaction. A user with several development interactions gets one case for each, all with the same train-only history, and the item of a given case is not necessarily the first one the user bought after the cutoff.
+- **The query is the user's history.** It is the titles of the user's last 20 train items (fewer if the user has fewer), oldest first, joined with single spaces. Users with no train history (39.6% of the development cases) have no query, so every system falls back to popularity for them.
+- **Words.** For B1, query and candidate titles are lowercased and split into runs of letters and digits (regular expression `[a-z0-9]+`), so "0.7 mm" becomes `0`, `7`, `mm`.
+- **Candidates.** The real next item plus 99 random items that user never touched in train, dev or test, so there are 100 candidates, shuffled, drawn with a fixed seed (42).
+- **Why 100.** The size of 100 (the real item and `NUM_NEGATIVES = 99` random items) and the history cap of 20 are settings of the case builder `scripts/wp4_build_eval_cases.py`. Ranking the whole catalogue of 80,181 items in each of 534,128 cases would need about 800 times as much scoring; 100 candidates is a common size for sampled evaluation and gives a clear floor, since a random ranking then scores Recall@10 = 0.10. The price is that every value is a sampled metric (see item 5 under "What this changes").
+- **Scoring.** A system is scored on where the real item lands in its ranking.
 
 **How a case is scored.** A system gives each of the 100 candidates a score and the candidates are sorted from highest to lowest. Let *rank* be the position of the real next item in that order (1 is best). Each case has exactly one relevant item, so the three metrics reduce to:
 
@@ -210,8 +248,8 @@ What this changes:
 
 1. **The headline gap was mostly the leak.** B1 does not more than double B0. Against a plain most-reviewed sort, BM25 adds about 4.5% in Recall@10 (0.3711 against 0.3550). B1 is still the stronger of the baselines, but only modestly stronger than popularity alone. The BM25 weight of 0.25 was first chosen on 30,000 cases under the leaking popularity. It was then re-checked on the full development set with train-only popularity (section 6.3), and 0.25 is still the best for NDCG@10 and MRR@10.
 2. **Popularity is most of the signal.** Cold users, who get popularity alone, score about as well as warm users who also get text matching. The proposal's glossary calls a popularity baseline "surprisingly strong", and this data agrees.
-3. **ItemKNN is feasible but weak.** The project lead's condition for adding it was that the data must support it. It does: a typical item shares users with a median of 54 other items, and only 12 of 2,000 sampled items had none. But histories are thin (median 5 train interactions, and only 1.23% of users have more than 20). For warm users it scores 0.2172 against 0.3785 for B1.
-4. **Latency is not a problem for the baselines.** Ranker-only p95 for 100 candidates over the first 500 development cases on the development laptop, in three repeated runs, was 0.10 to 0.16 ms for B0, 10.7 to 21.0 ms for B1 and 1.7 to 2.2 ms for ItemKNN, against the 25 ms limit (full table with M2 in section 7). An earlier version of this report gave 0.11, 11.2 and 1.35 ms; those figures are at or below the low end of this range (how they were measured was not recorded), and the 21.0 ms run shows B1 can get close to the limit when the machine is busy.
+3. **ItemKNN is feasible but weak.** The project lead's condition for adding it was that the data must support it. It does: of the 47,892 items that have at least one train user, a random sample of 2,000 (seed 42) shares users with a median of about 54 other items, and only 8 of the 2,000 share users with none. But histories are thin: among the 173,609 users with at least one train interaction, the median is 4 interactions, 68% have 5 or fewer, and only 1.15% have more than 20. For warm users it scores 0.2172 against 0.3785 for B1.
+4. **Latency is not a problem for the baselines.** Ranker-only p95 for 100 candidates on the development laptop, over repeated runs on two samples of 500 cases, was 0.10 to 0.21 ms for B0, 7.2 to 13.0 ms for B1 and 1.1 to 2.3 ms for ItemKNN, against the 25 ms limit (full table with M2 in section 7.1). An earlier version of this report gave 0.11, 11.2 and 1.35 ms, which could not be reproduced exactly; the figures above are the measured ones.
 5. **How to read the absolute values.** A random ranking of 100 candidates scores Recall@10 = 0.10. These are sampled metrics: each case ranks 100 candidates, not the full 80,181 items, so the values are not comparable with papers that rank the whole catalogue.
 
 The first table in this section is the original run with the leaking popularity; the right-hand column of the second is the corrected run. Everything that follows uses the corrected version unless it says otherwise.
@@ -361,7 +399,7 @@ The idfs in this table are rounded to three or four decimals, so a hand calculat
 
 **B0 on case `dev_0000000`.** With train-only counts, B0 sorts the 100 candidates by number of train reviews, highest first. The top five are #90 (129 reviews), #4 (93), #21 (49), #83 (36) and #100 (30). The real next item (#96) has 0 train reviews and ties with many others at 0, which the title breaks (descending), so it lands at **rank 89**. B1 put it at rank 71 (section 6.1). Both miss.
 
-**ItemKNN: the formula.** Let U(x) be the set of train users who interacted with item x. The similarity of two items is
+**ItemKNN: the formula.** The dataset is made of reviews, so a "buyer" in this report is a user who reviewed the item before the train cutoff. Let U(x) be the set of such train users of item x. The similarity of two items is
 
 > sim(a, b) = |U(a) ∩ U(b)| / sqrt(|U(a)| × |U(b)|)
 
@@ -377,7 +415,7 @@ The score of a candidate c is the mean of sim(c, h) over the user's history item
 | #79 Blue Summit self-seal security envelopes (the real next item) | 50 | 1, 1, 0 | 1/√(50×342) = 0.0076, 1/√(50×163) = 0.0111, 0 | 0.0062 |
 | #41 Universal binder clips | 119 | 1, 0, 1 | 1/√(119×342) = 0.0050, 0, 1/√(119×107) = 0.0089 | 0.0046 |
 
-The real item ranks **2**, so this case scores Recall@10 = 1, NDCG@10 = 0.631 and MRR@10 = 0.500. Four more candidates have small non-zero scores, and the other 93 candidates score exactly 0. This is the pattern behind the weak overall ItemKNN result: histories are thin (median 5 train interactions), so for most candidates the score is either 0 or built on a single shared buyer.
+The real item ranks **2**, so this case scores Recall@10 = 1, NDCG@10 = 0.631 and MRR@10 = 0.500. Four more candidates have small non-zero scores, and the other 93 candidates score exactly 0. This is the pattern behind the weak overall ItemKNN result: histories are thin (median 4 train interactions per user), so for most candidates the score is either 0 or built on a single shared buyer.
 
 ### 6.3 BM25 weight sweep and confidence intervals (full development set, train-only popularity)
 
@@ -454,7 +492,7 @@ The comparison below is on the held-out users: the 134,481 users (479,889 cases)
 
 **What the tuning showed.** Weights were first searched on 2,000 cases. That pointed at `attribute_match` and `tail_adjustment` as the useful additions. Repeating the search on 30,000 cases reversed it: `collaborative` was the best single addition, `tail_adjustment` slightly hurt, and `attribute_match` barely mattered. The 2,000-case result was noise, so all later tuning used 30,000 cases. These samples are the first 2,000 and first 30,000 lines of the development file (`--limit N`). The file is almost entirely grouped by user (150,200 runs of consecutive rows for 149,788 users), not shuffled, so the first 30,000 cases come from only 5,680 users, and the first 3,000 from 381. They are not a random sample: on the first 3,000 cases B1 scores Recall@10 = 0.202 against 0.371 on the full set. The 30,000-case results quoted in this part are therefore indicative of direction, not of level; the per-weight tables of the M2 searches were not kept; the search was redone on the full set in section 7.1.
 
-**A change to the signal, not just the weights.** `text_relevance` originally matched on titles only. Adding brand, category and store to the text on both sides improved that component by 7.1% in Recall@10, 9.5% in NDCG@10 and 11.1% in MRR@10 (warm users, 30,000 cases). A stronger signal did not want a bigger weight: text weights from 0.20 to 0.50 got steadily worse, and 0.20 was best. One design note: putting brand and category into the text overlaps with `attribute_match`, which the proposal lists as a separate component. It improves the numbers, but it blurs that line.
+**A change to the signal, not just the weights.** `text_relevance` originally matched on titles only. Adding brand, category and store to the text on both sides improved that component by 7.1% in Recall@10, 9.5% in NDCG@10 and 11.1% in MRR@10 (warm users, 30,000 cases, measured while popularity leaked; the full-set figure is much smaller, see "The enriched text" in 7.1). A stronger signal did not want a bigger weight: text weights from 0.20 to 0.50 got steadily worse, and 0.20 was best. One design note: putting brand and category into the text overlaps with `attribute_match`, which the proposal lists as a separate component. It improves the numbers, but it blurs that line.
 
 **Superseded.** The weights found in this earlier work (text 0.20, attribute 0.05, collaborative 0.10, popularity 0.65, tail 0) and its +3.47% NDCG@10 lift over B1 on 30,000 cases were measured while popularity leaked and on a non-random sample. With train-only popularity the same weights give +0.43% NDCG@10 over B1 on held-out users (section 7.1). Do not quote the earlier lift.
 
