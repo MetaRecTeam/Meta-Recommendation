@@ -44,7 +44,7 @@ split and constraint fixtures.*
 | Deliverable | Status | Where |
 |---|---|---|
 | D0 audit and B0 | **Done** | Sections 1 to 4; 15 frozen fixtures and golden files in `tests/wp4/` |
-| D1 data and features | **Done**, including the star ratings, leak-free item features and a complete data sheet | section 5; `docs/wp4/D1-data-sheet.md` |
+| D1 data and features | **Done**, including the star ratings, leak-free item features and a complete data sheet | Section 5; `docs/wp4/D1-data-sheet.md` |
 | D2 baselines | **Done** on development data; a popularity leak was found and the numbers re-run; confidence intervals, weight sweep and leak-free legacy B0 added (section 6) | Section 6; `scripts/wp4_build_eval_cases.py`, `scripts/wp4_run_baselines.py`, `scripts/wp4_sweep_ranks.py` |
 | D3 M2 ranker | **Done**: built, re-tuned with train-only popularity, tested (63 WP4 tests pass), ranker-only p95 11 to 19 ms against the 25 ms limit; on held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), short of the 3% target, but +2.91% on the long-history slice (section 7.2) | Section 7; `langgraph_metarec/product_ranker_m2.py`, `scripts/wp4_m2_*.py` |
 | D4 integration | Not started (the hard-constraint gate already sits behind the flag) | Section 8 |
@@ -98,11 +98,11 @@ split and constraint fixtures.*
 
 What the captures show:
 
-1. **The budget is text.** Before searching, the app restates the request ("product: mechanical keyboard, category: keyboard, use case: Mac, budget: <= 120 USD") and waits for Confirm (Figure 2; pipeline steps 2 and 5). The budget is the string `<= 120 USD`, not a number.
-2. **The order is rating, then review count, and nothing else.** The first result has rating 5.0 from 5 reviews and the second has 4.8 from 51; the 4.4-rated results at ranks 5 and 6 have 3,800 and 153 reviews (Figure 3; step 11).
+1. **The budget is text.** Before searching, the app restates the request ("product: mechanical keyboard, category: keyboard, use case: Mac, budget: <= 120 USD") and waits for Confirm (Fig. 2; pipeline steps 2 and 5). The budget is the string `<= 120 USD`, not a number.
+2. **The order is rating, then review count, and nothing else.** The first result has rating 5.0 from 5 reviews and the second has 4.8 from 51; the 4.4-rated results at ranks 5 and 6 have 3,800 and 153 reviews (Fig. 3; step 11).
 3. **One result breaks the budget.** Rank 8, the Logitech MX Mechanical at $149.99 (rating 4.2, 2,200 reviews), is over the $120 limit and still sits above the $69.34 Keychron K8 at rank 10.
 4. **One result has no price.** Rank 9, the Logitech MX Mechanical Mini, shows no price line and no price chip, so a user cannot see its price and a budget check has nothing to compare (section 3.2).
-5. **What a card carries** (Figure 4). The picture, the title, a Product badge, the price as text under the title (the subtitle, because the brand is empty) and again as a chip, the rating, the review count, the source (Amazon), the line "Matched the product search query." and a View source link. There is no price field and no explanation beyond that one line.
+5. **What a card carries** (Fig. 4). The picture, the title, a Product badge, the price as text under the title (the subtitle, because the brand is empty) and again as a chip, the rating, the review count, the source (Amazon), the line "Matched the product search query." and a View source link. There is no price field and no explanation beyond that one line.
 6. **Guests have no feedback controls.** No Save, Not interested or Purchased controls appear on the cards when signed in as a guest (section 3.4).
 
 ---
@@ -228,7 +228,7 @@ Full detail and every checksum are in `docs/wp4/D1-data-sheet.md`. The short ver
 | NDCG@10 | 1.000 | 0.631 | 0.500 | 0.387 | 0.289 | 0 |
 | MRR@10 | 1.000 | 0.500 | 0.333 | 0.200 | 0.100 | 0 |
 
-The reported value of each metric is its mean over all 534,128 cases, each case counting once, so a user with many development interactions contributes to many cases. If two candidates tie, the sort keeps their order in the stored (shuffled) candidate list. A system that ranked at random would average Recall@10 = 0.10, NDCG@10 = 0.045 and MRR@10 = 0.029, which is the floor to read the results against. These metrics treat the real next item as relevant (gain 1) and every other candidate as not (gain 0). The Project Plan also decides a graded scheme from the star rating in the user's review of that item: 5 stars = 2, 4 stars = 1, below 4 = 0. Because each case has exactly one rated item, NDCG normalised by the ideal ranking is 1 / log2(rank + 1) for any positive grade and 0 for grade 0, so the difference between 2 and 1 cancels out. Graded NDCG@10 therefore equals the binary NDCG@10 with the 13.5% of cases whose real item was rated below 4 stars set to 0 (section 6.4). Keeping 2 and 1 apart would need an unnormalised DCG; that is a decision for the supervisor (section 8). Section 6.1 shows a full case: the real item at rank 71 scores 0 on all three.
+The reported value of each metric is its mean over all 534,128 cases, each case counting once, so a user with many development interactions contributes to many cases. If two candidates tie, the sort keeps their order in the stored (shuffled) candidate list. A system that ranked at random would average Recall@10 = 0.10, NDCG@10 = 0.045 and MRR@10 = 0.029, which is the floor to read the results against. These metrics treat the real next item as relevant (gain 1) and every other candidate as not (gain 0). The Project Plan also decides a graded scheme from the star rating in the user's review of that item: 5 stars = 2, 4 stars = 1, below 4 = 0. Because each case has exactly one rated item, NDCG normalised by the ideal ranking is 1 / log2(rank + 1) for any positive grade and 0 for grade 0, so the difference between 2 and 1 cancels out. Graded NDCG@10 therefore equals the binary NDCG@10 with the 13.5% of cases whose real item was rated below 4 stars set to 0 (section 6.4). Keeping 2 and 1 apart would need an unnormalised DCG; that is not done here (section 8.1). Section 6.1 shows a full case: the real item at rank 71 scores 0 on all three.
 
 **The three baselines** all run on the same 534,128 cases:
 
