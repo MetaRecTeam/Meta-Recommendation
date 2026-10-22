@@ -54,7 +54,7 @@ split and constraint fixtures.*
 
 ## 1. Pipeline trace (a product request, end to end)
 
-![Figure 1. A product request in the current system, and the one place M2 attaches](figures/fig1_b0_pipeline.png)
+![Fig. 1. A product request in the current system, and the one place M2 attaches](figures/fig1_b0_pipeline.png)
 
 | # | Stage | Code | What happens for `domain = product` |
 |---|---|---|---|
@@ -90,11 +90,11 @@ split and constraint fixtures.*
 
 **Live capture of the current system.** The three figures below were taken from the running app on 22nd October 2026 at about 23:10 (Singapore time): signed in as a guest, service type locked to ProductRec, the online agent switched on, and the ranker flag left unset, so the legacy sort (B0) was in use. The query was `quiet mechanical keyboard under 120 USD for Mac`, the same query as the frozen search `case_02_keyboard_live` in Appendix B. This is a live search, so its products differ from the frozen ones.
 
-![Figure 2. The confirmation step, before any search runs](figures/ui/ui_01_preferences_confirm_crop.png#w=17)
+![Fig. 2. The confirmation step, before any search runs](figures/ui/ui_01_preferences_confirm_crop.png#w=17)
 
-![Figure 3. The ten results in the order the app show them (five screenshots joined; the label above each card was added and repeats the card's own rating, review count and price; the red and orange outlines were added)](figures/ui/ui_02_results_all10.png#w=14.5)
+![Fig. 3. The ten results in the order the app show them (five screenshots joined; the label above each card was added and repeats the card's own rating, review count and price; the red and orange outlines were added)](figures/ui/ui_02_results_all10.png#w=14.5)
 
-![Figure 4. The first two result cards appear on screen](figures/ui/ui_03_card_closeup_crop.png#w=12)
+![Fig. 4. The first two result cards appear on screen](figures/ui/ui_03_card_closeup_crop.png#w=12)
 
 What the captures show:
 
@@ -205,7 +205,7 @@ Full detail and every checksum are in `docs/wp4/D1-data-sheet.md`. The short ver
 
 ## 6. D2: baselines on development data
 
-![Figure 5. From the frozen dataset to the baseline and M2 numbers](figures/fig2_eval_flow.png)
+![Fig. 5. From the frozen dataset to the baseline and M2 numbers](figures/fig2_eval_flow.png)
 
 **How a test case is built.** The frozen data holds interactions and an item catalogue, with no search queries and no candidate lists, so the evaluation cases had to be constructed. These choices are mine; the proposal does not dictate them.
 
@@ -220,7 +220,7 @@ Full detail and every checksum are in `docs/wp4/D1-data-sheet.md`. The short ver
 
 - **Recall@10** = 1 if rank ≤ 10, otherwise 0. With one relevant item per case this is the same as the hit rate.
 - **MRR@10** = 1 / rank if rank ≤ 10, otherwise 0.
-- **NDCG@10** [4] = 1 / log2(rank + 1) if rank ≤ 10, otherwise 0. The ideal ranking puts the item at rank 1, which has a gain of 1, so no further normalisation is needed.
+- **NDCG@10** [2] = 1 / log2(rank + 1) if rank ≤ 10, otherwise 0. The ideal ranking puts the item at rank 1, which has a gain of 1, so no further normalisation is needed.
 
 | Rank of the real item | 1 | 2 | 3 | 5 | 10 | 11 or worse |
 |---|---|---|---|---|---|---|
@@ -233,9 +233,9 @@ The reported value of each metric is its mean over all 534,128 cases, each case 
 **The three baselines** all run on the same 534,128 cases:
 
 - **B0** is the existing sort: rating, then review count, then title. The popularity term in the real formula is always 0 for Amazon products, so it is left out; the order is the same.
-- **B1** scores each of the 100 candidates in a case in three steps, all inside that case. (1) *Text*: Okapi BM25 [2] (`rank_bm25` `BM25Okapi` [5], k1 = 1.5, b = 0.75) between the history text and the candidate's title, where both are lowercased and split into pieces of letters and digits, and the 100 candidate titles are the BM25 corpus (a word that occurs k times in the history counts k times). (2) *Popularity*: ln(1 + number of train reviews of the item). (3) Each of the two lists of 100 scores is turned into a z-score (score minus the list's mean, divided by its population standard deviation), and the final score is 0.25 × text z + 0.75 × popularity z. Candidates are sorted by that score, highest first. Section 6.1 follows two real cases through every number.
+- **B1** scores each of the 100 candidates in a case in three steps, all inside that case. (1) *Text*: Okapi BM25 [3] (`rank_bm25` `BM25Okapi` [4], k1 = 1.5, b = 0.75) between the history text and the candidate's title, where both are lowercased and split into pieces of letters and digits, and the 100 candidate titles are the BM25 corpus (a word that occurs k times in the history counts k times). (2) *Popularity*: ln(1 + number of train reviews of the item). (3) Each of the two lists of 100 scores is turned into a z-score (score minus the list's mean, divided by its population standard deviation), and the final score is 0.25 × text z + 0.75 × popularity z. Candidates are sorted by that score, highest first. Section 6.1 follows two real cases through every number.
 - **B0 in the leak-free runs** comes in two forms. The *reviews-only* sort orders by the number of train reviews, then by title (descending); it is the B0 in the main tables of this section. The *legacy order with train-only ratings* orders by the item's mean star rating over train reviews first (0 if it has none), then by train review count, then by title (descending); it is the closest leak-free version of the live sort and is scored in section 6.4.
-- **ItemKNN** [3], the collaborative baseline, scores a candidate by its average cosine similarity to the user's history items. The similarity of two items is the number of train users who interacted with both, divided by the square root of the product of their train user counts. Section 6.2 gives the formula and two cases.
+- **ItemKNN** [5], the collaborative baseline, scores a candidate by its average cosine similarity to the user's history items. The similarity of two items is the number of train users who interacted with both, divided by the square root of the product of their train user counts. Section 6.2 gives the formula and two cases.
 
 First full-set results, with popularity taken from the metadata (this version leaks; see below):
 
@@ -451,7 +451,7 @@ One pass over all 534,128 cases recorded the rank of the real next item under B0
 | 0.80 | 0.3012 | 0.1829 | 0.1468 |
 | 1.00 (text only) | 0.2820 | 0.1736 | 0.1405 |
 
-![Figure 6. Recall@10, NDCG@10 and MRR@10 of B1 against the BM25 weight](figures/fig3_bm25_weight_sweep.png)
+![Fig. 6. Recall@10, NDCG@10 and MRR@10 of B1 against the BM25 weight](figures/fig3_bm25_weight_sweep.png)
 
 NDCG@10 and MRR@10 peak at 0.25. Recall@10 peaks slightly later, at 0.35 (0.3737 against 0.3711), and the curve is flat between 0.25 and 0.40. The weight was chosen on the same development data it is scored on, but it is one number out of a smooth curve over 534,128 cases, so the risk of overfitting it is small.
 
@@ -690,16 +690,20 @@ These points were left open by the Plan or the proposal. Each is decided here, w
 ### 8.2 Still to confirm with the supervisor
 
 1. **Licence.** Neither the dataset's homepage nor its Hugging Face card states a licence or terms of use, only a citation request (checked 20 and 21 Oct). Is academic use on that basis acceptable?
-2. **Format.** Is there a required format or template for the interim and final reports? None was found.
+2. **Format.** Is there a required format or template for the interim and final reports? None was found, so the references follow IEEE style for now.
 3. **Demo key.** If a live demo is expected, who provides the SerpApi key and quota?
 
 ## References
 
-1. Y. Hou, J. Li, Z. He, A. Yan, X. Chen and J. McAuley, "Bridging Language and Items for Retrieval and Recommendation," arXiv:2403.03952, 2024. (Amazon Reviews 2023 dataset.)
-2. S. Robertson and H. Zaragoza, "The Probabilistic Relevance Framework: BM25 and Beyond," Foundations and Trends in Information Retrieval, vol. 3, no. 4, pp. 333–389, 2009.
-3. B. Sarwar, G. Karypis, J. Konstan and J. Riedl, "Item-based collaborative filtering recommendation algorithms," Proc. 10th International World Wide Web Conference (WWW), pp. 285–295, 2001.
-4. K. Järvelin and J. Kekäläinen, "Cumulated gain-based evaluation of IR techniques," ACM Transactions on Information Systems, vol. 20, no. 4, pp. 422–446, 2002.
-5. D. Brown, `rank_bm25` 0.2.2, Python package, https://github.com/dorianbrown/rank_bm25.
+[1] Y. Hou, J. Li, Z. He, A. Yan, X. Chen, and J. McAuley, “Bridging language and items for retrieval and recommendation,” arXiv:2403.03952, 2024.
+
+[2] K. Järvelin and J. Kekäläinen, “Cumulated gain-based evaluation of IR techniques,” *ACM Trans. Inf. Syst.*, vol. 20, no. 4, pp. 422–446, Oct. 2002.
+
+[3] S. Robertson and H. Zaragoza, “The probabilistic relevance framework: BM25 and beyond,” *Found. Trends Inf. Retr.*, vol. 3, no. 4, pp. 333–389, 2009.
+
+[4] D. Brown, “`rank_bm25`”, ver. 0.2.2, Python package. [Online]. Available: https://github.com/dorianbrown/rank_bm25
+
+[5] B. Sarwar, G. Karypis, J. Konstan, and J. Riedl, “Item-based collaborative filtering recommendation algorithms,” in *Proc. 10th Int. Conf. World Wide Web (WWW)*, Hong Kong, China, 2001, pp. 285–295.
 
 ## Appendix A. Full ranking for case dev_0000000 (B1, BM25 weight 0.25, train-only popularity)
 
