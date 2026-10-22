@@ -695,15 +695,15 @@ These points were left open by the Plan or the proposal. Each is decided here, w
 
 ## References
 
-[1] Y. Hou, J. Li, Z. He, A. Yan, X. Chen, and J. McAuley, “Bridging language and items for retrieval and recommendation,” arXiv:2403.03952, 2024.
+[1] Y. Hou, J. Li, Z. He, A. Yan, X. Chen, and J. McAuley, “Bridging language and items for retrieval and recommendation,” 2024, arXiv:2403.03952.
 
 [2] K. Järvelin and J. Kekäläinen, “Cumulated gain-based evaluation of IR techniques,” *ACM Trans. Inf. Syst.*, vol. 20, no. 4, pp. 422–446, Oct. 2002.
 
 [3] S. Robertson and H. Zaragoza, “The probabilistic relevance framework: BM25 and beyond,” *Found. Trends Inf. Retr.*, vol. 3, no. 4, pp. 333–389, 2009.
 
-[4] D. Brown, “`rank_bm25`”, ver. 0.2.2, Python package. [Online]. Available: https://github.com/dorianbrown/rank_bm25
+[4] D. Brown, “`rank_bm25`,” ver. 0.2.2, Python package, 2022. [Online]. Available: https://github.com/dorianbrown/rank_bm25
 
-[5] B. Sarwar, G. Karypis, J. Konstan, and J. Riedl, “Item-based collaborative filtering recommendation algorithms,” in *Proc. 10th Int. Conf. World Wide Web (WWW)*, Hong Kong, China, 2001, pp. 285–295.
+[5] B. Sarwar, G. Karypis, J. Konstan, and J. Riedl, “Item-based collaborative filtering recommendation algorithms,” in *Proc. 10th Int. Conf. World Wide Web (WWW)*, Hong Kong, China, May 2001, pp. 285–295.
 
 ## Appendix A. Full ranking for case dev_0000000 (B1, BM25 weight 0.25, train-only popularity)
 
