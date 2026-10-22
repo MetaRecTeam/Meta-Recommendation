@@ -1,22 +1,36 @@
-# WP4 · Interim Report
+# Constraint-Aware Product Recommendation (WP4): Interim Report
 
-Ong Chuan Hau (C240087) · MetaRec `feat/wp4-constraint-aware-product` · base commit `9c09346` · status as of 22 October 2026
+**Nanyang Technological University** · Mini Capstone (Specialisation) Project · Year 2026, Semester 1
+
+**Name:** Ong Chuan Hau
+
+**Supervisor:** Prof Zhang Jie
+
+**Work Package:** WP4, Constraint-Aware Product Recommendation, MetaRec multi-domain recommender
+
+**Proposal:** github.com/Hanny658/FYP26-Proposals, WP4-product-recommendation
+
+**Code:** MetaRec, branch `feat/wp4-constraint-aware-product`, base commit `9c09346`
+
+**Date:** 22nd October 2026
+
+<!-- toc -->
 
 **Objective.** WP4 makes MetaRec's product recommendations respect what the user asked for (budget, brand, category, compatibility) while ranking the remaining products by relevance. The target is a ranker, M2, that is shown offline to do better than the current sort (B0) and than a text-plus-popularity baseline (B1), with a point estimate of at least 3% relative NDCG@10 (Project Plan §6), and that leaves the live output identical to B0 when its feature flag is off. The evidence comes from a frozen Amazon Reviews 2023 dataset [1], a development split used for tuning, and a sealed test split opened once at the end.
 
 **Key results so far** (development data; every figure is explained and sourced in the section named):
 
-| finding | value | where |
+| Finding | Value | Where |
 |---|---|---|
-| The current sort (B0) shows products that break the user's own constraints | 52 of 146 frozen search results (36%) break a stated constraint; B0 surfaces all 52, with a violator at rank 1 in 6 of 15 searches | section 2, Appendix B |
-| A data leak inflated the first baseline numbers | B1 Recall@10 0.5140 with the leak, 0.3711 corrected | section 6 |
-| B1 (text + popularity) against a reviews-only sort | NDCG@10 0.2348 against 0.2231, +5.28% (95% interval +5.08% to +5.48%) | section 6.3 |
-| The existing rating-first order, scored without the leak | Recall@10 0.0776, below the 0.10 of a random ranking | section 6.4 |
-| M2 against B1, overall | NDCG@10 +0.81% (95% interval +0.69% to +0.94%); the 3% target is **not** met | section 7.1 |
-| M2 against B1, users with long histories | +2.91% (+2.62% to +3.21%); on short histories -0.24% (-0.50% to +0.02%), within the 2% margin | section 7.2 |
-| M2's hard-constraint gate on the 15 frozen searches | removes 52 of 52 violators, keeps 91 of 94 compliant products (the other 3 have no price while a budget is stated) | section 7.3 |
-| M2 speed | ranker-only p95 10.9 to 18.9 ms over 13 runs, limit 25 ms | section 7.1 |
-| Test split | sealed, not scored | section 4 |
+| The current sort (B0) shows products that break the user's own constraints | 52 of 146 frozen search results (36%) break a stated constraint; B0 surfaces all 52, with a violator at rank 1 in 6 of 15 searches | Section 2, Appendix B |
+| A data leak inflated the first baseline numbers | B1 Recall@10 0.5140 with the leak, 0.3711 corrected | Section 6 |
+| B1 (text + popularity) against a reviews-only sort | NDCG@10 0.2348 against 0.2231, +5.28% (95% interval +5.08% to +5.48%) | Section 6.3 |
+| The existing rating-first order, scored without the leak | Recall@10 0.0776, below the 0.10 of a random ranking | Section 6.4 |
+| M2 against B1, overall | NDCG@10 +0.81% (95% interval +0.69% to +0.94%); the 3% target is **not** met | Section 7.1 |
+| M2 against B1, users with long histories | +2.91% (+2.62% to +3.21%); on short histories -0.24% (-0.50% to +0.02%), within the 2% margin | Section 7.2 |
+| M2's hard-constraint gate on the 15 frozen searches | Removes 52 of 52 violators, keeps 91 of 94 compliant products (the other 3 have no price while a budget is stated) | Section 7.3 |
+| M2 speed | Ranker-only p95 10.9 to 18.9 ms over 13 runs, limit 25 ms | Section 7.1 |
+| Test split | Sealed, not scored | Section 4 |
 
 This report covers the D0 audit in full (sections 1 to 4), then what has been built since: the frozen dataset (D1, section 5), the baselines (D2, section 6) and the M2 ranker (D3, section 7). Section 8 lists what is still open and what comes next.
 
@@ -27,14 +41,14 @@ split and constraint fixtures.*
 
 ## Progress at a glance
 
-| deliverable | status | where |
+| Deliverable | Status | Where |
 |---|---|---|
-| D0 audit and B0 | **done** | sections 1 to 4; 15 frozen fixtures and golden files in `tests/wp4/` |
-| D1 data and features | **done**, including the star ratings, leak-free item features and a complete data sheet | section 5; `docs/wp4/D1-data-sheet.md` |
-| D2 baselines | **done** on development data; a popularity leak was found and the numbers re-run; confidence intervals, weight sweep and leak-free legacy B0 added (section 6) | section 6; `scripts/wp4_build_eval_cases.py`, `scripts/wp4_run_baselines.py`, `scripts/wp4_sweep_ranks.py` |
-| D3 M2 ranker | **done**: built, re-tuned with train-only popularity, tested (63 WP4 tests pass), ranker-only p95 11 to 19 ms against the 25 ms limit; on held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), short of the 3% target, but +2.91% on the long-history slice (section 7.2) | section 7; `langgraph_metarec/product_ranker_m2.py`, `scripts/wp4_m2_*.py` |
-| D4 integration | not started (the hard-constraint gate already sits behind the flag) | section 8 |
-| D5 evaluation | **partly done on development data**: confidence intervals, the weight sweep, slices and latency (sections 6.3, 7.1, 7.2); the one-command evaluator is not built and the sealed test split has not been scored | sections 6, 7 and 8 |
+| D0 audit and B0 | **Done** | Sections 1 to 4; 15 frozen fixtures and golden files in `tests/wp4/` |
+| D1 data and features | **Done**, including the star ratings, leak-free item features and a complete data sheet | section 5; `docs/wp4/D1-data-sheet.md` |
+| D2 baselines | **Done** on development data; a popularity leak was found and the numbers re-run; confidence intervals, weight sweep and leak-free legacy B0 added (section 6) | Section 6; `scripts/wp4_build_eval_cases.py`, `scripts/wp4_run_baselines.py`, `scripts/wp4_sweep_ranks.py` |
+| D3 M2 ranker | **Done**: built, re-tuned with train-only popularity, tested (63 WP4 tests pass), ranker-only p95 11 to 19 ms against the 25 ms limit; on held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), short of the 3% target, but +2.91% on the long-history slice (section 7.2) | Section 7; `langgraph_metarec/product_ranker_m2.py`, `scripts/wp4_m2_*.py` |
+| D4 integration | Not started (the hard-constraint gate already sits behind the flag) | Section 8 |
+| D5 evaluation | **Partly done on development data**: confidence intervals, the weight sweep, slices and latency (sections 6.3, 7.1, 7.2); the one-command evaluator is not built and the sealed test split has not been scored | Sections 6, 7 and 8 |
 
 ---
 
@@ -42,23 +56,23 @@ split and constraint fixtures.*
 
 ![Figure 1. A product request in the current system, and the one place M2 attaches](figures/fig1_b0_pipeline.png)
 
-| # | stage | code | what happens for `domain = product` |
+| # | Stage | Code | What happens for `domain = product` |
 |---|---|---|---|
-| 1 | HTTP | `main.py` `POST /api/process` | one endpoint: intent analysis, preference extraction, HITL confirm, routing, task creation |
-| 2 | intent + preferences | `service.py` (LLM) | free-text query → structured `preferences`; user confirms before search (`hitl_state`) |
-| 3 | routing | `langgraph_metarec/graphs/routing_graph.py` `run_routing_graph` | product route chosen by keyword classification **or** a preference frame carrying `brand`/`category` (`_DOMAIN_ENTITY_KEYS["product"]`). Emits `DomainRoute(domain="product", execution_domain="product", status="ready", tool_tags=["#thing","#shopping","#product"])` |
-| 4 | task dispatch | `langgraph_metarec/graphs/task_graph.py` → `service.py` `_execute_generic_domain_task` | preferences fused as `{**profile_domain_slice, **request_preferences}` |
-| 5 | product preference normalisation | `request_orchestrator.py` `_normalize_product_preferences` | regex fills `product`, `brand`, `category`, `use_case`, `model`, `budget`. **`budget` is a text string** (`"<= 120 USD"`, `"120 USD"`, `"affordable"`). No structured budget, no required attributes, no brand exclusions. |
-| 6 | candidate gather | `generic_graph.py` `candidate_gather` | `ToolRegistry.resolve(domain="product", tags=[...])` → `amazon.product.search` (active only if `SERPAPI_KEY` set). Seed pass: `_parameters_for_tool` → `_product_search_query(query, prefs)` concatenates the query with budget-text / category / brand / use_case / model tokens into **one search string** → `{"query": <string>, "max_results": 10}`. ReAct refine loop: `amazon.product.search` is not in `_RELAX_ORDER`, so no relaxation happens — the loop just stops. |
-| 7 | provider | `tool_registry.py` `_amazon_product_search_adapter` | SerpApi `engine=amazon`, `k=<query string>`. From each `organic_results[:10]` keeps **only** `{title, brand, link, rating, reviews, price, thumbnail, source}`. Then `compact_tool_output` caps free text. |
-| 8 | enrichment | — | **none for products.** (Places get gmap/osm merge; products do not.) |
-| 9 | normalisation | `generic_graph.py` `normalize_tool_items` (amazon branch) → `_item()` | `title`←title · `subtitle`←`brand or price` · `image_url`←thumbnail · `url`←link · `rating` · `reviews_count`←reviews · `source`="Amazon" · `tags`←`[brand?, price?]` · `why`="Matched the product search query." · `id` ← `raw.product_id or raw.asin` **→ always empty** (step 7 drops both) → falls back to `"product_" + sha1(tool\|title\|url)[:16]` |
-| 10 | dedup | `generic_graph.py` `_rank_items` → `_same_recommendation` | non-place items merge when canonical title matches **and** (same `url`, or — if neither has a url — same canonical `subtitle`). Merge keeps the higher-scored copy. |
-| 11 | **generic rank (B0)** | `generic_graph.py` `_item_score` | sort key = `(rating or 0, reviews_count or 0, raw.popularity or 0, title)`, descending. **No price, budget, brand, or category term anywhere.** `[:10]`. |
+| 1 | HTTP | `main.py` `POST /api/process` | One endpoint: intent analysis, preference extraction, HITL confirm, routing, task creation |
+| 2 | Intent + Preferences | `service.py` (LLM) | Free-text query → structured `preferences`; user confirms before search (`hitl_state`) |
+| 3 | Routing | `langgraph_metarec/graphs/routing_graph.py` `run_routing_graph` | Product route chosen by keyword classification **or** a preference frame carrying `brand`/`category` (`_DOMAIN_ENTITY_KEYS["product"]`). Emits `DomainRoute(domain="product", execution_domain="product", status="ready", tool_tags=["#thing","#shopping","#product"])` |
+| 4 | Task Dispatch | `langgraph_metarec/graphs/task_graph.py` → `service.py` `_execute_generic_domain_task` | Preferences fused as `{**profile_domain_slice, **request_preferences}` |
+| 5 | Product preference normalisation | `request_orchestrator.py` `_normalize_product_preferences` | Regex fills `product`, `brand`, `category`, `use_case`, `model`, `budget`. **`budget` is a text string** (`"<= 120 USD"`, `"120 USD"`, `"affordable"`). No structured budget, no required attributes, no brand exclusions. |
+| 6 | Candidate gather | `generic_graph.py` `candidate_gather` | `ToolRegistry.resolve(domain="product", tags=[...])` → `amazon.product.search` (active only if `SERPAPI_KEY` set). Seed pass: `_parameters_for_tool` → `_product_search_query(query, prefs)` concatenates the query with budget-text / category / brand / use_case / model tokens into **one search string** → `{"query": <string>, "max_results": 10}`. ReAct refine loop: `amazon.product.search` is not in `_RELAX_ORDER`, so no relaxation happens — the loop just stops. |
+| 7 | Provider | `tool_registry.py` `_amazon_product_search_adapter` | SerpApi `engine=amazon`, `k=<query string>`. From each `organic_results[:10]` keeps **only** `{title, brand, link, rating, reviews, price, thumbnail, source}`. Then `compact_tool_output` caps free text. |
+| 8 | Enrichment | — | **None for products.** (Places get gmap/osm merge; products do not.) |
+| 9 | Normalisation | `generic_graph.py` `normalize_tool_items` (amazon branch) → `_item()` | `title`←title · `subtitle`←`brand or price` · `image_url`←thumbnail · `url`←link · `rating` · `reviews_count`←reviews · `source`="Amazon" · `tags`←`[brand?, price?]` · `why`="Matched the product search query." · `id` ← `raw.product_id or raw.asin` **→ always empty** (step 7 drops both) → falls back to `"product_" + sha1(tool\|title\|url)[:16]` |
+| 10 | Dedup | `generic_graph.py` `_rank_items` → `_same_recommendation` | Non-place items merge when canonical title matches **and** (same `url`, or — if neither has a url — same canonical `subtitle`). Merge keeps the higher-scored copy. |
+| 11 | **Generic Rank (B0)** | `generic_graph.py` `_item_score` | sort key = `(rating or 0, reviews_count or 0, raw.popularity or 0, title)`, descending. **No price, budget, brand, or category term anywhere.** `[:10]`. |
 | 11a | *(WP4 M2 gate)* | `generic_graph.py` + `product_constraints.py` | hooked here, **behind `METAREC_PRODUCT_RANKER` (default `legacy` = no-op)** |
-| 12 | result object | `service.py` `_execute_generic_domain_task` | `RecommendationResult(items=[RecommendationItem(**item) …], confidence_score=0.85 if items else 0.45)` |
-| 13 | strict API / UI | `RecommendationItemAPI` (`StrictBaseModel`) | exposes `id, domain, title, subtitle, description, image_url, url, rating, reviews_count, source, tags, why, gps_coordinates`. The internal `raw` payload is **deliberately stripped** (`_client_safe_item`). |
-| 14 | persistence + feedback | `_persist_recommendation_result` → `result_id`; `internal/item_interactions/` behind `POST /api/item-interactions` | logs `(user_id, domain, item_id, action)`; projected to `ItemInteractionV1` |
+| 12 | Result Object | `service.py` `_execute_generic_domain_task` | `RecommendationResult(items=[RecommendationItem(**item) …], confidence_score=0.85 if items else 0.45)` |
+| 13 | Strict API / UI | `RecommendationItemAPI` (`StrictBaseModel`) | Exposes `id, domain, title, subtitle, description, image_url, url, rating, reviews_count, source, tags, why, gps_coordinates`. The internal `raw` payload is **deliberately stripped** (`_client_safe_item`). |
+| 14 | Persistence + Feedback | `_persist_recommendation_result` → `result_id`; `internal/item_interactions/` behind `POST /api/item-interactions` | logs `(user_id, domain, item_id, action)`; projected to `ItemInteractionV1` |
 
 ### B0 definition (frozen)
 
@@ -74,21 +88,21 @@ split and constraint fixtures.*
 - On load, each card fetches existing interactions for the ids on screen (`listItemInteractions`, keyed by item id). By code reading, if a product's id changes between searches its earlier "Saved" state would not show. This has not been observed live.
 - Because the snapshot stores `url` and the ASIN sits inside the url, stored interactions could be re-keyed to ASIN offline if the id scheme changes.
 
-**Live capture of the current system.** The three figures below were taken from the running app on 22 October 2026 at about 23:10 (Singapore time): signed in as a guest, service type locked to ProductRec, the online agent switched on, and the ranker flag left unset, so the legacy sort (B0) was in use. The query was `quiet mechanical keyboard under 120 USD for Mac`, the same query as the frozen search `case_02_keyboard_live` in Appendix B. This is a live search, so its products differ from the frozen ones.
+**Live capture of the current system.** The three figures below were taken from the running app on 22nd October 2026 at about 23:10 (Singapore time): signed in as a guest, service type locked to ProductRec, the online agent switched on, and the ranker flag left unset, so the legacy sort (B0) was in use. The query was `quiet mechanical keyboard under 120 USD for Mac`, the same query as the frozen search `case_02_keyboard_live` in Appendix B. This is a live search, so its products differ from the frozen ones.
 
-![Figure 1b. The confirmation step, before any search runs](figures/ui/ui_01_preferences_confirm_crop.png#w=17)
+![Figure 2. The confirmation step, before any search runs](figures/ui/ui_01_preferences_confirm_crop.png#w=17)
 
-![Figure 1c. The ten results in the order the app shows them (five screenshots joined; the label above each card was added and repeats the card's own rating, review count and price; the red and orange outlines were added)](figures/ui/ui_02_results_all10.png#w=14.5)
+![Figure 3. The ten results in the order the app show them (five screenshots joined; the label above each card was added and repeats the card's own rating, review count and price; the red and orange outlines were added)](figures/ui/ui_02_results_all10.png#w=14.5)
 
-![Figure 1d. The first two result cards as they appear on screen](figures/ui/ui_03_card_closeup_crop.png#w=12)
+![Figure 4. The first two result cards appear on screen](figures/ui/ui_03_card_closeup_crop.png#w=12)
 
 What the captures show:
 
-1. **The budget is text.** Before searching, the app restates the request ("product: mechanical keyboard, category: keyboard, use case: Mac, budget: <= 120 USD") and waits for Confirm (Figure 1b; pipeline steps 2 and 5). The budget is the string `<= 120 USD`, not a number.
-2. **The order is rating, then review count, and nothing else.** The first result has rating 5.0 from 5 reviews and the second has 4.8 from 51; the 4.4-rated results at ranks 5 and 6 have 3,800 and 153 reviews (Figure 1c; step 11).
+1. **The budget is text.** Before searching, the app restates the request ("product: mechanical keyboard, category: keyboard, use case: Mac, budget: <= 120 USD") and waits for Confirm (Figure 2; pipeline steps 2 and 5). The budget is the string `<= 120 USD`, not a number.
+2. **The order is rating, then review count, and nothing else.** The first result has rating 5.0 from 5 reviews and the second has 4.8 from 51; the 4.4-rated results at ranks 5 and 6 have 3,800 and 153 reviews (Figure 3; step 11).
 3. **One result breaks the budget.** Rank 8, the Logitech MX Mechanical at $149.99 (rating 4.2, 2,200 reviews), is over the $120 limit and still sits above the $69.34 Keychron K8 at rank 10.
 4. **One result has no price.** Rank 9, the Logitech MX Mechanical Mini, shows no price line and no price chip, so a user cannot see its price and a budget check has nothing to compare (section 3.2).
-5. **What a card carries** (Figure 1d). The picture, the title, a Product badge, the price as text under the title (the subtitle, because the brand is empty) and again as a chip, the rating, the review count, the source (Amazon), the line "Matched the product search query." and a View source link. There is no price field and no explanation beyond that one line.
+5. **What a card carries** (Figure 4). The picture, the title, a Product badge, the price as text under the title (the subtitle, because the brand is empty) and again as a chip, the rating, the review count, the source (Amazon), the line "Matched the product search query." and a View source link. There is no price field and no explanation beyond that one line.
 6. **Guests have no feedback controls.** No Save, Not interested or Purchased controls appear on the cards when signed in as a guest (section 3.4).
 
 ---
@@ -97,17 +111,17 @@ What the captures show:
 
 `python -m tests.wp4.eval_constraints --baseline` ranks the frozen candidate pools with `_rank_items` directly (no network) and counts labelled violators in the top-10.
 
-| metric | B0 |
+| Metric | B0 |
 |---|---|
-| labelled hard-constraint violators surfaced | **52 / 52 (100 %)** |
-| cases with a violator at rank 1 | 6 / 15 |
-| cases with a violator in the top 3 | 9 / 15 |
+| Labelled hard-constraint violators surfaced | **52 / 52 (100 %)** |
+| Cases with a violator at rank 1 | 6 / 15 |
+| Cases with a violator in the top 3 | 9 / 15 |
 
-**How to read the 100 %.** It is true by construction and should not be quoted as a finding. Each pool holds at most 10 products, B0 shows the top 10, and B0 removes nothing, so every violating product necessarily reaches the user. The evidence that matters is different: 52 of the 146 products (36 %) that the provider returned break the user's own stated constraints, and in 9 of 15 queries a violating product ranks in the top 3 (rank 1 in 6). The labels behind these counts were assigned by applying each query's stated constraints to the returned titles and prices; they are a judgment and should be spot-checked against the case files in `tests/wp4/cases/`. The per-search summary (including the `pool_viol` and `leaked` columns of the evaluation script) and the full list of all 52 are in Appendix B.
+**How to read the 100 %.** It is true by construction and should not be quoted as a finding. Each pool holds at most 10 products, B0 shows the top 10, and B0 removes nothing, so every violating product necessarily reaches the user. The evidence that matters is different: 52 of the 146 products (36 %) that the provider returned break the user's own stated constraints, and in 9 of 15 queries a violating product rank in the top 3 (rank 1 in 6). The labels behind these counts were assigned by applying each query's stated constraints to the returned titles and prices; they are a judgment and should be spot-checked against the case files in `tests/wp4/cases/`. The per-search summary (including the `pool_viol` and `leaked` columns of the evaluation script) and the full list of all 52 are in Appendix B.
 
-Cause: `_item_score` rewards rating + review count, so a well-reviewed item that is 55 % over budget (or the wrong category, or an excluded brand) outranks cheaper compliant items. This is the exact failure the proposal's acceptance criterion 2 targets.
+Cause: `_item_score` rewards rating + review count, so a well-reviewed item that is 55 % over budget (or the wrong category, or an excluded brand) outranks cheaper compliant items. This is the exact failure of the proposal's acceptance criterion 2 targets.
 
-B0 is also frozen at the **strict-API level**, which is what acceptance criterion 1 compares against. `tests/wp4/golden/*.json` holds, for each of the 15 cases, the exact items a client would receive today: the internal `raw` payload removed the way `main._client_safe_item` does it, and every item validated against `RecommendationItemAPI`. `tests/wp4/test_b0_golden.py` checks that with the ranker flag unset or `legacy` the output equals those files, and that switching the ranker on changes at least one of them, so the fixtures are able to detect a change. Regenerate them only if B0 is meant to change: `python -m tests.wp4.freeze_b0`.
+B0 is also frozen at the **strict-API level**, which is what acceptance criterion 1 compares against. `tests/wp4/golden/*.json` holds, for each of the 15 cases, the exact items a client would receive today: the internal `raw` payload removed the way `main._client_safe_item` does it, and every item validated against `RecommendationItemAPI`. `tests/wp4/test_b0_golden.py` checks that with the ranker flag unset or `legacy` the output equals those files, and that switching the ranker on changes at least one of them, so the fixtures are able to detect a change. Regenerate them only if B0 is meant to change `python -m tests.wp4.freeze_b0`.
 
 ---
 
@@ -119,7 +133,7 @@ The strict-API `id` for a product is `"product_" + sha1("amazon.product.search|"
 
 - The SerpApi Amazon result carries an ASIN, but `_amazon_product_search_adapter` does not keep it, so `raw.product_id` / `raw.asin` are always absent and the hash is always used.
 - **The ASIN is recoverable anyway.** All 140 captured links contain `/dp/<ASIN>` (`python -m tests.wp4.audit_candidates`).
-- **Measured stability** (`python -m tests.wp4.recheck_stability`, three queries re-run live on 18 Sep 2026, 12 products present in both runs): the link never changed (0 of 12), but the title changed for 4 of 12 (33 %). Because the id hashes the title, about one product in three would get a different id on a repeat search. An ASIN-based id would have been identical for 12 of 12.
+- **Measured stability** (`python -m tests.wp4.recheck_stability`, three queries re-run live on 18 Sep 2026, 12 products present in both runs): the link never changed (0 of 12), but the title changed to 4 of 12 (33 %). Because the id hashes the title, about one product in three would get a different id on a repeat search. An ASIN-based id would have been identical for 12 of 12.
 - The item-interaction seam keys on this `item_id`, so an item a user saved or hid could fail to match on a later search. That follows from the measurement above; it has not been observed end to end.
 - The sample is small (3 queries), so read 33 % as an indication rather than a rate.
 - **Action needed, still outstanding:** derive the ASIN from the link (or keep it from the provider) and use it as `item_id`, with the hash only as a fallback. Project Plan §6 ("ASIN scope") records this as in scope, as an additive change to `_amazon_product_search_adapter`. D1 froze a research dataset that already carries `parent_asin` and never touched the live adapter, so this is still unbuilt. It belongs to D4 integration, because the adapter is production code.
@@ -128,14 +142,14 @@ The strict-API `id` for a product is `"product_" + sha1("amazon.product.search|"
 
 - Present for 137 of 140 candidates (98 %); the 3 missing come from two queries. All 137 parse to a number and all use the `$` symbol. No ranges (`"$a - $b"`) appeared in this sample, although `product_constraints.parse_price` handles them.
 - There is no currency field, so currency is inferred from the symbol. `$` is ambiguous: the app treats `$` as SGD elsewhere, while SerpApi Amazon returns USD.
-- **Prices move between runs.** Of the 12 products seen in both runs, the price changed for 7 (58 %), for example $118.99 to $139.99 and $49.99 to $39.99. A budget constraint could pass on one run and fail on the next, so evaluation has to run on frozen snapshots rather than live calls.
-- **A policy has since been decided, and built in the M2 module only.** Project Plan §6 ("Missing price policy") records: unknown price is never treated as zero; when the request states a budget, strict mode excludes the item under a new `UNKNOWN_PRICE_STRICT_MODE` reason code; with no budget stated, the item is kept and flagged. At the time of this audit that reason code existed only in planning documents — a repo-wide search found it nowhere in actual code. The live `product_constraints.violations()` check (`if price is not None and price > c.budget_max`) still silently skips unknown-price items with no reason code and no distinction for whether a budget was even stated. Since then the policy has been implemented and tested in the M2 module (section 7.3); applying it in the live path is part of D4.
+- **Prices move between runs.** Of the 12 products seen in both runs, the price changed to 7 (58 %), for example $118.99 to $139.99 and $49.99 to $39.99. A budget constraint could pass on one run and fail on the next, so evaluation has to run on frozen snapshots rather than live calls.
+- **A policy has since been decided and built in the M2 module only.** Project Plan §6 ("Missing price policy") records: unknown price is never treated as zero; when the request states a budget, strict mode excludes the item under a new `UNKNOWN_PRICE_STRICT_MODE` reason code; with no budget stated, the item is kept and flagged. At the time of this audit that reason code existed only in planning documents — a repo-wide search found it nowhere in actual code. The live `product_constraints.violations()` check (`if price is not None and price > c.budget_max`) still silently skips unknown-price items with no reason code and no distinction for whether a budget was even stated. Since then, the policy has been implemented and tested in the M2 module (section 7.3); applying it in the live path is part of D4.
 
 ### 3.3 Missing and unreliable fields (measured over 140 live candidates)
 
 The 140 are the 14 directly captured case files. `case_01` was transcribed from a log and is incomplete (6 candidates), so it is left out of this field count to avoid skewing the percentages; it is included in the 146 candidates used for the B0 violation count in section 2.
 
-| field | present |
+| Field | Present |
 |---|---|
 | `title`, `rating`, `reviews`, `link`, `thumbnail` | 140 / 140 (100 %) |
 | `price` | 137 / 140 (98 %) |
@@ -158,20 +172,20 @@ Category and brand constraints can therefore only be checked against the title o
 
 ## 4. Freeze list
 
-| artefact | status | location |
+| Artefact | Status | Location |
 |---|---|---|
-| B0 definition | **frozen** (§1) | `generic_graph._rank_items` @ `9c09346` |
-| Strict item contract | **frozen** | `RecommendationItemAPI` (13 fields, no `raw`) |
-| OpenAPI contract | **frozen** | `contracts/metarec-openapi.json` |
-| Item-interaction contract | **frozen** | `ItemInteractionV1` (`business_models.to_interaction_v1`) |
-| Generic-graph metadata shape | **frozen** (+`constraint_filter`) | `generic_graph.recommendation_result` |
-| Constraint fixtures | **frozen — 15 cases** | `tests/wp4/cases/*.json` (12 constraint queries + 3 clean controls, 52 labelled violators; case_01 was transcribed from a log, the other 14 are live SerpApi captures) |
-| B0 strict-API output | **frozen, 15 golden files** | `tests/wp4/golden/` |
-| Ranking dataset (Amazon Reviews 2023 subset) | **frozen** — `Office_Products` (rank 17 of 33 categories by rating count, the literal median; not Electronics), checksummed raw files | `docs/wp4/D1-data-sheet.md` |
-| Split (chronological per the proposal) | **frozen** — last 10% of the timeline is the locked test set, the 10% before that is development (80/10/10 by time, not by row count) | `docs/wp4/D1-data-sheet.md` |
-| Graded relevance judgements | **created for dev**: 5 stars = 2, 4 stars = 1, below 4 = 0, one label per dev row (Project Plan §6); used for the graded NDCG in sections 6.4 and 7.1 | `data/wp4/processed/split/dev_graded_relevance.tsv` |
-| Development eval cases | **frozen by checksum**: 534,128 cases (about 1 GB), rebuilt from scratch and byte-identical; candidates are stored as ASINs only | `scripts/wp4_build_eval_cases.py`, seed 42, `eval/checksums.sha256` |
-| Test split (443,817 rows) | **sealed**: not scored, not used to tune anything | `data/wp4/processed/split/test.tsv` |
+| B0 definition | **Frozen** (§1) | `generic_graph._rank_items` @ `9c09346` |
+| Strict item contract | **Frozen** | `RecommendationItemAPI` (13 fields, no `raw`) |
+| OpenAPI contract | **Frozen** | `contracts/metarec-openapi.json` |
+| Item-interaction contract | **Frozen** | `ItemInteractionV1` (`business_models.to_interaction_v1`) |
+| Generic-graph metadata shape | **Frozen** (+`constraint_filter`) | `generic_graph.recommendation_result` |
+| Constraint fixtures | **Frozen — 15 cases** | `tests/wp4/cases/*.json` (12 constraint queries + 3 clean controls, 52 labelled violators; case_01 was transcribed from a log, the other 14 are live SerpApi captures) |
+| B0 strict-API output | **Frozen, 15 golden files** | `tests/wp4/golden/` |
+| Ranking dataset (Amazon Reviews 2023 subset) | **Frozen** — `Office_Products` (rank 17 of 33 categories by rating count, the literal median; not Electronics), checksummed raw files | `docs/wp4/D1-data-sheet.md` |
+| Split (chronological per the proposal) | **Frozen** — last 10% of the timeline is the locked test set, the 10% before that is development (80/10/10 by time, not by row count) | `docs/wp4/D1-data-sheet.md` |
+| Graded relevance judgements | **Created for dev**: 5 stars = 2, 4 stars = 1, below 4 = 0, one label per dev row (Project Plan §6); used for the graded NDCG in sections 6.4 and 7.1 | `data/wp4/processed/split/dev_graded_relevance.tsv` |
+| Development eval cases | **Frozen by checksum**: 534,128 cases (about 1 GB), rebuilt from scratch and byte-identical; candidates are stored as ASINs only | `scripts/wp4_build_eval_cases.py`, seed 42, `eval/checksums.sha256` |
+| Test split (443,817 rows) | **Sealed**: not scored, not used to tune anything | `data/wp4/processed/split/test.tsv` |
 
 ---
 
@@ -191,7 +205,7 @@ Full detail and every checksum are in `docs/wp4/D1-data-sheet.md`. The short ver
 
 ## 6. D2: baselines on development data
 
-![Figure 2. From the frozen dataset to the baseline and M2 numbers](figures/fig2_eval_flow.png)
+![Figure 5. From the frozen dataset to the baseline and M2 numbers](figures/fig2_eval_flow.png)
 
 **How a test case is built.** The frozen data holds interactions and an item catalogue, with no search queries and no candidate lists, so the evaluation cases had to be constructed. These choices are mine; the proposal does not dictate them.
 
@@ -202,21 +216,21 @@ Full detail and every checksum are in `docs/wp4/D1-data-sheet.md`. The short ver
 - **Why 100.** The size of 100 (the real item and `NUM_NEGATIVES = 99` random items) and the history cap of 20 are settings of the case builder `scripts/wp4_build_eval_cases.py`. Ranking the whole catalogue of 80,181 items in each of 534,128 cases would need about 800 times as much scoring; 100 candidates is a common size for sampled evaluation and gives a clear floor, since a random ranking then scores Recall@10 = 0.10. The price is that every value is a sampled metric (see item 5 under "What this changes").
 - **Scoring.** A system is scored on where the real item lands in its ranking.
 
-**How a case is scored.** A system gives each of the 100 candidates a score and the candidates are sorted from highest to lowest. Let *rank* be the position of the real next item in that order (1 is best). Each case has exactly one relevant item, so the three metrics reduce to:
+**How a case is scored.** A system gives each of the 100 candidates a score and the candidates are sorted from highest to lowest. Let *rank* be the position of the real next item in that order (1 is best). Each case has exactly one relevant item, so the three metrics are reduced to:
 
 - **Recall@10** = 1 if rank ≤ 10, otherwise 0. With one relevant item per case this is the same as the hit rate.
 - **MRR@10** = 1 / rank if rank ≤ 10, otherwise 0.
 - **NDCG@10** [4] = 1 / log2(rank + 1) if rank ≤ 10, otherwise 0. The ideal ranking puts the item at rank 1, which has a gain of 1, so no further normalisation is needed.
 
-| rank of the real item | 1 | 2 | 3 | 5 | 10 | 11 or worse |
+| Rank of the real item | 1 | 2 | 3 | 5 | 10 | 11 or worse |
 |---|---|---|---|---|---|---|
 | Recall@10 | 1 | 1 | 1 | 1 | 1 | 0 |
 | NDCG@10 | 1.000 | 0.631 | 0.500 | 0.387 | 0.289 | 0 |
 | MRR@10 | 1.000 | 0.500 | 0.333 | 0.200 | 0.100 | 0 |
 
-The reported value of each metric is its mean over all 534,128 cases, each case counting once, so a user with many development interactions contributes many cases. If two candidates tie, the sort keeps their order in the stored (shuffled) candidate list. A system that ranked at random would average Recall@10 = 0.10, NDCG@10 = 0.045 and MRR@10 = 0.029, which is the floor to read the results against. These metrics treat the real next item as relevant (gain 1) and every other candidate as not (gain 0). The Project Plan also decides a graded scheme from the star rating in the user's review of that item: 5 stars = 2, 4 stars = 1, below 4 = 0. Because each case has exactly one rated item, NDCG normalised by the ideal ranking is 1 / log2(rank + 1) for any positive grade and 0 for grade 0, so the difference between 2 and 1 cancels out. Graded NDCG@10 therefore equals the binary NDCG@10 with the 13.5% of cases whose real item was rated below 4 stars set to 0 (section 6.4). Keeping 2 and 1 apart would need an unnormalised DCG; that is a decision for the supervisor (section 8). Section 6.1 shows a full case: the real item at rank 71 scores 0 on all three.
+The reported value of each metric is its mean over all 534,128 cases, each case counting once, so a user with many development interactions contributes to many cases. If two candidates tie, the sort keeps their order in the stored (shuffled) candidate list. A system that ranked at random would average Recall@10 = 0.10, NDCG@10 = 0.045 and MRR@10 = 0.029, which is the floor to read the results against. These metrics treat the real next item as relevant (gain 1) and every other candidate as not (gain 0). The Project Plan also decides a graded scheme from the star rating in the user's review of that item: 5 stars = 2, 4 stars = 1, below 4 = 0. Because each case has exactly one rated item, NDCG normalised by the ideal ranking is 1 / log2(rank + 1) for any positive grade and 0 for grade 0, so the difference between 2 and 1 cancels out. Graded NDCG@10 therefore equals the binary NDCG@10 with the 13.5% of cases whose real item was rated below 4 stars set to 0 (section 6.4). Keeping 2 and 1 apart would need an unnormalised DCG; that is a decision for the supervisor (section 8). Section 6.1 shows a full case: the real item at rank 71 scores 0 on all three.
 
-**The three baselines**, all run on the same 534,128 cases:
+**The three baselines** all run on the same 534,128 cases:
 
 - **B0** is the existing sort: rating, then review count, then title. The popularity term in the real formula is always 0 for Amazon products, so it is left out; the order is the same.
 - **B1** scores each of the 100 candidates in a case in three steps, all inside that case. (1) *Text*: Okapi BM25 [2] (`rank_bm25` `BM25Okapi` [5], k1 = 1.5, b = 0.75) between the history text and the candidate's title, where both are lowercased and split into pieces of letters and digits, and the 100 candidate titles are the BM25 corpus (a word that occurs k times in the history counts k times). (2) *Popularity*: ln(1 + number of train reviews of the item). (3) Each of the two lists of 100 scores is turned into a z-score (score minus the list's mean, divided by its population standard deviation), and the final score is 0.25 × text z + 0.75 × popularity z. Candidates are sorted by that score, highest first. Section 6.1 follows two real cases through every number.
@@ -225,7 +239,7 @@ The reported value of each metric is its mean over all 534,128 cases, each case 
 
 First full-set results, with popularity taken from the metadata (this version leaks; see below):
 
-| system | Recall@10 | NDCG@10 | MRR@10 |
+| System | Recall@10 | NDCG@10 | MRR@10 |
 |---|---|---|---|
 | B0, legacy sort | 0.2144 | 0.1020 | 0.0678 |
 | B1, BM25 weight 0.5 (untuned) | 0.4747 | 0.2806 | 0.2213 |
@@ -236,7 +250,7 @@ By slice, Recall@10 for warm users is 0.2005 (B0), 0.5105 (B1) and 0.2172 (ItemK
 
 **These numbers are inflated by a leak that was found while checking this report.** B0 and B1 take an item's popularity from `rating_number` in the metadata, and the metadata counts reviews up to 2023. For a case in the development period that count includes reviews written after the case, and the target review itself. The interaction split is clean, but this item-side feature is not. Recomputing popularity from train interactions only, which is all that was knowable at the train cutoff, gives this on the full development set:
 
-| full dev set, 534,128 cases (Recall@10 / NDCG@10 / MRR@10) | popularity from metadata (leaks) | popularity from train only |
+| Full dev set, 534,128 cases (Recall@10 / NDCG@10 / MRR@10) | Popularity from metadata (leaks) | Popularity from train only |
 |---|---|---|
 | B0, legacy sort (see note) | 0.2144 / 0.1020 / 0.0678 | 0.3550 / 0.2231 / 0.1824 |
 | B1, BM25 weight 0.25 | 0.5140 / 0.3217 / 0.2624 | 0.3711 / 0.2348 / 0.1928 |
@@ -264,7 +278,7 @@ This follows development case `dev_0000000` (the first line of `eval/product_dev
 
 **Step 1: n and idf for each history word.** n is the number of the 100 candidate titles that contain the word. It is counted once per word, over the candidates, and not over the user's history. The idf is ln((100 − n + 0.5) / (n + 0.5)). A word found in few candidates gets a large idf; a word found in many gets a small one. A word found in no candidate adds nothing to any score.
 
-| history word | n | idf | candidates containing it |
+| History word | N | IDF | Candidates containing it |
 |---|---|---|---|
 | paper | 6 | 2.677 | 7, 75, 80, 81, 82, 88 |
 | mate | 0 | 5.303 | none |
@@ -292,7 +306,7 @@ where L is the number of words in that candidate's title. The constants are k1 +
 
 Worked values:
 
-| candidate | L | matching words | each = idf × length factor | text score |
+| Candidate | L | Matching words | Each = IDF × length factor | Text Score |
 |---|---|---|---|---|
 | #6 | 17 | 6 | 1.957 × 1.0476 = 2.050 | 2.050 |
 | #19 | 10 | 0 | 3.065 × 1.2691 = 3.890 | 3.890 |
@@ -311,7 +325,7 @@ The program works with unrounded values, so a hand calculation with the rounded 
 
 **Step 5: the ranking.** Sorting the 100 candidates by final score, highest first, gives this top 10:
 
-| rank | candidate | text score | train reviews | text z | popularity z | final |
+| Rank | Candidate | Text Score | Train Reviews | Text z | popularity z | Final |
 |---|---|---|---|---|---|---|
 | 1 | #100 | 12.105 | 30 | 5.326 | 1.625 | 2.550 |
 | 2 | #90 | 0 | 129 | −0.758 | 2.743 | 1.868 |
@@ -324,11 +338,11 @@ The program works with unrounded values, so a hand calculation with the rounded 
 | 9 | #19 | 3.890 | 12 | 1.198 | 0.947 | 1.009 |
 | 10 | #55 | 2.256 | 17 | 0.376 | 1.201 | 0.994 |
 
-The real next item, #96, lands at **rank 71**. For this case Recall@10, NDCG@10 and MRR@10 are all 0. B1 misses it because the item has no train reviews and shares only the word `pencil` with the history. Four of the top ten entries (#90, #4, #21 and #12) have a text score of zero and are there on popularity alone, which is the 0.75 weight at work. The reported figures (Recall@10 0.3711 for B1 with train-only popularity) are the average of this calculation over all 534,128 cases. Most cases are misses (the real next item is in the top 10 about 37% of the time), so this one is not unusual.
+The real next item, #96, lands at **rank 71**. For this case Recall@10, NDCG@10 and MRR@10 are all 0. B1 misses it because the item has no train reviews and shares only the word `pencil` with the history. Four of the top ten entries (#90, #4, #21 and #12) have a text score of zero and are there on popularity alone, which is the 0.75 weight at work. The reported figures (Recall@10 0.3711 for B1 with train-only popularity) are the average of this calculation over all 534,128 cases. Most cases are missing (the real next item is in the top 10 about 37% of the time), so this one is not unusual.
 
 **A second example: a history of three purchases (case `dev_0000006`).** Case 0 has a history of one purchase, so it does not show how several purchases are combined. This user has three train purchases, all before the cutoff of 13 November 2018. Their titles are joined, in date order, into one history text of 56 words (49 of them different), and that one text is compared with every candidate.
 
-| # | date | train purchase (title) |
+| # | Date | Train purchase (title) |
 |---|---|---|
 | 1 | 2016-01-21 | Canon PGI225/CLI226 Color Multi Pack Compatible to iP4820, MG5220, MG5120, MG6120, MG8120, MX882, iX6520, iP4920, MG5320, MG6220, MG8220, MX892 |
 | 2 | 2017-12-21 | HP Printer Paper \| 8.5 x 11 Paper \| ColorPrinting 24 lb \| 6 Pack Case - 2400 Sheets \| 97 Bright \|Made in USA - FSC Certified \| 202040C |
@@ -336,9 +350,9 @@ The real next item, #96, lands at **rank 71**. For this case Recall@10, NDCG@10 
 
 The user also has two dev purchases (2019-06-25 and 2019-11-10), each of which is its own case with this same history, and four test purchases that are never used. This case is the one for the 2019-11-10 purchase: ASIN B07P2RN1RN, Blue Summit Supplies self-seal security envelopes (100 pack, $9.99), which the user rated 4 stars. It sits at position #79 among the 100 candidates, together with 99 random items. The 100 titles are 1,889 words in total, so A = 18.89.
 
-**n and idf.** A word that occurs several times in the history text is counted once for every occurrence (`rank_bm25` loops over the history tokens, repeats included); "times" below is that count. Case 0 has no repeats, so it does not show this.
+**N and IDF.** A word that occurs several times in the history text is counted once for every occurrence (`rank_bm25` loops over the history tokens, repeats included); "times" below is that count. Case 0 has no repeats, so it does not show this.
 
-| word | from purchase | times | n | idf | candidates containing it |
+| Word | From purchase | Times | N | IDF | Candidates containing it |
 |---|---|---|---|---|---|
 | canon | 1 | 1 | 2 | 3.674 | 66, 76 |
 | color | 1 | 1 | 6 | 2.677 | 17, 42, 52, 76, 77, 98 |
@@ -368,7 +382,7 @@ The user also has two dev purchases (2019-06-25 and 2019-11-10), each of which i
 
 **Text scores.** The length factor of a candidate is 2.5 / (1 + 1.5 × (0.25 + 0.75 × L / 18.89)). Each matching word then adds (times in history) × idf × length factor.
 
-| candidate | L | length factor | matching words | calculation | text score |
+| Candidate | L | Length factor | Matching words | Calculation | Text score |
 |---|---|---|---|---|---|
 | #47 Sharpie Twin-Tip marker | 14 | 1.1318 | pack, 6 | 3 × 1.1386 × 1.1318 = 3.866; 1 × 2.1540 × 1.1318 = 2.438 | 6.304 |
 | #79 envelopes (the real next item) | 26 | 0.8552 | pack, printer, 8, x | 3 × 1.139 × 0.8552 = 2.922; 3.065 × 0.8552 = 2.621; 2.265 × 0.8552 = 1.937; 2 × 1.193 × 0.8552 = 2.040 | 9.520 |
@@ -381,14 +395,14 @@ The idfs in this table are rounded to three or four decimals, so a hand calculat
 
 **Averages and spreads over the 100 candidates.** The average is the sum divided by 100; the spread is the square root of the average squared distance from the average (population standard deviation).
 
-| | sum | average | sum of squared distances | divided by 100 | spread (square root) |
+| | Sum | Average | Sum of squared distances | Divided by 100 | Spread (square root) |
 |---|---|---|---|---|---|
-| text scores | 468.65 | 4.686 | 2,565.60 | 25.656 | 5.065 |
-| popularity scores | 134.30 | 1.343 | 194.13 | 1.941 | 1.393 |
+| Text scores | 468.65 | 4.686 | 2,565.60 | 25.656 | 5.065 |
+| Popularity scores | 134.30 | 1.343 | 194.13 | 1.941 | 1.393 |
 
 **z-scores and the final score.** z = (score − average) / spread, and final = 0.25 × text z + 0.75 × popularity z.
 
-| candidate | text z | popularity z | final |
+| Candidate | Text z | Popularity z | Final |
 |---|---|---|---|
 | #47 | (6.304 − 4.686) / 5.065 = 0.319 | (2.197 − 1.343) / 1.393 = 0.613 | 0.25 × 0.319 + 0.75 × 0.613 = 0.540 |
 | #79 (real next item) | (9.520 − 4.686) / 5.065 = 0.954 | (3.932 − 1.343) / 1.393 = 1.858 | 0.25 × 0.954 + 0.75 × 1.858 = 1.632 |
@@ -409,7 +423,7 @@ The score of a candidate c is the mean of sim(c, h) over the user's history item
 
 **ItemKNN on case `dev_0000006`**, where it does find a signal. The history is three items: a Canon PGI225/CLI226 ink multi-pack (342 train buyers), HP printer paper (163) and Highland sticky notes (107). Only 7 of the 100 candidates share a buyer with any of them.
 
-| candidate | its train buyers | shared buyers with the three history items | similarities | mean = score |
+| Candidate | Its train buyers | Shared buyers with the three history items | Similarities | Mean = score |
 |---|---|---|---|---|
 | #47 Sharpie Twin-Tip marker | 8 | 1, 0, 0 | 1/√(8×342) = 0.0191, 0, 0 | 0.0064 |
 | #79 Blue Summit self-seal security envelopes (the real next item) | 50 | 1, 1, 0 | 1/√(50×342) = 0.0076, 1/√(50×163) = 0.0111, 0 | 0.0062 |
@@ -437,22 +451,22 @@ One pass over all 534,128 cases recorded the rank of the real next item under B0
 | 0.80 | 0.3012 | 0.1829 | 0.1468 |
 | 1.00 (text only) | 0.2820 | 0.1736 | 0.1405 |
 
-![Figure 3. Recall@10, NDCG@10 and MRR@10 of B1 against the BM25 weight](figures/fig3_bm25_weight_sweep.png)
+![Figure 6. Recall@10, NDCG@10 and MRR@10 of B1 against the BM25 weight](figures/fig3_bm25_weight_sweep.png)
 
 NDCG@10 and MRR@10 peak at 0.25. Recall@10 peaks slightly later, at 0.35 (0.3737 against 0.3711), and the curve is flat between 0.25 and 0.40. The weight was chosen on the same development data it is scored on, but it is one number out of a smooth curve over 534,128 cases, so the risk of overfitting it is small.
 
 **Confidence intervals.** The cases of one user are not independent, so the intervals resample users, not cases: 149,788 users drawn with replacement, each keeping all their cases, 2,000 resamples, seed 42, 95% percentile interval.
 
-| system | Recall@10 | NDCG@10 | MRR@10 |
+| System | Recall@10 | NDCG@10 | MRR@10 |
 |---|---|---|---|
 | B0 (reviews only) | 0.3550 [0.3530, 0.3569] | 0.2231 [0.2217, 0.2244] | 0.1824 [0.1812, 0.1836] |
 | B1, weight 0.25 | 0.3711 [0.3691, 0.3730] | 0.2348 [0.2334, 0.2362] | 0.1928 [0.1916, 0.1941] |
 | ItemKNN | 0.2737 [0.2721, 0.2753] | 0.1675 [0.1663, 0.1686] | 0.1349 [0.1338, 0.1359] |
 
-| relative lift of B1 | Recall@10 | NDCG@10 | MRR@10 |
+| Elative lift of B1 | Recall@10 | NDCG@10 | MRR@10 |
 |---|---|---|---|
-| over B0 (reviews only) | +4.53% [+4.34%, +4.71%] | +5.28% [+5.08%, +5.48%] | +5.72% [+5.46%, +5.96%] |
-| over ItemKNN | +35.56% [+34.95%, +36.13%] | +40.19% [+39.56%, +40.81%] | +42.96% [+42.25%, +43.70%] |
+| Over B0 (reviews only) | +4.53% [+4.34%, +4.71%] | +5.28% [+5.08%, +5.48%] | +5.72% [+5.46%, +5.96%] |
+| Over ItemKNN | +35.56% [+34.95%, +36.13%] | +40.19% [+39.56%, +40.81%] | +42.96% [+42.25%, +43.70%] |
 
 B1's edge over the reviews-only sort and over ItemKNN is clearly above zero. The intervals only cover which users happen to be in the development set. They do not cover the choice of random negatives (fixed by seed 42) or the choice of weight. The same procedure is used for M2 against B1 in section 7.1. The legacy B0 (rating first) is scored with train-only ratings in section 6.4, without an interval; these intervals are for the reviews-only sort.
 
@@ -460,7 +474,7 @@ B1's edge over the reviews-only sort and over ItemKNN is clearly above zero. The
 
 The comparison below is on the held-out users: the 134,481 users (479,889 cases) that were not used to tune M2 in section 7, so the baselines and M2 are scored on identical cases. Users are assigned by a hash of their id (1 in 10 for tuning), so the split does not depend on file order. The held-out figures differ slightly from the all-users figures above (B1 Recall@10 0.3713 here, 0.3711 on all users). *Graded NDCG@10* is the binary NDCG@10 with every case whose real item was rated below 4 stars set to 0 (grade 0 in the D1 labels; 13.5% of cases), as explained under "How a case is scored".
 
-| system (held-out users) | Recall@10 | NDCG@10 | MRR@10 | graded NDCG@10 | NDCG@10, warm users | NDCG@10, cold users |
+| System (held-out users) | Recall@10 | NDCG@10 | MRR@10 | Graded NDCG@10 | NDCG@10, warm users | NDCG@10, cold users |
 |---|---|---|---|---|---|---|
 | B0, legacy order with train-only ratings | 0.0776 | 0.0347 | 0.0222 | 0.0313 | 0.0352 | 0.0338 |
 | B0, reviews only | 0.3551 | 0.2231 | 0.1825 | 0.1940 | 0.2198 | 0.2282 |
@@ -479,7 +493,7 @@ The comparison below is on the held-out users: the 134,481 users (479,889 cases)
 
 **How each component is computed.** Inside a case, every component except `eligibility` is z-scored over the candidates that pass the gate, which in the offline evaluation is all 100 (same z-score as B1, population standard deviation; a list with zero spread becomes all zeros). The M2 score is the weighted sum of the five z-scores. A candidate that fails the hard-constraint gate gets score −∞ and the reason code of its violation.
 
-| component | what it computes | notes |
+| Component | What it computes | notes |
 |---|---|---|
 | `eligibility` | 1 if the candidate passes the hard-constraint gate (budget, category, brand, compatibility, exclusions), otherwise it is removed | Not weighted. Passes everything on the Amazon data, which states no constraints. |
 | `text_relevance` | BM25 between the user's history and the candidate, both built from title + brand + main category + store | Same BM25 settings as B1; the query is the enriched text of the last ≤20 history items. All zeros if there is no history. |
@@ -504,7 +518,7 @@ The tuning described above was done before the leak was found, on 30,000-case sa
 
 **The best weightings found** (NDCG@10 and Recall@10 on the tuning users):
 
-| rank | NDCG@10 | Recall@10 | text | attribute | collaborative | popularity | tail |
+| Rank | NDCG@10 | Recall@10 | Text | Attribute | Collaborative | Popularity | Tail |
 |---|---|---|---|---|---|---|---|
 | 1 | 0.2360 | 0.3737 | 0.25 | 0.00 | 0.05 | 0.65 | 0.05 |
 | 2 | 0.2358 | 0.3703 | 0.20 | 0.00 | 0.05 | 0.65 | 0.10 |
@@ -516,7 +530,7 @@ The first ten weightings are within 0.0010 NDCG@10 of each other (0.2360 to 0.23
 
 **Result on the held-out users** (B1 uses the weight 0.25 chosen in section 6.3 on all development users, which if anything favours B1 slightly):
 
-| system | Recall@10 | NDCG@10 | MRR@10 | graded NDCG@10 |
+| System | Recall@10 | NDCG@10 | MRR@10 | Graded NDCG@10 |
 |---|---|---|---|---|
 | B0, reviews only | 0.3551 | 0.2231 | 0.1825 | 0.1940 |
 | ItemKNN | 0.2738 | 0.1676 | 0.1350 | 0.1471 |
@@ -539,13 +553,13 @@ Relative lift of the re-tuned M2, with 95% user-level bootstrap intervals (134,4
 
 **Ablations** (held-out users; weight set to zero with the other weights unchanged; relative change in NDCG@10 against re-tuned M2, with 95% intervals). `attribute_match` already has weight 0 in the tuned setting, so removing it changes nothing.
 
-| variant | NDCG@10 | change against re-tuned M2 |
+| Variant | NDCG@10 | Change against re-tuned M2 |
 |---|---|---|
-| re-tuned M2 | 0.2369 | |
-| without `text_relevance` | 0.2271 | -4.13% [-4.35%, -3.93%] |
-| without `collaborative` | 0.2347 | -0.91% [-0.98%, -0.85%] |
-| without `tail_adjustment` | 0.2367 | -0.06% [-0.10%, -0.02%] |
-| without `popularity` | 0.1010 | -57.34% [-57.81%, -56.86%] |
+| Re-tuned M2 | 0.2369 | |
+| Without `text_relevance` | 0.2271 | -4.13% [-4.35%, -3.93%] |
+| Without `collaborative` | 0.2347 | -0.91% [-0.98%, -0.85%] |
+| Without `tail_adjustment` | 0.2367 | -0.06% [-0.10%, -0.02%] |
+| Without `popularity` | 0.1010 | -57.34% [-57.81%, -56.86%] |
 | `popularity` only | 0.2231 | -5.81% [-6.05%, -5.58%] |
 | `text_relevance` only | 0.1044 | -55.92% [-56.37%, -55.45%] |
 | `collaborative` only | 0.0954 | -59.71% [-60.07%, -59.38%] |
@@ -558,7 +572,7 @@ Popularity carries almost all of the result, and removing it halves NDCG. The te
 
 **Latency** (ranker-only: scoring 100 candidates, cards built beforehand, one process; declared hardware: 11th Gen Intel Core i7-1185G7 at 3.00 GHz, 4 cores and 8 threads, 15.7 GB RAM, Windows 11 Home 10.0.26200, Python 3.10.11; `scripts/wp4_latency.py`). Two samples of 500 development cases were used, so the answer does not depend on which users happen to be picked: the *first 500 cases* (from only a few users, with long histories, so the heavier case) and *500 cases spread over the whole file* (every 1,000th case, 295 of them with a history). The laptop was plugged in on the Balanced power plan with ordinary background applications open (about 21% CPU load when checked before the runs); neither was changed. The p95 in milliseconds, as the range over the repeated runs:
 
-| system | first 500 cases (8 runs) | spread sample (5 runs) | spread sample, users with a history only (5 runs) |
+| System | First 500 cases (8 runs) | Spread sample (5 runs) | Spread sample, users with a history only (5 runs) |
 |---|---|---|---|
 | B0 | 0.11 to 0.21 | 0.10 to 0.18 | 0.10 to 0.16 |
 | B1 | 11.40 to 13.01 | 7.18 to 8.87 | 8.51 to 10.29 |
@@ -570,17 +584,17 @@ M2's p95 was below the 25 ms limit in all 13 runs on both samples, at most 18.92
 
 ### 7.2 Complex-versus-keyword-like slices (a stand-in for the Plan's complex-query slice)
 
-The Plan freezes a 2% non-inferiority margin for a complex-query slice, but the evaluation cases have no real search queries: each case's "query" is the user's last purchases joined together (section 6). So the length of that history text is used here as a proxy for how much detail the request carries. This is my own decision; the proposal does not define the slice. It separates long histories from short ones, not complex wording from simple wording.
+The Plan freezes a 2% non-inferiority margin for a complex-query slice, but the evaluation cases have no real search queries: each case's "query" is the user's last purchases joined together (section 6). So, the length of that history text is used here as a proxy for how much detail the request carries. This is my own decision; the proposal does not define the slice. It separates long histories from short ones, not complex wording from simple wording.
 
 **Definition, fixed before any slice result was computed.** Users with a history (at least one word of history text) are split at the median length of that text over all 322,454 such development cases, which is **51 words** (quartiles 27 and 95 words; the longest is 500, because a history holds at most 20 purchases). *Keyword-like* means 1 to 51 words and *complex* means more than 51 words. Users with no history are a third slice, *cold*. The cut was taken from the length distribution alone, before M2 and B1 were compared on any slice. A user's cases all share one history, so the three slices contain different users (39,145, 43,725 and 51,611, which add up to the 134,481 held-out users).
 
 **Result** (held-out users, NDCG@10; 2,000 user-level bootstrap resamples, seed 42). M2 counts as non-inferior to B1 on a slice if the lower end of the 95% interval of its relative NDCG@10 difference is above -2%.
 
-| slice | cases | B0 reviews only | ItemKNN | B1 | M2 | M2 over B1, 95% interval | non-inferior at 2%? |
+| Slice | Cases | B0 reviews only | ItemKNN | B1 | M2 | M2 over B1, 95% interval | non-inferior at 2%? |
 |---|---|---|---|---|---|---|---|
-| cold (no history) | 189,450 | 0.2282 | 0.2282 | 0.2282 | 0.2282 | -0.01% [-0.03%, +0.00%] | yes |
-| keyword-like (1 to 51 words) | 145,681 | 0.2274 | 0.1033 | 0.2396 | 0.2390 | -0.24% [-0.50%, +0.02%] | yes |
-| **complex (more than 51 words)** | 144,758 | 0.2121 | 0.1530 | 0.2391 | **0.2461** | **+2.91% [+2.62%, +3.21%]** | yes |
+| Cold (no history) | 189,450 | 0.2282 | 0.2282 | 0.2282 | 0.2282 | -0.01% [-0.03%, +0.00%] | yes |
+| Keyword-like (1 to 51 words) | 145,681 | 0.2274 | 0.1033 | 0.2396 | 0.2390 | -0.24% [-0.50%, +0.02%] | yes |
+| **Complex (more than 51 words)** | 144,758 | 0.2121 | 0.1530 | 0.2391 | **0.2461** | **+2.91% [+2.62%, +3.21%]** | yes |
 
 **Sensitivity, as a check and not the headline.** The same comparison at the tercile cuts gives, for keyword-like and complex users: cut at 33 words, -0.84% [-1.17%, -0.52%] and +2.40% [+2.15%, +2.66%]; cut at 76 words, +0.22% [-0.02%, +0.45%] and +3.67% [+3.28%, +4.04%]. The pattern does not depend on the cut: M2's edge over B1 grows with the length of the history, and short histories never fall below the -2% margin.
 
@@ -639,7 +653,7 @@ python scripts/wp4_build_eval_cases.py --split dev
 python scripts/wp4_run_baselines.py --system b1 --split dev --bm25-weight 0.25 --leakage-safe
 ```
 
-`--system` takes `b0`, `b1`, `itemknn` or `m2`; `--limit N` scores only the first N cases. The weight sweep and the confidence intervals of section 6.3 come from two further scripts; section 6.4 and 7.1 come from three more (timings on 8 cores, 7 workers; the component pass writes a 1 GB file next to where it is run):
+`--system` takes `b0`, `b1`, `itemknn` or `m2`; `--limit N` scores only the first N cases. The weight sweeps and the confidence intervals of section 6.3 come from two further scripts; section 6.4 and 7.1 come from three more (timings on 8 cores, 7 workers; the component pass writes a 1 GB file next to where it is run):
 
 ```
 python scripts/wp4_sweep_ranks.py all sweep_ranks.npz      # about 12 minutes
@@ -664,7 +678,7 @@ python scripts/wp4_slices.py run m2full sweep_ranks.npz 51  # slices, a few minu
 
 These points were left open by the Plan or the proposal. Each is decided here, with the reason, so the work can go on; the project lead's feedback on the Plan said that on several of them the choice is mine as long as it is recorded.
 
-| topic | decision | reason | where |
+| Topic | Decision | Reason | Where |
 |---|---|---|---|
 | **Complex-query slice** | A proxy: users with a history are split at the median length of their history text (51 words) into keyword-like and complex; users with no history are a separate cold slice. | The data has no real search queries. The cut was fixed from the length distribution before any result was seen, and the result holds at other cuts. | 7.2 |
 | **Head and tail threshold** | Head = top 20% of items by review count, with the count taken from train only: **12 reviews**. Fixed now, before the final evaluation. | The leak-free runs use train counts. The metadata count (868) includes reviews written after the case. | 7.1 |
@@ -691,7 +705,7 @@ These points were left open by the Plan or the proposal. Each is decided here, w
 
 Candidates are numbered by their position in the stored candidate list. Ties keep that stored order. The real next item is marked.
 
-| rank | candidate | text score | train reviews | text z | popularity z | final |
+| Rank | Candidate | Text score | Train reviews | Text z | Popularity z | Final |
 |---|---|---|---|---|---|---|
 | 1 | #100 | 12.105 | 30 | 5.326 | 1.625 | 2.550 |
 | 2 | #90 | 0.000 | 129 | -0.758 | 2.743 | 1.868 |
@@ -800,7 +814,7 @@ The searches are live captures of the Amazon search provider (SerpApi) taken in 
 
 **Per-search summary.** "B0 first violator" is the position (1 to 10) of the first labelled violator in B0's top 10; "after the gate" is what the live hard-constraint gate shows, without the missing-price policy of section 7.3. Run with `python -m tests.wp4.eval_constraints`.
 
-| search | query | stated constraints | products returned | violators | B0: first violator at rank | after the live gate: violators / products shown |
+| Search | Query | Stated constraints | Pproducts returned | Violators | B0: first violator at rank | After the live gate: violators / products shown |
 |---|---|---|---|---|---|---|
 | case_01_keyboard | recommend me a quiet mechanical keyboard under $120 for Mac | budget ≤ 120 USD; category: mechanical; not: membrane | 6 | 3 | 3 | 0 / 3 |
 | case_02_keyboard_live | quiet mechanical keyboard under 120 USD for Mac | budget ≤ 120 USD; category: mechanical; not: membrane | 10 | 3 | 4 | 0 / 7 |
@@ -823,7 +837,7 @@ In searches 9 (SSD) and 13 (gaming laptop) all 10 returned products break a cons
 
 **The 52 violators.**
 
-| search | product (title shortened) | price | broken |
+| Search | Product (title shortened) | Price | Broken |
 |---|---|---|---|
 | case_01_keyboard | Corsair K65 PLUS WIRELESS RGB 75% Mechanical Gaming Keyboard | $129.99 | budget |
 | case_01_keyboard | Corsair K100 AIR WIRELESS RGB Ultra-Thin Mechanical Gaming Keyboard | $186.03 | budget |
