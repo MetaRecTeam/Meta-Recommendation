@@ -200,7 +200,7 @@ Each development interaction gives one case. "The real next item" in this report
 
 The candidates are the real next item plus 99 random items that the user never touched in train, dev or test. That makes 100 candidates, shuffled and drawn with a fixed seed (42). The size of 100 (the real item and `NUM_NEGATIVES = 99` random items) and the history cap of 20 are settings of the case builder `scripts/wp4_build_eval_cases.py`. Ranking the whole catalogue of 80,181 items in each of 534,128 cases would need about 800 times as much scoring. A size of 100 candidates is common for sampled evaluation, and it gives a clear floor, because a random ranking then scores Recall@10 = 0.10. The price is that every value is a sampled metric (see item 5 in {sec:leak}). A system is scored on where the real item lands in its ranking.
 
-A system gives each of the 100 candidates a score, and the candidates are sorted from highest to lowest. Let *rank* be the position of the real next item in that order, where 1 is best. Each case has exactly one relevant item, so the three metrics reduce to the following. Recall@10 is 1 if the rank is at most 10 and 0 otherwise, which with one relevant item per case is the same as the hit rate.
+A system gives each of the 100 candidates a score, and the candidates are sorted from highest to lowest. Let *rank* be the position of the real next item in that order, where 1 is best. Each case has exactly one relevant item, so the three metrics reduce to {eq:e_recall}, {eq:e_mrr} and {eq:e_ndcg}. Recall@10 is 1 if the rank is at most 10 and 0 otherwise, which with one relevant item per case is the same as the hit rate.
 
 %eq e_recall | Recall@10 = 1 if rank ≤ 10, otherwise 0
 

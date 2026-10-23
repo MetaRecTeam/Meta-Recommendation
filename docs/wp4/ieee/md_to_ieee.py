@@ -337,7 +337,7 @@ def add_inline(p, text, size=None, bold=False, italic=False, mono=False, small_c
             add_inline(p, tok[2:-2], size, True, italic, mono, small_caps)
             continue
         if tok.startswith("`") and tok.endswith("`") and len(tok) > 2:
-            r = p.add_run(tok[1:-1])
+            r = p.add_run(code_breaks(tok[1:-1]))
             r.font.name = MONO
             r.element.rPr.rFonts.set(qn("w:eastAsia"), MONO)
             r.font.size = Pt((size or 10) - 1.5)
@@ -379,10 +379,27 @@ def new_par(align=WD_ALIGN_PARAGRAPH.JUSTIFY, before=0, after=0, indent=None, ke
 
 # alignment choices taken from the edited Word file (the baseline): everything in a table is centred except a few
 # long-text columns, body text is justified, and a few headings and equations carry justified alignment too
-LEFT_COLS = {"t07": {0}, "t10": {3}, "t13": {2}, "t14": {5}}
+LEFT_COLS = {"t10": {3}, "t13": {2}, "t14": {5}}
 JUSTIFIED_HEADINGS = {"prices", "fields", "own"}
-JUSTIFIED_EQ = {"e_recall", "e_mrr", "e_ndcg"}
-LEFT_PARA_PREFIX = "The command `python -m tests.wp4.eval_constraints --baseline`"
+ZW = chr(0x200B)   # zero-width space: lets Word break inside a long code term, so justified lines are not stretched
+BREAK_AFTER = set("/._,(<>:")
+
+
+def code_breaks(text):
+    """Break opportunities inside code: anywhere except within 3 characters of either end in a term of 10+ characters, after separators in shorter terms."""
+    if len(text) <= 8:
+        return text
+    out = []
+    for part in re.split(r"(\s+)", text):
+        if not part or part.isspace():
+            out.append(part)
+            continue
+        if len(part) >= 10:
+            out.append(part[:3] + ZW + ZW.join(part[3:-3]) + ZW + part[-3:])
+        else:
+            out.append("".join(ch + (ZW if ch in BREAK_AFTER and i + 1 < len(part) and part[i + 1] not in ")]};,.:" else "")
+                               for i, ch in enumerate(part)))
+    return "".join(out)
 
 
 # ---------------------------------------------------------------------------------------------- tables
@@ -539,24 +556,21 @@ for b in blocks:
         bookmark(p, f"ref_{m.group(1)}")
     elif k == "para":
         want_cols(2)
-        left = b["text"].startswith(LEFT_PARA_PREFIX)
-        p = new_par(WD_ALIGN_PARAGRAPH.LEFT if left else WD_ALIGN_PARAGRAPH.JUSTIFY, before=0, after=4, indent=0.4)
+        p = new_par(WD_ALIGN_PARAGRAPH.JUSTIFY, before=0, after=4, indent=0.4)
         add_inline(p, b["text"])
     elif k in ("bullets", "numbers"):
         want_cols(2)
         for idx, it in enumerate(b["items"], start=1):
-            p = new_par(before=0, after=2)
+            p = new_par(WD_ALIGN_PARAGRAPH.JUSTIFY, before=0, after=2)
             p.paragraph_format.left_indent = Cm(0.6)
             p.paragraph_format.first_line_indent = Cm(-0.5)
             p.paragraph_format.tab_stops.add_tab_stop(Cm(0.6))
             add_inline(p, (f"{idx}.\t" if k == "numbers" else "•\t") + it)
     elif k == "eq":
         want_cols(2)
-        p = new_par(WD_ALIGN_PARAGRAPH.JUSTIFY if b["key"] in JUSTIFIED_EQ else WD_ALIGN_PARAGRAPH.LEFT, before=3, after=5)
-        ts = p.paragraph_format.tab_stops
-        ts.add_tab_stop(Cm(COL_W / 2), WD_TAB_ALIGNMENT.CENTER)
-        ts.add_tab_stop(Cm(COL_W), WD_TAB_ALIGNMENT.RIGHT)
-        p.add_run("\t")
+        p = new_par(WD_ALIGN_PARAGRAPH.LEFT, before=3, after=5)
+        p.paragraph_format.left_indent = Cm(0.3)          # all equations start on the same left edge
+        p.paragraph_format.tab_stops.add_tab_stop(Cm(COL_W), WD_TAB_ALIGNMENT.RIGHT)
         add_inline(p, b["text"], size=9)
         p.add_run(f"\t({b['num']})")
         bookmark(p, "eq_" + b["key"])
