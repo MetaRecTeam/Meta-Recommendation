@@ -15,7 +15,7 @@
 
 ## Introduction {#intro}
 
-WP4 aims to make the product recommendations in MetaRec respect what the user actually asked for, such as budget, brand, category and compatibility, and then to rank the products that remain by relevance. The goal is a ranker called M2. Offline, M2 has to do better than the current sort (B0) and better than a text-plus-popularity baseline (B1), with a point estimate of at least 3% relative NDCG@10 (Project Plan §6). With its feature flag switched off, the live output has to stay identical to B0. The evidence comes from a frozen Amazon Reviews 2023 dataset {cite:1}, a development split used for tuning, and a sealed test split that is opened once, at the end.
+WP4 aims to make the product recommendations in MetaRec respect what the user asked for, such as budget, brand, category and compatibility, and then to rank the products that remain by relevance. The goal is a ranker called M2. Offline, M2 has to do better than the current sort (B0) and better than a text-plus-popularity baseline (B1), with a point estimate of at least 3% relative NDCG@10 (Project Plan §6). With its feature flag switched off, the live output has to stay identical to B0. The evidence comes from a frozen Amazon Reviews 2023 dataset {cite:1}, a development split used for tuning, and a sealed test split that is opened once, at the end.
 
 {tab:t01} lists the main results so far, and every figure in it is explained in the section named in its last column.
 

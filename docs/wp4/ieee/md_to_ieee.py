@@ -377,6 +377,14 @@ def new_par(align=WD_ALIGN_PARAGRAPH.JUSTIFY, before=0, after=0, indent=None, ke
     return p
 
 
+# alignment choices taken from the edited Word file (the baseline): everything in a table is centred except a few
+# long-text columns, body text is justified, and a few headings and equations carry justified alignment too
+LEFT_COLS = {"t07": {0}, "t10": {3}, "t13": {2}, "t14": {5}}
+JUSTIFIED_HEADINGS = {"prices", "fields", "own"}
+JUSTIFIED_EQ = {"e_recall", "e_mrr", "e_ndcg"}
+LEFT_PARA_PREFIX = "The command `python -m tests.wp4.eval_constraints --baseline`"
+
+
 # ---------------------------------------------------------------------------------------------- tables
 def split_row(line):
     return [c.strip().replace("\\|", "|") for c in re.split(r"(?<!\\)\|", line.strip().strip("|"))]
@@ -446,9 +454,7 @@ def render_table(b):
     th = OxmlElement("w:tblHeader"); th.set(qn("w:val"), "true"); trpr.append(th)
     ncol = len(header)
     col_max = [max(len(plain(r[j])) for r in rows if j < len(r)) for j in range(ncol)]
-    centre = [col_max[j] <= 16 for j in range(ncol)]
-    if ncol >= 3 and col_max[0] > 5:
-        centre[0] = False          # row labels read better left-aligned
+    centre = [j not in LEFT_COLS.get(b["key"], set()) for j in range(ncol)]
     for ri, row in enumerate(rows, start=1):
         trpr = t.rows[ri]._tr.get_or_add_trPr()
         cs = OxmlElement("w:cantSplit"); cs.set(qn("w:val"), "true"); trpr.append(cs)
@@ -504,7 +510,7 @@ for b in blocks:
             add_inline(p, f"{b['num']} {b['text']}", size=10, small_caps=True)
         elif b["lvl"] == 2:
             p = doc.add_paragraph(style="Heading 2")
-            p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY if b["key"] in JUSTIFIED_HEADINGS else WD_ALIGN_PARAGRAPH.LEFT
             p.paragraph_format.space_before, p.paragraph_format.space_after = Pt(8), Pt(3)
             add_inline(p, f"{b['num']} {b['text']}", size=10, italic=True)
         else:
@@ -533,8 +539,8 @@ for b in blocks:
         bookmark(p, f"ref_{m.group(1)}")
     elif k == "para":
         want_cols(2)
-        long_code = any(len(c) > 22 for c in re.findall(r"`([^`]+)`", b["text"]))
-        p = new_par(WD_ALIGN_PARAGRAPH.LEFT if long_code else WD_ALIGN_PARAGRAPH.JUSTIFY, before=0, after=4, indent=0.4)
+        left = b["text"].startswith(LEFT_PARA_PREFIX)
+        p = new_par(WD_ALIGN_PARAGRAPH.LEFT if left else WD_ALIGN_PARAGRAPH.JUSTIFY, before=0, after=4, indent=0.4)
         add_inline(p, b["text"])
     elif k in ("bullets", "numbers"):
         want_cols(2)
@@ -546,7 +552,7 @@ for b in blocks:
             add_inline(p, (f"{idx}.\t" if k == "numbers" else "•\t") + it)
     elif k == "eq":
         want_cols(2)
-        p = new_par(WD_ALIGN_PARAGRAPH.LEFT, before=3, after=5)
+        p = new_par(WD_ALIGN_PARAGRAPH.JUSTIFY if b["key"] in JUSTIFIED_EQ else WD_ALIGN_PARAGRAPH.LEFT, before=3, after=5)
         ts = p.paragraph_format.tab_stops
         ts.add_tab_stop(Cm(COL_W / 2), WD_TAB_ALIGNMENT.CENTER)
         ts.add_tab_stop(Cm(COL_W), WD_TAB_ALIGNMENT.RIGHT)
