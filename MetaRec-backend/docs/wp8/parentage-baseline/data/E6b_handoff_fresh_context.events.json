@@ -1,0 +1,163 @@
+[
+  {
+    "seq": 1,
+    "event": "chain_start",
+    "name": "LangGraph",
+    "run_id": "01a106ae-19e8-79c2-aeac-73f8e55b44b5",
+    "parent_run_id": null,
+    "t_ms": 0.52,
+    "asyncio_task": "Task-1",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 2,
+    "event": "chain_start",
+    "name": "handoff_node",
+    "run_id": "01a106ae-19e8-79c2-aeac-7400e0ff8b3b",
+    "parent_run_id": "01a106ae-19e8-79c2-aeac-73f8e55b44b5",
+    "t_ms": 0.725,
+    "asyncio_task": "Task-1",
+    "metadata": {
+      "langgraph_node": "handoff_node",
+      "langgraph_step": 1,
+      "langgraph_checkpoint_ns": "handoff_node:7a87e29c-60f5-051c-506f-addf4c2f0397"
+    },
+    "tags": [
+      "graph:step:1"
+    ]
+  },
+  {
+    "seq": 3,
+    "event": "chain_start",
+    "name": "LangGraph",
+    "run_id": "01a106ae-19ea-7270-953f-5fc5a9225f66",
+    "parent_run_id": null,
+    "t_ms": 3.097,
+    "asyncio_task": "Task-1256",
+    "metadata": {
+      "thread_id": "u-handoff:c-fresh:branch-main:t-fresh"
+    },
+    "tags": []
+  },
+  {
+    "seq": 4,
+    "event": "chain_start",
+    "name": "task_started",
+    "run_id": "01a106ae-19eb-7d42-9744-da4cf3071965",
+    "parent_run_id": "01a106ae-19ea-7270-953f-5fc5a9225f66",
+    "t_ms": 3.371,
+    "asyncio_task": "Task-1256",
+    "metadata": {
+      "langgraph_node": "task_started",
+      "langgraph_step": 1,
+      "langgraph_checkpoint_ns": "task_started:3344b9d7-c236-9fad-6238-505f953b7ec3",
+      "thread_id": "u-handoff:c-fresh:branch-main:t-fresh"
+    },
+    "tags": [
+      "graph:step:1"
+    ]
+  },
+  {
+    "seq": 5,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-19e8-79c2-aeac-7400e0ff8b3b",
+    "parent_run_id": "01a106ae-19e8-79c2-aeac-73f8e55b44b5",
+    "t_ms": 3.472,
+    "asyncio_task": "Task-1261",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 6,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-19eb-7d42-9744-da4cf3071965",
+    "parent_run_id": "01a106ae-19ea-7270-953f-5fc5a9225f66",
+    "t_ms": 3.522,
+    "asyncio_task": "Task-1262",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 7,
+    "event": "chain_start",
+    "name": "domain_graph_dispatch",
+    "run_id": "01a106ae-19eb-7d42-9744-da58150bb668",
+    "parent_run_id": "01a106ae-19ea-7270-953f-5fc5a9225f66",
+    "t_ms": 3.722,
+    "asyncio_task": "Task-1256",
+    "metadata": {
+      "langgraph_node": "domain_graph_dispatch",
+      "langgraph_step": 2,
+      "langgraph_checkpoint_ns": "domain_graph_dispatch:c5b6ea3e-a044-7f0a-7065-07498dbfc156",
+      "thread_id": "u-handoff:c-fresh:branch-main:t-fresh"
+    },
+    "tags": [
+      "graph:step:2"
+    ]
+  },
+  {
+    "seq": 8,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-19e8-79c2-aeac-73f8e55b44b5",
+    "parent_run_id": null,
+    "t_ms": 3.782,
+    "asyncio_task": "Task-1267",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 9,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-19eb-7d42-9744-da58150bb668",
+    "parent_run_id": "01a106ae-19ea-7270-953f-5fc5a9225f66",
+    "t_ms": 3.904,
+    "asyncio_task": "Task-1268",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 10,
+    "event": "chain_start",
+    "name": "result_projection",
+    "run_id": "01a106ae-19eb-7d42-9744-da66a2c987a8",
+    "parent_run_id": "01a106ae-19ea-7270-953f-5fc5a9225f66",
+    "t_ms": 4.041,
+    "asyncio_task": "Task-1256",
+    "metadata": {
+      "langgraph_node": "result_projection",
+      "langgraph_step": 3,
+      "langgraph_checkpoint_ns": "result_projection:382af1b5-9535-6a54-49fd-af184215ad41",
+      "thread_id": "u-handoff:c-fresh:branch-main:t-fresh"
+    },
+    "tags": [
+      "graph:step:3"
+    ]
+  },
+  {
+    "seq": 11,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-19eb-7d42-9744-da66a2c987a8",
+    "parent_run_id": "01a106ae-19ea-7270-953f-5fc5a9225f66",
+    "t_ms": 4.187,
+    "asyncio_task": "Task-1272",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 12,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-19ea-7270-953f-5fc5a9225f66",
+    "parent_run_id": null,
+    "t_ms": 4.394,
+    "asyncio_task": "Task-1276",
+    "metadata": {},
+    "tags": []
+  }
+]

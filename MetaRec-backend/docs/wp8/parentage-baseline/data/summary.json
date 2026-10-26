@@ -1,0 +1,1758 @@
+{
+  "experiments": {
+    "E1_routing_only": {
+      "outcome": {
+        "route_domain": "hotel",
+        "route_mode": "single_domain"
+      },
+      "event_count": 8,
+      "event_types": [
+        "chain_end",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-16bc-7aa1-975a-6d16796af952",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 96.615,
+          "end_ms": 102.405,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": null,
+          "checkpoint_ns_seen": null
+        }
+      ],
+      "errors": [],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 0
+      },
+      "concurrency": {
+        "task_graphs_checked": 0,
+        "cross_request_leaks": []
+      }
+    },
+    "E2_restaurant_only": {
+      "outcome": {
+        "checked": [
+          "Graph Bistro"
+        ]
+      },
+      "event_count": 10,
+      "event_types": [
+        "chain_end",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "restaurant_graph",
+          "graph_run_id": "01a106ae-16ca-76e2-a6a2-64fbf1ceee4b",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 7.649,
+          "end_ms": 11.603,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": null,
+          "checkpoint_ns_seen": null
+        }
+      ],
+      "errors": [],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 0
+      },
+      "concurrency": {
+        "task_graphs_checked": 0,
+        "cross_request_leaks": []
+      }
+    },
+    "E3_service_hotel_chain": {
+      "outcome": {
+        "first_type": "confirmation",
+        "second_type": "task_created",
+        "task_status": "completed",
+        "item_titles": [
+          "Palm View Hotel",
+          "Palm Hostel"
+        ],
+        "tool_adapter_calls": 3
+      },
+      "event_count": 52,
+      "event_types": [
+        "chain_end",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-180c-7182-90e8-c5a7b218c2d6",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 317.839,
+          "end_ms": 327.722,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-hotel:c-u-probe-hotel:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-1812-7821-8941-2a03f3c2cfcb",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-180f-7361-8dc4-32e4d1ef9a24",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 324.129,
+          "end_ms": 325.905,
+          "asyncio_task": "Task-33",
+          "thread_id_seen": "u-probe-hotel:c-u-probe-hotel:branch-main",
+          "checkpoint_ns_seen": "routing:b4ddd434-d37d-74c3-7781-f8921aec625e"
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1820-7173-8fb9-7216555e9f61",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 337.354,
+          "end_ms": 353.124,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-hotel:c-u-probe-hotel:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-182a-7a42-823e-b54346a33324",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1821-7491-82c7-dc16ad95b107",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 347.943,
+          "end_ms": 355.498,
+          "asyncio_task": "Task-80",
+          "thread_id_seen": "u-probe-hotel:c-u-probe-hotel:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:57158c44-d0fa-f1e8-bf9a-d61ed01c8e5b"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-182f-7312-940e-eae4cf56cda0",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-182b-79d2-b498-2381a4e2b17d",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 352.261,
+          "end_ms": 354.734,
+          "asyncio_task": "Task-92",
+          "thread_id_seen": "u-probe-hotel:c-u-probe-hotel:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:f40fdc87-5ebf-fa7a-c0f9-2b958e5dcd0f"
+        }
+      ],
+      "errors": [],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 0
+      },
+      "concurrency": {
+        "task_graphs_checked": 1,
+        "cross_request_leaks": []
+      }
+    },
+    "E4_itinerary_anchor": {
+      "outcome": {
+        "type": "confirmation",
+        "tool_adapter_calls": 2
+      },
+      "event_count": 30,
+      "event_types": [
+        "chain_end",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 10.525,
+          "end_ms": 26.035,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-anchor:c-probe-anchor:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-1842-7583-a80f-e50bf9213fd6",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-183e-7d03-8919-3ed9b114a6af",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 15.579,
+          "end_ms": 16.83,
+          "asyncio_task": "Task-137",
+          "thread_id_seen": "u-probe-anchor:c-probe-anchor:branch-main",
+          "checkpoint_ns_seen": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-1849-73d1-89aa-1e9932afce7e",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1844-70d3-b24c-cb3c1ae72cb6",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 22.452,
+          "end_ms": 24.215,
+          "asyncio_task": "Task-156",
+          "thread_id_seen": "u-probe-anchor:c-probe-anchor:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e"
+        }
+      ],
+      "errors": [],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 0
+      },
+      "concurrency": {
+        "task_graphs_checked": 0,
+        "cross_request_leaks": []
+      }
+    },
+    "E5_concurrent_chains": {
+      "outcome": {
+        "n": 10,
+        "statuses": [
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "completed",
+          "completed"
+        ]
+      },
+      "event_count": 520,
+      "event_types": [
+        "chain_end",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1857-77d1-96e2-d70184188b96",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 10.078,
+          "end_ms": 188.949,
+          "asyncio_task": "Task-183",
+          "thread_id_seen": "u-conc-0:c-u-conc-0:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1878-7910-8d87-43d1fb8264c4",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 43.035,
+          "end_ms": 188.955,
+          "asyncio_task": "Task-184",
+          "thread_id_seen": "u-conc-1:c-u-conc-1:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1883-78b1-a7a2-93d13c16310a",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 53.776,
+          "end_ms": 188.959,
+          "asyncio_task": "Task-185",
+          "thread_id_seen": "u-conc-2:c-u-conc-2:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-188d-7093-9f7e-c68ad29f2c0d",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 64.23,
+          "end_ms": 188.963,
+          "asyncio_task": "Task-186",
+          "thread_id_seen": "u-conc-3:c-u-conc-3:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1898-7031-8aa8-2493f6e428b3",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 74.598,
+          "end_ms": 188.967,
+          "asyncio_task": "Task-187",
+          "thread_id_seen": "u-conc-4:c-u-conc-4:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-18a2-7272-a7f5-fea00d18688e",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 85.044,
+          "end_ms": 188.971,
+          "asyncio_task": "Task-188",
+          "thread_id_seen": "u-conc-5:c-u-conc-5:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-18ac-7b53-a424-304c6e6041e7",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 95.257,
+          "end_ms": 188.974,
+          "asyncio_task": "Task-189",
+          "thread_id_seen": "u-conc-6:c-u-conc-6:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-18b7-7921-8c85-23fb936cdc3e",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 105.5,
+          "end_ms": 254.408,
+          "asyncio_task": "Task-190",
+          "thread_id_seen": "u-conc-7:c-u-conc-7:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-18c1-7790-86b7-e4e0f5ff721b",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 115.995,
+          "end_ms": 264.338,
+          "asyncio_task": "Task-191",
+          "thread_id_seen": "u-conc-8:c-u-conc-8:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-18cb-76f2-b2c8-5cd88eda4225",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 126.179,
+          "end_ms": 264.343,
+          "asyncio_task": "Task-192",
+          "thread_id_seen": "u-conc-9:c-u-conc-9:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18d5-7e71-8172-27490e4cb8fb",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18d0-7620-a46f-f4ed98d6c2d3",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 135.965,
+          "end_ms": 182.016,
+          "asyncio_task": "Task-305",
+          "thread_id_seen": "u-conc-0:c-u-conc-0:branch-main",
+          "checkpoint_ns_seen": "routing:95bb5040-2ee7-733d-8463-d9d7d27515f4"
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18d9-7bf1-ae3f-9f312ff207ce",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18d0-7620-a46f-f4f19ae5be86",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 140.172,
+          "end_ms": 182.025,
+          "asyncio_task": "Task-308",
+          "thread_id_seen": "u-conc-1:c-u-conc-1:branch-main",
+          "checkpoint_ns_seen": "routing:35c614e3-15a4-a35b-ef63-26f12fe50141"
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18dd-7db3-99ae-a0767fd8e601",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18d0-7620-a46f-f503d29f019a",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 144.27,
+          "end_ms": 182.032,
+          "asyncio_task": "Task-311",
+          "thread_id_seen": "u-conc-2:c-u-conc-2:branch-main",
+          "checkpoint_ns_seen": "routing:96935314-b8ee-dee7-d7ff-02ea3ac62028"
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18e2-7182-b703-8f89589be9cc",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18d0-7620-a46f-f51d4c8be6d9",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 149.133,
+          "end_ms": 182.038,
+          "asyncio_task": "Task-314",
+          "thread_id_seen": "u-conc-3:c-u-conc-3:branch-main",
+          "checkpoint_ns_seen": "routing:b2b0adc9-2e1a-e462-6fac-098556a3a0e3"
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18e7-7d51-b8f0-9c81548588a9",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18d0-7620-a46f-f524ee2d9edc",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 153.589,
+          "end_ms": 182.044,
+          "asyncio_task": "Task-317",
+          "thread_id_seen": "u-conc-4:c-u-conc-4:branch-main",
+          "checkpoint_ns_seen": "routing:755e0d4b-4446-5d82-504b-13a8b117185f"
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18eb-7183-91f3-f0540ea24acc",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18d1-7242-ba3b-711341b72bbd",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 157.545,
+          "end_ms": 182.05,
+          "asyncio_task": "Task-320",
+          "thread_id_seen": "u-conc-5:c-u-conc-5:branch-main",
+          "checkpoint_ns_seen": "routing:78b78d50-2ac6-0d5f-31fe-7725968e756d"
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18ef-7c01-ad3b-2cd4393fcf9a",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18d1-7242-ba3b-7128821e67fb",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 161.619,
+          "end_ms": 182.055,
+          "asyncio_task": "Task-323",
+          "thread_id_seen": "u-conc-6:c-u-conc-6:branch-main",
+          "checkpoint_ns_seen": "routing:483b4472-2037-3685-9e95-1024a3e8dcfb"
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18f3-7161-b6d8-4dee2b3a5b98",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18d1-7242-ba3b-713413550a00",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 165.754,
+          "end_ms": 182.513,
+          "asyncio_task": "Task-326",
+          "thread_id_seen": "u-conc-7:c-u-conc-7:branch-main",
+          "checkpoint_ns_seen": "routing:2375bede-3760-6104-5b5f-f0985cb323e3"
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18f7-7ca0-9878-e93605eba0a7",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18d1-7242-ba3b-7144e55f71c4",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 169.67,
+          "end_ms": 182.754,
+          "asyncio_task": "Task-329",
+          "thread_id_seen": "u-conc-8:c-u-conc-8:branch-main",
+          "checkpoint_ns_seen": "routing:7183057d-2d2b-b0c3-741c-04beed08c88a"
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-18fe-7991-9441-f504c985b229",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-18f7-7ca0-9878-e952567eef4f",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 176.506,
+          "end_ms": 182.759,
+          "asyncio_task": "Task-368",
+          "thread_id_seen": "u-conc-9:c-u-conc-9:branch-main",
+          "checkpoint_ns_seen": "routing:f0a443de-0d8a-3b79-046c-714973c0bb0e"
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1914-7622-a0e2-76534d49d38d",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 198.649,
+          "end_ms": 382.889,
+          "asyncio_task": "Task-183",
+          "thread_id_seen": "u-conc-0:c-u-conc-0:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-191d-77c0-a08d-b0e8118496e8",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 207.706,
+          "end_ms": 382.899,
+          "asyncio_task": "Task-184",
+          "thread_id_seen": "u-conc-1:c-u-conc-1:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1926-7572-8018-651a0ebd3b38",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 217.026,
+          "end_ms": 382.905,
+          "asyncio_task": "Task-185",
+          "thread_id_seen": "u-conc-2:c-u-conc-2:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-192f-7da1-adb0-6a0085d4b5a2",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 226.288,
+          "end_ms": 382.911,
+          "asyncio_task": "Task-186",
+          "thread_id_seen": "u-conc-3:c-u-conc-3:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1938-77f1-817c-9b5f9e5c4c38",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 235.478,
+          "end_ms": 382.917,
+          "asyncio_task": "Task-187",
+          "thread_id_seen": "u-conc-4:c-u-conc-4:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1942-7691-94df-aa2d4306d904",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 244.943,
+          "end_ms": 382.921,
+          "asyncio_task": "Task-188",
+          "thread_id_seen": "u-conc-5:c-u-conc-5:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-194b-7ab0-ad84-2ff16d15a8cf",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 254.077,
+          "end_ms": 382.925,
+          "asyncio_task": "Task-189",
+          "thread_id_seen": "u-conc-6:c-u-conc-6:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1955-7c22-a4af-19c3748d8fa1",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 263.99,
+          "end_ms": 383.209,
+          "asyncio_task": "Task-190",
+          "thread_id_seen": "u-conc-7:c-u-conc-7:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-195e-7283-9f32-ca583ab6fcb1",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 273.365,
+          "end_ms": 383.263,
+          "asyncio_task": "Task-191",
+          "thread_id_seen": "u-conc-8:c-u-conc-8:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1968-7c41-9ea6-8dd94a346f73",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 282.616,
+          "end_ms": 383.27,
+          "asyncio_task": "Task-192",
+          "thread_id_seen": "u-conc-9:c-u-conc-9:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1971-79e2-a418-e0a0ab3ee238",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-196d-7a12-bc59-93da2d535127",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 291.643,
+          "end_ms": 399.254,
+          "asyncio_task": "Task-782",
+          "thread_id_seen": "u-conc-0:c-u-conc-0:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:7f4e07fb-545d-9ce0-03ca-d47322c867f4"
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1973-7922-b461-f3875d920ea0",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-196d-7a12-bc59-93e0824a08b9",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 294.037,
+          "end_ms": 399.27,
+          "asyncio_task": "Task-783",
+          "thread_id_seen": "u-conc-1:c-u-conc-1:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:bed3f3d6-9712-b2aa-86b3-62b69069cb15"
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1976-7480-95e6-789f615995bb",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-196d-7a12-bc59-93fae74bf66b",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 296.506,
+          "end_ms": 399.559,
+          "asyncio_task": "Task-784",
+          "thread_id_seen": "u-conc-2:c-u-conc-2:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:2b30fcb1-564b-80eb-f0bd-5d56414995bd"
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1978-7b13-ab4a-31e03589636a",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-196d-7a12-bc59-94044bcb5937",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 298.879,
+          "end_ms": 400.095,
+          "asyncio_task": "Task-785",
+          "thread_id_seen": "u-conc-3:c-u-conc-3:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:14c3c2c3-3d8a-2926-4ef1-3f091502d566"
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-197a-7ce2-b996-1ad5163b0793",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-196e-7871-8d0a-18da9d3fc698",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 301.154,
+          "end_ms": 399.26,
+          "asyncio_task": "Task-786",
+          "thread_id_seen": "u-conc-4:c-u-conc-4:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:6392460a-239b-7ba8-e945-0370313c390e"
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-197c-72a2-9182-05a34de8dc0c",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-196e-7871-8d0a-18ee848e5057",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 303.439,
+          "end_ms": 399.565,
+          "asyncio_task": "Task-787",
+          "thread_id_seen": "u-conc-5:c-u-conc-5:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:1b3d7325-7ac9-0a85-fa9c-0e2bcfffc504"
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-197f-7d70-8ee5-4457ad4aa075",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-196e-7871-8d0a-18fb3d552949",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 305.697,
+          "end_ms": 399.569,
+          "asyncio_task": "Task-788",
+          "thread_id_seen": "u-conc-6:c-u-conc-6:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:676eeb83-1b73-0900-277c-6b1a136a9abe"
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1982-70c3-853c-973e705ec24b",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-197f-7d70-8ee5-4476b17bd24e",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 308.692,
+          "end_ms": 399.573,
+          "asyncio_task": "Task-829",
+          "thread_id_seen": "u-conc-7:c-u-conc-7:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:64631f02-1b10-7b46-ea4b-8bdc0ee0fccc"
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1986-7122-9397-1e0374c66bef",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1982-70c3-853c-9755941d9647",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 313.232,
+          "end_ms": 400.101,
+          "asyncio_task": "Task-869",
+          "thread_id_seen": "u-conc-8:c-u-conc-8:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:00c72ca1-ffb4-cc27-c61f-1a47c05f1502"
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1989-7d20-b152-314adb98addd",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1982-70c3-853c-976a98366f83",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 316.049,
+          "end_ms": 399.265,
+          "asyncio_task": "Task-870",
+          "thread_id_seen": "u-conc-9:c-u-conc-9:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:f0f87e54-809e-8a27-2473-440e5b470364"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-198e-75d3-a018-41eb1f5ec105",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1989-7d20-b152-316c00936adb",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 320.637,
+          "end_ms": 394.038,
+          "asyncio_task": "Task-884",
+          "thread_id_seen": "u-conc-0:c-u-conc-0:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:d669f88b-08e4-5a12-8044-f15ab22392ec"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-1991-78d1-8fb1-3b2d55d95791",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-198a-7f42-9521-5cb6ed86d226",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 323.993,
+          "end_ms": 394.053,
+          "asyncio_task": "Task-887",
+          "thread_id_seen": "u-conc-1:c-u-conc-1:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:3d2f7d19-8429-cc0e-0d1c-7e49c22f6013"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-1994-79c2-9829-60a9afcea0a9",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-198a-7f42-9521-5cc46693b758",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 327.399,
+          "end_ms": 394.168,
+          "asyncio_task": "Task-890",
+          "thread_id_seen": "u-conc-2:c-u-conc-2:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:2ad68093-d829-64cf-0446-c5cb768a7ffa"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-1998-7be1-ae92-1d96e52978ef",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-198a-7f42-9521-5cdadbfed49e",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 330.964,
+          "end_ms": 395.757,
+          "asyncio_task": "Task-893",
+          "thread_id_seen": "u-conc-3:c-u-conc-3:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:ee836a7b-3f38-7887-da13-64661b6b35a7"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-199b-7900-89ba-8ed35c95f703",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-198a-7f42-9521-5ceabc28af16",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 334.385,
+          "end_ms": 394.044,
+          "asyncio_task": "Task-896",
+          "thread_id_seen": "u-conc-4:c-u-conc-4:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:f37d9a7d-516d-9e8c-0856-9ffc1b904a2a"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-199f-74b2-aa81-612370bb0613",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-198a-7f42-9521-5cf7fa5400ca",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 338.094,
+          "end_ms": 394.189,
+          "asyncio_task": "Task-899",
+          "thread_id_seen": "u-conc-5:c-u-conc-5:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:e54f10b4-fdf4-9c06-6919-c8323ab17f0a"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-19bc-7073-8159-62c290cd4024",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-198a-7f42-9521-5d04ecc9d6b8",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 367.15,
+          "end_ms": 394.194,
+          "asyncio_task": "Task-902",
+          "thread_id_seen": "u-conc-6:c-u-conc-6:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:d63239e1-3ef6-d431-43a4-9e806b37292a"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-19c2-78a0-89c7-ac5422b1e5c2",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-19be-7791-ad61-a0a0c373404e",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 372.55,
+          "end_ms": 394.199,
+          "asyncio_task": "Task-938",
+          "thread_id_seen": "u-conc-7:c-u-conc-7:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:e210a5c6-736f-8079-5dcc-4ecb67b2be9c"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-19c7-7120-9240-a0100cec2026",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-19c3-7842-ad1e-805723a4742c",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 377.67,
+          "end_ms": 395.763,
+          "asyncio_task": "Task-958",
+          "thread_id_seen": "u-conc-8:c-u-conc-8:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:67a6e0b9-1ebf-41e8-0606-5eea27d04a2f"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-19ca-73e0-8f45-4b7d07d763e7",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-19c3-7842-ad1e-806b98ea5eb9",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 381.442,
+          "end_ms": 394.049,
+          "asyncio_task": "Task-961",
+          "thread_id_seen": "u-conc-9:c-u-conc-9:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:c1408648-7ecb-5dda-2b4f-ceb330307758"
+        }
+      ],
+      "errors": [],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 0
+      },
+      "concurrency": {
+        "task_graphs_checked": 10,
+        "cross_request_leaks": []
+      }
+    },
+    "E6a_handoff_inherited_context": {
+      "outcome": {
+        "handoff": "inherited"
+      },
+      "event_count": 12,
+      "event_types": [
+        "chain_end",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "probe_parent_graph",
+          "graph_run_id": "01a106ae-19e3-7c92-a46c-c60230e51cdd",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 0.712,
+          "end_ms": 3.726,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": null,
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-19e6-7333-b7a6-92bbccc11671",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-19e3-7c92-a46c-c612ab8c83cf",
+          "parent_name": "handoff_node",
+          "parent_graph": "probe_parent_graph",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 3.046,
+          "end_ms": 4.353,
+          "asyncio_task": "Task-1234",
+          "thread_id_seen": "u-handoff:c-inherited:branch-main:t-inherited",
+          "checkpoint_ns_seen": "handoff_node:5875c4c6-2b39-bfc2-9253-87898dcffb29"
+        }
+      ],
+      "errors": [],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 0
+      },
+      "concurrency": {
+        "task_graphs_checked": 1,
+        "cross_request_leaks": []
+      }
+    },
+    "E6b_handoff_fresh_context": {
+      "outcome": {
+        "handoff": "fresh"
+      },
+      "event_count": 12,
+      "event_types": [
+        "chain_end",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "probe_parent_graph",
+          "graph_run_id": "01a106ae-19e8-79c2-aeac-73f8e55b44b5",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 0.52,
+          "end_ms": 3.782,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": null,
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-19ea-7270-953f-5fc5a9225f66",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 3.097,
+          "end_ms": 4.394,
+          "asyncio_task": "Task-1256",
+          "thread_id_seen": "u-handoff:c-fresh:branch-main:t-fresh",
+          "checkpoint_ns_seen": null
+        }
+      ],
+      "errors": [],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 0
+      },
+      "concurrency": {
+        "task_graphs_checked": 0,
+        "cross_request_leaks": []
+      }
+    },
+    "E7_domain_failure_caught": {
+      "outcome": {
+        "first_type": "confirmation",
+        "second_type": "task_created",
+        "task_status": "completed",
+        "item_titles": [],
+        "tool_adapter_calls": 2
+      },
+      "event_count": 48,
+      "event_types": [
+        "chain_end",
+        "chain_error",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-19f6-71c1-8f59-dc13c0130517",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 10.028,
+          "end_ms": 17.997,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-fail:c-u-probe-fail:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-19fb-7e00-8b03-5510428f85ae",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-19f7-7ff2-bfa4-59e15cfc6806",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 15.095,
+          "end_ms": 16.843,
+          "asyncio_task": "Task-1290",
+          "thread_id_seen": "u-probe-fail:c-u-probe-fail:branch-main",
+          "checkpoint_ns_seen": "routing:f6b684d3-ba03-d2a3-9026-dfcd41715cb6"
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1a07-7752-9ecd-b1aa770e5190",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 26.88,
+          "end_ms": 35.676,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-fail:c-u-probe-fail:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1a0b-7352-ad53-9e63d80d32e3",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1a09-7e42-921d-19147f0e7efa",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 30.824,
+          "end_ms": 39.47,
+          "asyncio_task": "Task-1337",
+          "thread_id_seen": "u-probe-fail:c-u-probe-fail:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:fdc5f95d-bc42-3349-bcde-046d94ddccba"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-1a0f-7f60-b351-d85e8ab8fdaa",
+          "status": "error",
+          "error_class": "RuntimeError",
+          "parent_run_id": "01a106ae-1a0c-7550-a6eb-af42e05d0787",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 34.883,
+          "end_ms": 36.262,
+          "asyncio_task": "Task-1349",
+          "thread_id_seen": "u-probe-fail:c-u-probe-fail:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:85ed3d40-19b0-bc2b-1a14-ba2cc1f56259"
+        }
+      ],
+      "errors": [
+        {
+          "run": "generic_graph",
+          "error_class": "RuntimeError"
+        },
+        {
+          "run": "candidate_gather",
+          "error_class": "RuntimeError"
+        }
+      ],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 2
+      },
+      "concurrency": {
+        "task_graphs_checked": 1,
+        "cross_request_leaks": []
+      }
+    },
+    "E8_routing_failure_uncaught": {
+      "outcome": {
+        "raised": "RuntimeError"
+      },
+      "event_count": 14,
+      "event_types": [
+        "chain_end",
+        "chain_error",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1a1e-7242-a92a-5766dfabfd24",
+          "status": "error",
+          "error_class": "RuntimeError",
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 10.273,
+          "end_ms": 16.204,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-route-fail:c-probe-route-fail:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-1a23-73d1-910c-7c91e87497fc",
+          "status": "error",
+          "error_class": "RuntimeError",
+          "parent_run_id": "01a106ae-1a20-7712-9604-424c8ec82825",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 15.278,
+          "end_ms": 15.951,
+          "asyncio_task": "Task-1386",
+          "thread_id_seen": "u-probe-route-fail:c-probe-route-fail:branch-main",
+          "checkpoint_ns_seen": "routing:b35c918f-6f6c-4f4c-e73e-0c7cf8341e5b"
+        }
+      ],
+      "errors": [
+        {
+          "run": "request_orchestrator",
+          "error_class": "RuntimeError"
+        },
+        {
+          "run": "routing",
+          "error_class": "RuntimeError"
+        },
+        {
+          "run": "routing_graph",
+          "error_class": "RuntimeError"
+        },
+        {
+          "run": "domain_classification",
+          "error_class": "RuntimeError"
+        }
+      ],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 4
+      },
+      "concurrency": {
+        "task_graphs_checked": 0,
+        "cross_request_leaks": []
+      }
+    },
+    "E9_background_cancel": {
+      "outcome": {
+        "first_type": "confirmation",
+        "second_type": "task_created",
+        "cancel_summary_cancelled": 1,
+        "background_await": "CancelledError",
+        "task_status": "cancelled",
+        "item_titles": [],
+        "tool_adapter_calls": 1
+      },
+      "event_count": 46,
+      "event_types": [
+        "chain_end",
+        "chain_error",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1a2f-76f3-a3e2-eb1110668c60",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 10.461,
+          "end_ms": 17.956,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-cancel:c-u-probe-cancel:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-1a34-75d2-9b86-ff5e48f49f77",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1a30-7f71-83ce-fe58fdf2cd9d",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 15.336,
+          "end_ms": 16.864,
+          "asyncio_task": "Task-1414",
+          "thread_id_seen": "u-probe-cancel:c-u-probe-cancel:branch-main",
+          "checkpoint_ns_seen": "routing:ce73350b-c256-37a7-9d8c-483c029e25dd"
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1a40-7263-ad16-204d9c967d52",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 26.809,
+          "end_ms": 35.212,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-cancel:c-u-probe-cancel:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1a43-7cd1-b86e-47f122471650",
+          "status": "error",
+          "error_class": "CancelledError",
+          "parent_run_id": "01a106ae-1a41-7f00-b8d3-4046768c0bb1",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 30.503,
+          "end_ms": 35.759,
+          "asyncio_task": "Task-1461",
+          "thread_id_seen": "u-probe-cancel:c-u-probe-cancel:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:31da6fe8-f6b7-1d7c-1f1d-0385e4fdccee"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-1a47-7443-a675-d635bca3bef1",
+          "status": "error",
+          "error_class": "CancelledError",
+          "parent_run_id": "01a106ae-1a44-76e1-82cf-f02100008fd8",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 34.453,
+          "end_ms": 35.531,
+          "asyncio_task": "Task-1473",
+          "thread_id_seen": "u-probe-cancel:c-u-probe-cancel:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:79b6a509-3c0c-b338-db2f-94a8a57a912e"
+        }
+      ],
+      "errors": [
+        {
+          "run": "task_graph",
+          "error_class": "CancelledError"
+        },
+        {
+          "run": "domain_graph_dispatch",
+          "error_class": "CancelledError"
+        },
+        {
+          "run": "generic_graph",
+          "error_class": "CancelledError"
+        },
+        {
+          "run": "candidate_gather",
+          "error_class": "CancelledError"
+        }
+      ],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 4
+      },
+      "concurrency": {
+        "task_graphs_checked": 1,
+        "cross_request_leaks": []
+      }
+    },
+    "E10_request_timeout": {
+      "outcome": {
+        "raised": "TimeoutError"
+      },
+      "event_count": 4,
+      "event_types": [
+        "chain_error",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1a53-7d71-8478-3cb6a2015938",
+          "status": "error",
+          "error_class": "CancelledError",
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 10.289,
+          "end_ms": 503.565,
+          "asyncio_task": "Task-1491",
+          "thread_id_seen": "u-probe-timeout:c-probe-timeout:branch-main",
+          "checkpoint_ns_seen": null
+        }
+      ],
+      "errors": [
+        {
+          "run": "request_orchestrator",
+          "error_class": "CancelledError"
+        },
+        {
+          "run": "intention",
+          "error_class": "CancelledError"
+        }
+      ],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 2
+      },
+      "concurrency": {
+        "task_graphs_checked": 0,
+        "cross_request_leaks": []
+      }
+    },
+    "E11_multi_domain_siblings": {
+      "outcome": {
+        "first_type": "confirmation",
+        "second_type": "task_created",
+        "task_status": "completed",
+        "item_titles": [
+          "Skyline Luge",
+          "Fort Siloso",
+          "Palm View Hotel",
+          "Palm Hostel"
+        ],
+        "tool_adapter_calls": 4
+      },
+      "event_count": 60,
+      "event_types": [
+        "chain_end",
+        "chain_start"
+      ],
+      "tool_or_llm_events": 0,
+      "graph_root_run_names": [
+        "LangGraph"
+      ],
+      "graphs": [
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1c61-7063-b228-f95f8811d147",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 29.561,
+          "end_ms": 43.29,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-multi:c-u-probe-multi:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "routing_graph",
+          "graph_run_id": "01a106ae-1c6a-7092-99c2-d8c7644ee7bc",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1c64-79b1-8445-adc748b2d280",
+          "parent_name": "routing",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 39.043,
+          "end_ms": 41.877,
+          "asyncio_task": "Task-1513",
+          "thread_id_seen": "u-probe-multi:c-u-probe-multi:branch-main",
+          "checkpoint_ns_seen": "routing:48535149-198d-c97d-3a3b-a33a51b479cc"
+        },
+        {
+          "graph": "request_orchestrator",
+          "graph_run_id": "01a106ae-1c7b-75b1-88ac-625c31dd341f",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": null,
+          "parent_name": null,
+          "parent_graph": null,
+          "parent_ended_before_child": false,
+          "ends_after_root": false,
+          "start_ms": 55.967,
+          "end_ms": 67.085,
+          "asyncio_task": "Task-1",
+          "thread_id_seen": "u-probe-multi:c-u-probe-multi:branch-main",
+          "checkpoint_ns_seen": null
+        },
+        {
+          "graph": "task_graph",
+          "graph_run_id": "01a106ae-1c80-7e22-a2f9-76a3ddb725e6",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1c7d-77e2-9f50-3966907d7f50",
+          "parent_name": "domain_dispatch",
+          "parent_graph": "request_orchestrator",
+          "parent_ended_before_child": true,
+          "ends_after_root": true,
+          "start_ms": 60.781,
+          "end_ms": 75.676,
+          "asyncio_task": "Task-1560",
+          "thread_id_seen": "u-probe-multi:c-u-probe-multi:branch-main",
+          "checkpoint_ns_seen": "domain_dispatch:99a97f40-b853-dc1a-b6b1-a945ae6c8398"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-1c85-7a61-9d54-e92e0aeec03e",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1c81-7c22-955f-dc79bbc7625a",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 66.0,
+          "end_ms": 68.625,
+          "asyncio_task": "Task-1572",
+          "thread_id_seen": "u-probe-multi:c-u-probe-multi:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:7f7e9ae2-d1c5-2a10-b9e1-1f1cf693870e"
+        },
+        {
+          "graph": "generic_graph",
+          "graph_run_id": "01a106ae-1c8c-7d11-847e-8bd9b191c160",
+          "status": "completed",
+          "error_class": null,
+          "parent_run_id": "01a106ae-1c81-7c22-955f-dc79bbc7625a",
+          "parent_name": "domain_graph_dispatch",
+          "parent_graph": "task_graph",
+          "parent_ended_before_child": false,
+          "ends_after_root": true,
+          "start_ms": 72.458,
+          "end_ms": 74.514,
+          "asyncio_task": "Task-1572",
+          "thread_id_seen": "u-probe-multi:c-u-probe-multi:branch-main",
+          "checkpoint_ns_seen": "domain_graph_dispatch:7f7e9ae2-d1c5-2a10-b9e1-1f1cf693870e"
+        }
+      ],
+      "errors": [],
+      "integrity": {
+        "dangling_parents": 0,
+        "cycles": 0,
+        "unmatched_starts": 0,
+        "error_runs": 0
+      },
+      "concurrency": {
+        "task_graphs_checked": 1,
+        "cross_request_leaks": []
+      }
+    }
+  },
+  "exactly_once": {
+    "tool_calls_tracing_off": 3,
+    "tool_calls_tracing_on": 3,
+    "items_equal": true
+  }
+}

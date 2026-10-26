@@ -1,0 +1,440 @@
+[
+  {
+    "seq": 1,
+    "event": "chain_start",
+    "name": "LangGraph",
+    "run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "parent_run_id": null,
+    "t_ms": 10.525,
+    "asyncio_task": "Task-1",
+    "metadata": {
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": []
+  },
+  {
+    "seq": 2,
+    "event": "chain_start",
+    "name": "intention",
+    "run_id": "01a106ae-183d-70b0-ae83-8c0820fa8dbf",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 10.853,
+    "asyncio_task": "Task-1",
+    "metadata": {
+      "langgraph_node": "intention",
+      "langgraph_step": 1,
+      "langgraph_checkpoint_ns": "intention:2014cb22-10ce-ab1f-8ae7-1f5ffdd9f13f",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:1"
+    ]
+  },
+  {
+    "seq": 3,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-183d-70b0-ae83-8c0820fa8dbf",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 11.121,
+    "asyncio_task": "Task-128",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 4,
+    "event": "chain_start",
+    "name": "collect_confirm",
+    "run_id": "01a106ae-183e-7d03-8919-3eb02463e7a9",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 11.294,
+    "asyncio_task": "Task-1",
+    "metadata": {
+      "langgraph_node": "collect_confirm",
+      "langgraph_step": 2,
+      "langgraph_checkpoint_ns": "collect_confirm:e17d6786-be82-7a94-22cd-082e20e149d3",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:2"
+    ]
+  },
+  {
+    "seq": 5,
+    "event": "chain_start",
+    "name": "_route_after_collect_confirm",
+    "run_id": "01a106ae-183e-7d03-8919-3ecb90b80f39",
+    "parent_run_id": "01a106ae-183e-7d03-8919-3eb02463e7a9",
+    "t_ms": 11.449,
+    "asyncio_task": "Task-1",
+    "metadata": {
+      "langgraph_node": "collect_confirm",
+      "langgraph_step": 2,
+      "langgraph_checkpoint_ns": "collect_confirm:e17d6786-be82-7a94-22cd-082e20e149d3",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "seq:step:3"
+    ]
+  },
+  {
+    "seq": 6,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-183e-7d03-8919-3ecb90b80f39",
+    "parent_run_id": "01a106ae-183e-7d03-8919-3eb02463e7a9",
+    "t_ms": 11.582,
+    "asyncio_task": "Task-133",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 7,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-183e-7d03-8919-3eb02463e7a9",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 11.647,
+    "asyncio_task": "Task-134",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 8,
+    "event": "chain_start",
+    "name": "routing",
+    "run_id": "01a106ae-183e-7d03-8919-3ed9b114a6af",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 11.825,
+    "asyncio_task": "Task-1",
+    "metadata": {
+      "langgraph_node": "routing",
+      "langgraph_step": 3,
+      "langgraph_checkpoint_ns": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:3"
+    ]
+  },
+  {
+    "seq": 9,
+    "event": "chain_start",
+    "name": "LangGraph",
+    "run_id": "01a106ae-1842-7583-a80f-e50bf9213fd6",
+    "parent_run_id": "01a106ae-183e-7d03-8919-3ed9b114a6af",
+    "t_ms": 15.579,
+    "asyncio_task": "Task-137",
+    "metadata": {
+      "langgraph_node": "routing",
+      "langgraph_step": 3,
+      "langgraph_checkpoint_ns": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03",
+      "checkpoint_ns": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "seq:step:1"
+    ]
+  },
+  {
+    "seq": 10,
+    "event": "chain_start",
+    "name": "domain_classification",
+    "run_id": "01a106ae-1842-7583-a80f-e518efedd9a1",
+    "parent_run_id": "01a106ae-1842-7583-a80f-e50bf9213fd6",
+    "t_ms": 15.87,
+    "asyncio_task": "Task-137",
+    "metadata": {
+      "langgraph_node": "domain_classification",
+      "langgraph_step": 1,
+      "langgraph_checkpoint_ns": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03|domain_classification:d91a3b11-ae40-41a7-8df2-30c71dd34cf3",
+      "checkpoint_ns": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:1"
+    ]
+  },
+  {
+    "seq": 11,
+    "event": "chain_start",
+    "name": "route_after_classification",
+    "run_id": "01a106ae-1843-7852-9ea5-febc018814d9",
+    "parent_run_id": "01a106ae-1842-7583-a80f-e518efedd9a1",
+    "t_ms": 16.073,
+    "asyncio_task": "Task-137",
+    "metadata": {
+      "langgraph_node": "domain_classification",
+      "langgraph_step": 1,
+      "langgraph_checkpoint_ns": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03|domain_classification:d91a3b11-ae40-41a7-8df2-30c71dd34cf3",
+      "checkpoint_ns": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "seq:step:3"
+    ]
+  },
+  {
+    "seq": 12,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-1843-7852-9ea5-febc018814d9",
+    "parent_run_id": "01a106ae-1842-7583-a80f-e518efedd9a1",
+    "t_ms": 16.186,
+    "asyncio_task": "Task-143",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 13,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-1842-7583-a80f-e518efedd9a1",
+    "parent_run_id": "01a106ae-1842-7583-a80f-e50bf9213fd6",
+    "t_ms": 16.244,
+    "asyncio_task": "Task-144",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 14,
+    "event": "chain_start",
+    "name": "itinerary",
+    "run_id": "01a106ae-1843-7852-9ea5-fec5a3b00923",
+    "parent_run_id": "01a106ae-1842-7583-a80f-e50bf9213fd6",
+    "t_ms": 16.423,
+    "asyncio_task": "Task-137",
+    "metadata": {
+      "langgraph_node": "itinerary",
+      "langgraph_step": 2,
+      "langgraph_checkpoint_ns": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03|itinerary:76d7e922-e20e-8742-6cff-367d24072296",
+      "checkpoint_ns": "routing:2b8792de-efbd-66b2-bb08-6d2e6db9ad03",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:2"
+    ]
+  },
+  {
+    "seq": 15,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-1843-7852-9ea5-fec5a3b00923",
+    "parent_run_id": "01a106ae-1842-7583-a80f-e50bf9213fd6",
+    "t_ms": 16.569,
+    "asyncio_task": "Task-148",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 16,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-1842-7583-a80f-e50bf9213fd6",
+    "parent_run_id": "01a106ae-183e-7d03-8919-3ed9b114a6af",
+    "t_ms": 16.83,
+    "asyncio_task": "Task-152",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 17,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-183e-7d03-8919-3ed9b114a6af",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 16.958,
+    "asyncio_task": "Task-153",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 18,
+    "event": "chain_start",
+    "name": "domain_dispatch",
+    "run_id": "01a106ae-1844-70d3-b24c-cb3c1ae72cb6",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 17.133,
+    "asyncio_task": "Task-1",
+    "metadata": {
+      "langgraph_node": "domain_dispatch",
+      "langgraph_step": 4,
+      "langgraph_checkpoint_ns": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:4"
+    ]
+  },
+  {
+    "seq": 19,
+    "event": "chain_start",
+    "name": "LangGraph",
+    "run_id": "01a106ae-1849-73d1-89aa-1e9932afce7e",
+    "parent_run_id": "01a106ae-1844-70d3-b24c-cb3c1ae72cb6",
+    "t_ms": 22.452,
+    "asyncio_task": "Task-156",
+    "metadata": {
+      "langgraph_node": "domain_dispatch",
+      "langgraph_step": 4,
+      "langgraph_checkpoint_ns": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e",
+      "checkpoint_ns": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "seq:step:1"
+    ]
+  },
+  {
+    "seq": 20,
+    "event": "chain_start",
+    "name": "candidate_gather",
+    "run_id": "01a106ae-1849-73d1-89aa-1ea57b654760",
+    "parent_run_id": "01a106ae-1849-73d1-89aa-1e9932afce7e",
+    "t_ms": 22.807,
+    "asyncio_task": "Task-156",
+    "metadata": {
+      "langgraph_node": "candidate_gather",
+      "langgraph_step": 1,
+      "langgraph_checkpoint_ns": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e|candidate_gather:139df761-3484-fd29-7aa1-82db13a8b735",
+      "checkpoint_ns": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:1"
+    ]
+  },
+  {
+    "seq": 21,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-1849-73d1-89aa-1ea57b654760",
+    "parent_run_id": "01a106ae-1849-73d1-89aa-1e9932afce7e",
+    "t_ms": 23.328,
+    "asyncio_task": "Task-161",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 22,
+    "event": "chain_start",
+    "name": "normalize_and_rank",
+    "run_id": "01a106ae-184a-73c2-974c-f70406c5e3b6",
+    "parent_run_id": "01a106ae-1849-73d1-89aa-1e9932afce7e",
+    "t_ms": 23.545,
+    "asyncio_task": "Task-156",
+    "metadata": {
+      "langgraph_node": "normalize_and_rank",
+      "langgraph_step": 2,
+      "langgraph_checkpoint_ns": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e|normalize_and_rank:46c92f01-6970-1de0-97f8-3f6434019555",
+      "checkpoint_ns": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:2"
+    ]
+  },
+  {
+    "seq": 23,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-184a-73c2-974c-f70406c5e3b6",
+    "parent_run_id": "01a106ae-1849-73d1-89aa-1e9932afce7e",
+    "t_ms": 23.676,
+    "asyncio_task": "Task-165",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 24,
+    "event": "chain_start",
+    "name": "recommendation_result",
+    "run_id": "01a106ae-184a-73c2-974c-f71b13ebdfc4",
+    "parent_run_id": "01a106ae-1849-73d1-89aa-1e9932afce7e",
+    "t_ms": 23.848,
+    "asyncio_task": "Task-156",
+    "metadata": {
+      "langgraph_node": "recommendation_result",
+      "langgraph_step": 3,
+      "langgraph_checkpoint_ns": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e|recommendation_result:b2548ac8-1f43-079b-fa56-0ac2a96e6957",
+      "checkpoint_ns": "domain_dispatch:86e0cdab-c652-dc0a-5324-a5816e92b44e",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:3"
+    ]
+  },
+  {
+    "seq": 25,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-184a-73c2-974c-f71b13ebdfc4",
+    "parent_run_id": "01a106ae-1849-73d1-89aa-1e9932afce7e",
+    "t_ms": 23.964,
+    "asyncio_task": "Task-169",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 26,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-1849-73d1-89aa-1e9932afce7e",
+    "parent_run_id": "01a106ae-1844-70d3-b24c-cb3c1ae72cb6",
+    "t_ms": 24.215,
+    "asyncio_task": "Task-173",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 27,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-1844-70d3-b24c-cb3c1ae72cb6",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 25.287,
+    "asyncio_task": "Task-174",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 28,
+    "event": "chain_start",
+    "name": "result",
+    "run_id": "01a106ae-184c-7a43-83db-c11f9847fdde",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 25.461,
+    "asyncio_task": "Task-1",
+    "metadata": {
+      "langgraph_node": "result",
+      "langgraph_step": 5,
+      "langgraph_checkpoint_ns": "result:335068a0-df89-4595-a1ef-84b33be06318",
+      "thread_id": "u-probe-anchor:c-probe-anchor:branch-main"
+    },
+    "tags": [
+      "graph:step:5"
+    ]
+  },
+  {
+    "seq": 29,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-184c-7a43-83db-c11f9847fdde",
+    "parent_run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "t_ms": 25.75,
+    "asyncio_task": "Task-178",
+    "metadata": {},
+    "tags": []
+  },
+  {
+    "seq": 30,
+    "event": "chain_end",
+    "name": null,
+    "run_id": "01a106ae-183d-70b0-ae83-8bf32b7086b4",
+    "parent_run_id": null,
+    "t_ms": 26.035,
+    "asyncio_task": "Task-182",
+    "metadata": {},
+    "tags": []
+  }
+]

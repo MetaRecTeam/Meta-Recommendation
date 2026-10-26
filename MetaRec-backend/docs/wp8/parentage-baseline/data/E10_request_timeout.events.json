@@ -1,0 +1,57 @@
+[
+  {
+    "seq": 1,
+    "event": "chain_start",
+    "name": "LangGraph",
+    "run_id": "01a106ae-1a53-7d71-8478-3cb6a2015938",
+    "parent_run_id": null,
+    "t_ms": 10.289,
+    "asyncio_task": "Task-1491",
+    "metadata": {
+      "thread_id": "u-probe-timeout:c-probe-timeout:branch-main"
+    },
+    "tags": []
+  },
+  {
+    "seq": 2,
+    "event": "chain_start",
+    "name": "intention",
+    "run_id": "01a106ae-1a54-7233-a235-24bf38c825b9",
+    "parent_run_id": "01a106ae-1a53-7d71-8478-3cb6a2015938",
+    "t_ms": 10.578,
+    "asyncio_task": "Task-1491",
+    "metadata": {
+      "langgraph_node": "intention",
+      "langgraph_step": 1,
+      "langgraph_checkpoint_ns": "intention:f0694aef-ac89-0f3b-5638-aa4c6a2e3f25",
+      "thread_id": "u-probe-timeout:c-probe-timeout:branch-main"
+    },
+    "tags": [
+      "graph:step:1"
+    ]
+  },
+  {
+    "seq": 3,
+    "event": "chain_error",
+    "name": null,
+    "run_id": "01a106ae-1a54-7233-a235-24bf38c825b9",
+    "parent_run_id": "01a106ae-1a53-7d71-8478-3cb6a2015938",
+    "t_ms": 503.128,
+    "asyncio_task": "Task-1496",
+    "metadata": {},
+    "tags": [],
+    "error_class": "CancelledError"
+  },
+  {
+    "seq": 4,
+    "event": "chain_error",
+    "name": null,
+    "run_id": "01a106ae-1a53-7d71-8478-3cb6a2015938",
+    "parent_run_id": null,
+    "t_ms": 503.565,
+    "asyncio_task": "Task-1499",
+    "metadata": {},
+    "tags": [],
+    "error_class": "CancelledError"
+  }
+]
