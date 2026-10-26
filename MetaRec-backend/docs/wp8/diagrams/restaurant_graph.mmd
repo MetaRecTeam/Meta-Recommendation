@@ -1,0 +1,22 @@
+%% WP8 — restaurant_graph.py internal topology. Nested ainvoke, NO config
+%% passed today. Only production call site: task_graph.py's
+%% domain_graph_dispatch node (via service.py run_domain / execute_domain_task).
+%% Verified against branch WP8-LangGraph-Recommendation-Trace, commit 9c09346.
+
+flowchart TD
+    CALLER[["task_graph.py — domain_graph_dispatch node\nreal node parent WITHIN task_graph"]]
+    CALLER -.-> START(["START"])
+    START --> GATHER["candidate_gather\n(agent_plan planner — native tool-calling, still a\nraw SDK call — + registry.dispatch via asyncio.to_thread;\nneither fires a native callback)"]
+    GATHER --> RERANK["rerank_and_summarize"]
+    RERANK --> VALIDATE["validation_and_calibration"]
+    VALIDATE --> RESULT["recommendation_result"]
+    RESULT --> END(["END"])
+
+    classDef entry fill:#EAF2FB,stroke:#1C7293,stroke-width:1.5px,color:#0B1F3A;
+    classDef node fill:#FFFFFF,stroke:#13315C,stroke-width:1.5px,color:#0B1F3A;
+    classDef rawnode fill:#FDF3E3,stroke:#B5791E,stroke-width:1.5px,color:#5C3A0A;
+    classDef external fill:#F4F8FC,stroke:#5B6B79,stroke-width:1.25px,stroke-dasharray:4 3,color:#13315C;
+    class START,END entry;
+    class RERANK,VALIDATE,RESULT node;
+    class GATHER rawnode;
+    class CALLER external;

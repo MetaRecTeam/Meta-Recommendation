@@ -1,0 +1,24 @@
+%% WP8 — generic_graph.py internal topology. Nested ainvoke, NO config
+%% passed today. TWO distinct production call sites — this graph has real
+%% node parents from both, never a task-sibling-only relationship. See
+%% ../GRAPH_EXECUTION_FLOW.md §3 for the full citation.
+%% Verified against branch WP8-LangGraph-Recommendation-Trace, commit 9c09346.
+
+flowchart TD
+    CALLER1[["request_orchestrator.py — domain_dispatch node\nitinerary hotel/end anchor resolution\nreal node parent, BEFORE any task exists"]]
+    CALLER2[["task_graph.py — domain_graph_dispatch node\nordinary domain dispatch\nreal node parent WITHIN task_graph"]]
+    CALLER1 -.-> START(["START"])
+    CALLER2 -.-> START
+    START --> GATHER["candidate_gather\n(raw tool dispatch + optional raw LLM reasoner —\nneither fires a native callback)"]
+    GATHER --> RANK["normalize_and_rank"]
+    RANK --> RESULT["recommendation_result"]
+    RESULT --> END(["END"])
+
+    classDef entry fill:#EAF2FB,stroke:#1C7293,stroke-width:1.5px,color:#0B1F3A;
+    classDef node fill:#FFFFFF,stroke:#13315C,stroke-width:1.5px,color:#0B1F3A;
+    classDef rawnode fill:#FDF3E3,stroke:#B5791E,stroke-width:1.5px,color:#5C3A0A;
+    classDef external fill:#F4F8FC,stroke:#5B6B79,stroke-width:1.25px,stroke-dasharray:4 3,color:#13315C;
+    class START,END entry;
+    class RANK,RESULT node;
+    class GATHER rawnode;
+    class CALLER1,CALLER2 external;

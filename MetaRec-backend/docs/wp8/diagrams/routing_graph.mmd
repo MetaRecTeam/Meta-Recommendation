@@ -1,0 +1,27 @@
+%% WP8 — routing_graph.py internal topology. Nested ainvoke, NO config
+%% passed today. Only production call site: request_orchestrator.py's
+%% routing_node.
+%% Verified against branch WP8-LangGraph-Recommendation-Trace, commit 9c09346.
+
+flowchart TD
+    CALLER[["request_orchestrator.py — routing node\nrun_routing_graph() — REAL node parent"]]
+    CALLER -.-> START(["START"])
+    START --> CLASSIFY["domain_classification"]
+    CLASSIFY -->|unknown| RETRY["retry_domain"]
+    CLASSIFY -->|itinerary| ITIN["itinerary"]
+    CLASSIFY -->|multi_domain| MULTI["multi_domain"]
+    CLASSIFY -->|else| SINGLE["single_domain"]
+    RETRY -->|still unknown| ERROR["domain_error"]
+    RETRY -->|multi_domain| MULTI
+    RETRY -->|else| SINGLE
+    SINGLE --> END(["END"])
+    MULTI --> END
+    ITIN --> END
+    ERROR --> END
+
+    classDef entry fill:#EAF2FB,stroke:#1C7293,stroke-width:1.5px,color:#0B1F3A;
+    classDef node fill:#FFFFFF,stroke:#13315C,stroke-width:1.5px,color:#0B1F3A;
+    classDef external fill:#F4F8FC,stroke:#5B6B79,stroke-width:1.25px,stroke-dasharray:4 3,color:#13315C;
+    class START,END entry;
+    class CLASSIFY,RETRY,ITIN,MULTI,SINGLE,ERROR node;
+    class CALLER external;

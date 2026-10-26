@@ -1,0 +1,29 @@
+%% WP8 — request_orchestrator.py internal topology. Root ainvoke #1
+%% (public /message and internal debug-run requests both enter here).
+%% Dashed boxes/arrows are external graphs it calls into — shown collapsed
+%% here; see their own diagram file for internals.
+%% Verified against branch WP8-LangGraph-Recommendation-Trace, commit 9c09346.
+
+flowchart TD
+    CALLER(["service.py — _handle_user_request_graph\n(one ainvoke call, config = merge configurable.thread_id)"])
+    CALLER --> START(["START"])
+    START --> INTENTION["intention\n(raw LLM call — not a callback)"]
+    INTENTION --> COLLECT["collect_confirm"]
+    COLLECT -->|query / confirmation_yes| ROUTING["routing"]
+    COLLECT -->|otherwise| RESULT["result"]
+    ROUTING --> DISPATCH["domain_dispatch\n(raw LLM call — not a callback)"]
+    DISPATCH --> RESULT
+    RESULT --> END(["END"])
+
+    ROUTING -.-> RG[["routing_graph.py\nreal node parent"]]
+    DISPATCH -.->|itinerary anchor only| GG[["generic_graph.py\nreal node parent, before any task exists"]]
+    DISPATCH -.->|confirmation_yes| TG[["task_graph.py\nasyncio.create_task — parent kept via contextvar,\nbut outlives this node"]]
+
+    classDef entry fill:#EAF2FB,stroke:#1C7293,stroke-width:1.5px,color:#0B1F3A;
+    classDef node fill:#FFFFFF,stroke:#13315C,stroke-width:1.5px,color:#0B1F3A;
+    classDef llmnode fill:#FDF3E3,stroke:#B5791E,stroke-width:1.5px,color:#5C3A0A;
+    classDef external fill:#F4F8FC,stroke:#5B6B79,stroke-width:1.25px,stroke-dasharray:4 3,color:#13315C;
+    class CALLER,START,END entry;
+    class COLLECT,ROUTING,RESULT node;
+    class INTENTION,DISPATCH llmnode;
+    class RG,GG,TG external;

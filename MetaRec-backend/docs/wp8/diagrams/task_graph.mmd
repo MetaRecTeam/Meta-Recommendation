@@ -1,0 +1,23 @@
+%% WP8 — task_graph.py internal topology. Root ainvoke #2 (own checkpoint
+%% namespace; config = merge configurable.thread_id) whose callback parent is
+%% still the domain_dispatch node run — see ../parentage-baseline/REPORT.md. Only production call site: service.py's
+%% run_recommendation_task_graph, spawned by a detached asyncio.create_task.
+%% Verified against branch WP8-LangGraph-Recommendation-Trace, commit 9c09346.
+
+flowchart TD
+    CALLER[["request_orchestrator.py — domain_dispatch node\nadapters.create_task -> service.create_task_async\nasyncio.create_task — copies contextvars, so the\ncallback parent survives (runtime-verified)"]]
+    CALLER -.-> START(["START — parent_run_id = domain_dispatch run\nruns on after the request graph has ended"])
+    START --> STARTED["task_started"]
+    STARTED --> DISPATCH["domain_graph_dispatch\n(may invoke 1..N domain graphs sequentially —\nitinerary tasks gather attraction+restaurant+hotel here)"]
+    DISPATCH --> PROJECT["result_projection"]
+    PROJECT --> END(["END"])
+
+    DISPATCH -.->|single_domain / attraction / hotel / movie / ...| GG[["generic_graph.py\nreal node parent WITHIN task_graph"]]
+    DISPATCH -.->|restaurant domain| RSG[["restaurant_graph.py\nreal node parent WITHIN task_graph"]]
+
+    classDef entry fill:#EAF2FB,stroke:#1C7293,stroke-width:1.5px,color:#0B1F3A;
+    classDef node fill:#FFFFFF,stroke:#13315C,stroke-width:1.5px,color:#0B1F3A;
+    classDef external fill:#F4F8FC,stroke:#5B6B79,stroke-width:1.25px,stroke-dasharray:4 3,color:#13315C;
+    class START,END entry;
+    class STARTED,DISPATCH,PROJECT node;
+    class CALLER,GG,RSG external;
