@@ -2,7 +2,9 @@
 
 **Date:** 2026-10-04 · **Branch:** `WP8-LangGraph-Recommendation-Trace` · **Commit:** `9c09346`
 **Environment:** Python 3.11.5 · `langgraph==1.1.10` · `langchain-core==1.6.1`
-**Scope:** WP8 D0 (system understanding and baseline). Research questions 1 and 4.
+**Scope:** WP8 D0 (system understanding and baseline). Research question 1
+(faithful path and parentage reconstruction) and the team's supplementary
+question RQ4 (which operations callbacks can observe at all).
 
 ---
 
@@ -247,7 +249,7 @@ Ten simultaneous end-to-end requests produced 10 task graphs, each attached to
 its own request, with no shared or swapped parents. This is early support for
 the README's 50-concurrent-run acceptance criterion; it is not yet that test.
 
-### 5.7 What callbacks can and cannot see (research question 4)
+### 5.7 What callbacks can and cannot see (RQ4)
 
 | Kind of operation | Visible via native callbacks |
 |---|---|

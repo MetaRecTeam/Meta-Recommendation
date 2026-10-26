@@ -84,17 +84,22 @@ the leak count do not.
 ```
 
 Figures — `--roots` picks which root run(s) to draw; `2` is the confirm turn.
-Each SVG is converted with `rsvg-convert -b white -z 1.6 -o figures/<name>.png <name>.svg`.
+The renderer writes SVG; the SVGs go to a temporary directory (they are
+intermediate, not committed) and `rsvg-convert` turns each into the committed
+PNG.
 
 ```bash
 D=docs/wp8/parentage-baseline/data
+F=docs/wp8/parentage-baseline/figures
+T=$(mktemp -d)
 W="../.venv/bin/python scripts/wp8_trace_waterfall.py"
-$W $D/E3_service_hotel_chain.events.json E3_service_hotel_chain.svg --title "E3 · Real service chain: hotel request, confirm, background task" --panel-titles "Turn 1 — query: routing_graph nests under the routing node|Turn 2 — confirm: task_graph keeps its callback parent but outlives the request graph"
-$W $D/E4_itinerary_anchor.events.json E4_itinerary_anchor.svg --title "E4 · Itinerary anchor: generic_graph nested inside domain_dispatch before any task exists" --panel-titles "Itinerary query turn"
-$W $D/E6_handoff_pair.events.json E6_handoff_pair.svg --title "E6 · Same asyncio.create_task hand-off, with vs without the inherited context" --panel-titles "E6a — context inherited (production behaviour): task_graph is a child of handoff_node|E6b — fresh context: the parent graph alone…|…and task_graph arrives as a disconnected root (parent_run_id = null)"
-$W $D/E7_domain_failure_caught.events.json E7_domain_failure_caught.svg --roots 2 --title "E7 · Failure inside generic_graph, caught by the service" --panel-titles "Confirm turn: the error closes generic_graph and candidate_gather, but task_graph and its node report success"
-$W $D/E8_routing_failure_uncaught.events.json E8_routing_failure_uncaught.svg --title "E8 · Uncaught failure inside routing_graph" --panel-titles "Query turn: one error closes every enclosing run, innermost first, and escapes to the caller"
-$W $D/E9_background_cancel.events.json E9_background_cancel.svg --roots 2 --title "E9 · Background task cancelled mid tool call (conversation delete)" --panel-titles "Confirm turn: cancellation arrives as chain_error(CancelledError) on every open run in the task"
-$W $D/E10_request_timeout.events.json E10_request_timeout.svg --title "E10 · Chat request times out while waiting on the LLM" --panel-titles "Query turn: the root and the open node close with CancelledError; the LLM call itself is invisible"
-$W $D/E11_multi_domain_siblings.events.json E11_multi_domain_siblings.svg --roots 2 --title "E11 · Multi-domain request: two generic_graph instances under one node" --panel-titles "Confirm turn: hotel and attraction graphs run one after another under the same domain_graph_dispatch run"
+$W $D/E3_service_hotel_chain.events.json $T/E3_service_hotel_chain.svg --title "E3 · Real service chain: hotel request, confirm, background task" --panel-titles "Turn 1 — query: routing_graph nests under the routing node|Turn 2 — confirm: task_graph keeps its callback parent but outlives the request graph"
+$W $D/E4_itinerary_anchor.events.json $T/E4_itinerary_anchor.svg --title "E4 · Itinerary anchor: generic_graph nested inside domain_dispatch before any task exists" --panel-titles "Itinerary query turn"
+$W $D/E6_handoff_pair.events.json $T/E6_handoff_pair.svg --title "E6 · Same asyncio.create_task hand-off, with vs without the inherited context" --panel-titles "E6a — context inherited (production behaviour): task_graph is a child of handoff_node|E6b — fresh context: the parent graph alone…|…and task_graph arrives as a disconnected root (parent_run_id = null)"
+$W $D/E7_domain_failure_caught.events.json $T/E7_domain_failure_caught.svg --roots 2 --title "E7 · Failure inside generic_graph, caught by the service" --panel-titles "Confirm turn: the error closes generic_graph and candidate_gather, but task_graph and its node report success"
+$W $D/E8_routing_failure_uncaught.events.json $T/E8_routing_failure_uncaught.svg --title "E8 · Uncaught failure inside routing_graph" --panel-titles "Query turn: one error closes every enclosing run, innermost first, and escapes to the caller"
+$W $D/E9_background_cancel.events.json $T/E9_background_cancel.svg --roots 2 --title "E9 · Background task cancelled mid tool call (conversation delete)" --panel-titles "Confirm turn: cancellation arrives as chain_error(CancelledError) on every open run in the task"
+$W $D/E10_request_timeout.events.json $T/E10_request_timeout.svg --title "E10 · Chat request times out while waiting on the LLM" --panel-titles "Query turn: the root and the open node close with CancelledError; the LLM call itself is invisible"
+$W $D/E11_multi_domain_siblings.events.json $T/E11_multi_domain_siblings.svg --roots 2 --title "E11 · Multi-domain request: two generic_graph instances under one node" --panel-titles "Confirm turn: hotel and attraction graphs run one after another under the same domain_graph_dispatch run"
+for svg in $T/*.svg; do rsvg-convert -b white -z 1.6 -o "$F/$(basename "${svg%.svg}").png" "$svg"; done
 ```

@@ -2,10 +2,13 @@
 %% single-domain "hotel" request that confirms and completes, with an
 %% optional itinerary branch shown in the alt block. Sequence numbers are
 %% the intended GraphRunEventV1.sequence order once WP8 instrumentation
-%% exists today there is no collector, so nothing below is emitted yet.
-%% run_id / parent_run_id are illustrative opaque IDs (rN = orchestrator-graph
-%% run, gN = generic-graph run, tN = task-graph run) showing what a callback
-%% collector must reconstruct.
+%% exists. Today there is no collector, so nothing below is emitted yet.
+%% run_id / parent_run_id are illustrative opaque IDs showing what a callback
+%% collector must reconstruct: rN = request_orchestrator turn 1 (instance A),
+%% sN = request_orchestrator turn 2 (instance A2), bN = routing_graph,
+%% cN = itinerary-anchor generic_graph, dN = task_graph, eN = task generic_graph.
+%% The measured version of this path is figure E3 in
+%% ../parentage-baseline/REPORT.md.
 %%
 %% Verified call chain (branch WP8-LangGraph-Recommendation-Trace, 9c09346):
 %% service.py _handle_user_request_graph -> run_request_orchestrator ->
@@ -18,21 +21,21 @@ sequenceDiagram
     autonumber
     participant Client
     participant Service as service.py
-    participant OrchGraph as request_orchestrator\n(ainvoke #1, graph_instance A)
-    participant RoutingGraph as routing_graph\n(ainvoke, graph_instance B)
-    participant BgTask as asyncio.create_task\n(detached background task)
-    participant TaskGraph as task_graph\n(ainvoke #2, graph_instance D\nNO parent_graph_instance_id)
-    participant GenericGraph as generic_graph\n(ainvoke, graph_instance C or E)
-    participant Tool as tool_registry.dispatch\n(asyncio.to_thread — NOT a callback)
-    participant LLM as llm_service / SDK client\n(NOT a callback)
+    participant OrchGraph as request_orchestrator<br/>(ainvoke no. 1, graph_instance A)
+    participant RoutingGraph as routing_graph<br/>(ainvoke, graph_instance B)
+    participant BgTask as asyncio.create_task<br/>(detached background task)
+    participant TaskGraph as task_graph<br/>(ainvoke no. 2, graph_instance D,<br/>parent_graph_instance_id=A2)
+    participant GenericGraph as generic_graph<br/>(ainvoke, graph_instance C or E)
+    participant Tool as tool_registry.dispatch<br/>(asyncio.to_thread — NOT a callback)
+    participant LLM as llm_service / SDK client<br/>(NOT a callback)
 
-    Client->>Service: POST /message (query="find me a hotel in Singapore")
+    Client->>Service: POST /api/process (query="find me a hotel in Singapore")
     Service->>OrchGraph: await graph.ainvoke(state, config={configurable.thread_id})
     Note over OrchGraph: graph_start run_id=r0, parent_run_id=null (root)
 
     OrchGraph->>OrchGraph: node_start "intention" run_id=r1 parent=r0
     OrchGraph->>LLM: analyze_user_message(...) [raw SDK call]
-    Note right of LLM: WP5 adapter, if present, emits\nllm_start/llm_end runnable_type=llm_attempt_adapter\nparent_run_id=r1. No native callback fires here.
+    Note right of LLM: WP5 adapter, if present, emits<br/>llm_start/llm_end runnable_type=llm_attempt_adapter<br/>parent_run_id=r1. No native callback fires here.
     LLM-->>OrchGraph: LLMResponse(intent="query", preferences={domain:"hotel", location:"Singapore"})
     OrchGraph->>OrchGraph: node_end "intention" run_id=r1
 
@@ -40,7 +43,7 @@ sequenceDiagram
 
     OrchGraph->>OrchGraph: node_start "routing" run_id=r3 parent=r0
     OrchGraph->>RoutingGraph: await run_routing_graph(query, intent, preferences)
-    Note over RoutingGraph: graph_start run_id=b0\nparent_run_id=r3 (REAL node parent)\nparent_graph_instance_id=A
+    Note over RoutingGraph: graph_start run_id=b0<br/>parent_run_id=r3 (REAL node parent)<br/>parent_graph_instance_id=A
     RoutingGraph->>RoutingGraph: node_start/end "domain_classification" run_id=b1 parent=b0
     RoutingGraph->>RoutingGraph: node_start/end "single_domain" run_id=b2 parent=b0
     RoutingGraph-->>OrchGraph: graph_end run_id=b0, DomainRoute(domain="hotel", status="ready")
@@ -52,9 +55,9 @@ sequenceDiagram
 
     opt route.mode == "itinerary" (hotel/end anchor requested)
         OrchGraph->>GenericGraph: _resolve_itinerary_anchor_preferences -> run_generic_domain_graph(domain="hotel")
-        Note over GenericGraph: graph_start run_id=c0\nparent_run_id=r4 (REAL node parent,\nnot a task sibling — no task exists yet)\nparent_graph_instance_id=A
+        Note over GenericGraph: graph_start run_id=c0<br/>parent_run_id=r4 (REAL node parent,<br/>not a task sibling — no task exists yet)<br/>parent_graph_instance_id=A
         GenericGraph->>Tool: registry.dispatch("gmap.search", ...) [asyncio.to_thread]
-        Note right of Tool: WP7 adapter, if present, emits\ntool_start/tool_end parent_run_id=(candidate_gather node run).\nNo native callback fires here.
+        Note right of Tool: WP7 adapter, if present, emits<br/>tool_start/tool_end parent_run_id=(candidate_gather node run).<br/>No native callback fires here.
         Tool-->>GenericGraph: provider records
         GenericGraph-->>OrchGraph: graph_end run_id=c0
     end
@@ -64,20 +67,22 @@ sequenceDiagram
     OrchGraph-->>Service: graph_end run_id=r0, response_payload
     Service-->>Client: confirmation_request (needs_confirmation=true)
 
-    Client->>Service: POST /message (hitl_state.action="confirm")
+    Client->>Service: POST /api/process (hitl_state.action="confirm")
     Service->>OrchGraph: await graph.ainvoke(state, config) — SAME thread_id, NEW graph_instance A2
-    Note over OrchGraph: intent=confirmation_yes, domain_dispatch_node\ncalls adapters.create_task (no routing_graph re-run\nbecause existing_route is reused)
+    Note over OrchGraph: graph_start run_id=s0, parent_run_id=null (root)<br/>intent=confirmation_yes. Nodes intention, collect_confirm<br/>and routing run again (s1-s3), but the routing node reuses<br/>existing_route, so routing_graph is not invoked again
+    OrchGraph->>OrchGraph: node_start "domain_dispatch" run_id=s4 parent=s0
     OrchGraph->>BgTask: adapters.create_task -> service.create_task_async()
-    Note over BgTask: asyncio.create_task(...) copies contextvars, so the\ncallback parent survives (runtime-verified). It is implicit\nonly: a fresh context yields parent_run_id=null (Invariant 2).
-    OrchGraph-->>Service: graph_end (response_payload.type = "task_created", task_id)
+    Note over BgTask: asyncio.create_task(...) copies contextvars, so the<br/>callback parent survives (runtime-verified). It is implicit<br/>only: a fresh context yields parent_run_id=null (Invariant 2).
+    OrchGraph->>OrchGraph: node_end "domain_dispatch" run_id=s4, then node "result"
+    OrchGraph-->>Service: graph_end run_id=s0 (response_payload.type = "task_created", task_id)
     Service-->>Client: {task_id}
 
-    BgTask->>TaskGraph: await run_task_graph(...) [ainvoke #2]
-    Note over TaskGraph: graph_start run_id=d0, parent_run_id=r4\n(callback child of domain_dispatch, but its own\ncheckpoint root, and it outlives graph A)
+    BgTask->>TaskGraph: await run_task_graph(...) [ainvoke no. 2]
+    Note over TaskGraph: graph_start run_id=d0, parent_run_id=s4<br/>(callback child of turn 2's domain_dispatch, but its<br/>own checkpoint root, and it outlives graph A2)
     TaskGraph->>TaskGraph: node_start/end "task_started" run_id=d1 parent=d0
     TaskGraph->>TaskGraph: node_start "domain_graph_dispatch" run_id=d2 parent=d0
     TaskGraph->>GenericGraph: run_domain -> execute_domain_task -> run_generic_domain_graph(domain="hotel")
-    Note over GenericGraph: graph_start run_id=e0\nparent_run_id=d2 (REAL node parent WITHIN task_graph,\n"task sibling" only describes its relationship to the\nROOT request graph_instance A, not to this node)\nparent_graph_instance_id=D
+    Note over GenericGraph: graph_start run_id=e0<br/>parent_run_id=d2 (REAL node parent WITHIN task_graph)<br/>parent_graph_instance_id=D
     GenericGraph->>Tool: registry.dispatch("gmap.search", ...) [asyncio.to_thread]
     Tool-->>GenericGraph: provider records
     GenericGraph->>GenericGraph: node_start/end "candidate_gather" run_id=e1 parent=e0
@@ -87,4 +92,4 @@ sequenceDiagram
     TaskGraph->>TaskGraph: node_end "domain_graph_dispatch" run_id=d2
     TaskGraph->>TaskGraph: node_start/end "result_projection" run_id=d3 parent=d0
     TaskGraph-->>BgTask: graph_end run_id=d0
-    Note over Client,Service: Client polls GET /internal/debug/behavior-tests/{run_id}\nevery 1.5s (existing coarse baseline) — WP8 adds\nGET .../graph-trace?after_sequence=N as a parallel,\nfiner-grained cursor over the same run.
+    Note over Client,Service: When this request runs as a Debug Arena behaviour test,<br/>the admin UI polls GET /internal/debug/behavior-tests/{run_id}<br/>every 1.5s (existing coarse baseline). WP8 adds<br/>GET .../graph-trace?after_sequence=N as a finer-grained<br/>cursor over the same run.
