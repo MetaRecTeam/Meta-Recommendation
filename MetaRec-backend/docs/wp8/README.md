@@ -19,6 +19,7 @@ collector can and cannot see. No WP8 collector exists yet.
 | [parentage-baseline/METHOD.md](parentage-baseline/METHOD.md) | How the evidence was produced and how to regenerate data and figures |
 | [parentage-baseline/figures/](parentage-baseline/figures/) | Observed trace waterfalls |
 | [parentage-baseline/data/](parentage-baseline/data/) | Raw recorded events and the summary they were analysed from |
+| [team/](team/README.md) | Who builds what: the member split, the whole-framework guide, and one implementation guide per member |
 
 Related code: [tests/test_wp8_parentage_baseline.py](../../tests/test_wp8_parentage_baseline.py)
 (12 `runtime_contract` tests), [tests/wp8_probe_support.py](../../tests/wp8_probe_support.py),
@@ -26,7 +27,8 @@ Related code: [tests/test_wp8_parentage_baseline.py](../../tests/test_wp8_parent
 [scripts/wp8_trace_waterfall.py](../../scripts/wp8_trace_waterfall.py).
 
 **Reading order:** this page → `GRAPH_EXECUTION_FLOW.md` §1–§3 with the
-diagrams → `parentage-baseline/REPORT.md`.
+diagrams → `parentage-baseline/REPORT.md` → `team/FRAMEWORK.md` and your own
+member guide.
 
 ## Glossary
 
