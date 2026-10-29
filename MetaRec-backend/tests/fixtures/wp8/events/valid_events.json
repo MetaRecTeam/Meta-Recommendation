@@ -1,0 +1,416 @@
+{
+  "root_graph_start": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-1",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 1,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 1.0,
+    "event_type": "graph_start",
+    "status": "running",
+    "graph_definition_id": "request-orchestrator@v1",
+    "graph_instance_id": "gi-orch",
+    "parent_graph_instance_id": null,
+    "node_id": null,
+    "run_id": "r0",
+    "parent_run_id": null,
+    "runnable_type": "graph",
+    "duration_ms": null,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": null,
+    "error": null,
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "node_start": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-2",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 2,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 2.0,
+    "event_type": "node_start",
+    "status": "running",
+    "graph_definition_id": "request-orchestrator@v1",
+    "graph_instance_id": "gi-orch",
+    "parent_graph_instance_id": null,
+    "node_id": "domain_dispatch",
+    "run_id": "r4",
+    "parent_run_id": "r0",
+    "runnable_type": "graph_node",
+    "duration_ms": null,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": null,
+    "error": null,
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "nested_graph_start": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-3",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 3,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 3.0,
+    "event_type": "graph_start",
+    "status": "running",
+    "graph_definition_id": "generic-domain@v1",
+    "graph_instance_id": "gi-gen",
+    "parent_graph_instance_id": "gi-orch",
+    "node_id": null,
+    "run_id": "c0",
+    "parent_run_id": "r4",
+    "runnable_type": "graph",
+    "duration_ms": null,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": null,
+    "error": null,
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "node_end_with_state_diff": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-4",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 4,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 4.0,
+    "event_type": "node_end",
+    "status": "completed",
+    "graph_definition_id": "generic-domain@v1",
+    "graph_instance_id": "gi-gen",
+    "parent_graph_instance_id": "gi-orch",
+    "node_id": "candidate_gather",
+    "run_id": "c1",
+    "parent_run_id": "c0",
+    "runnable_type": "graph_node",
+    "duration_ms": 42.8,
+    "input_summary": {
+      "keys": [
+        "domain",
+        "preferences"
+      ],
+      "bytes": 220
+    },
+    "output_summary": {
+      "keys": [
+        "executions"
+      ],
+      "bytes": 480
+    },
+    "state_diff": {
+      "basis": "node_input_to_update",
+      "added": {
+        "candidate_count": 12
+      },
+      "changed": {
+        "stage": {
+          "before": "gather",
+          "after": "rank"
+        }
+      },
+      "removed": [],
+      "omitted": [
+        {
+          "path": "$.raw",
+          "reason": "not_allowlisted"
+        }
+      ]
+    },
+    "metadata": {
+      "domain": "hotel",
+      "tool": null,
+      "model": null
+    },
+    "error": null,
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "tool_end_with_health": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-5",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 5,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 5.0,
+    "event_type": "tool_end",
+    "status": "completed",
+    "graph_definition_id": "generic-domain@v1",
+    "graph_instance_id": "gi-gen",
+    "parent_graph_instance_id": "gi-orch",
+    "node_id": "candidate_gather",
+    "run_id": "t1",
+    "parent_run_id": "c1",
+    "runnable_type": "tool",
+    "duration_ms": 12.0,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": {
+      "domain": "hotel",
+      "tool": "gmap.hotel.search",
+      "tool_health": {
+        "provider_id": "gmap",
+        "state": "healthy",
+        "reason_code": null,
+        "checked_at": "2026-08-20T10:29:00Z",
+        "expires_at": "2026-08-20T10:34:00Z"
+      }
+    },
+    "error": null,
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "llm_attempt_start": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-6",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 6,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 6.0,
+    "event_type": "llm_start",
+    "status": "running",
+    "graph_definition_id": "request-orchestrator@v1",
+    "graph_instance_id": "gi-orch",
+    "parent_graph_instance_id": null,
+    "node_id": "intention",
+    "run_id": "l1",
+    "parent_run_id": "r1",
+    "runnable_type": "llm_attempt_adapter",
+    "duration_ms": null,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": {
+      "model": "model-a",
+      "attempt": 1,
+      "llm_attempt": {
+        "request_id": "req-1",
+        "attempt_id": "att-1",
+        "provider_id": "provider-a",
+        "model_id": "model-a",
+        "policy_leg": "primary",
+        "outcome": null,
+        "validation_status": null,
+        "total_tokens": null,
+        "cost_usd": null,
+        "pricing_snapshot_id": null,
+        "provider_price_table_version": null
+      }
+    },
+    "error": null,
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "tool_scope_policy_end": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-7",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 7,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 7.0,
+    "event_type": "policy_end",
+    "status": "completed",
+    "graph_definition_id": "generic-domain@v1",
+    "graph_instance_id": "gi-gen",
+    "parent_graph_instance_id": "gi-orch",
+    "node_id": "candidate_gather",
+    "run_id": "p1",
+    "parent_run_id": "c1",
+    "runnable_type": "tool_scope_adapter",
+    "duration_ms": 1.5,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": {
+      "tool_scope": {
+        "catalog_id": "cat-1",
+        "health_snapshot_id": "hs-1",
+        "policy_version": "v1",
+        "eligible_tool_names": [
+          "gmap.hotel.search"
+        ],
+        "excluded": [
+          {
+            "name": "osm.hotel.discover",
+            "reason_code": "provider_unhealthy"
+          }
+        ]
+      }
+    },
+    "error": null,
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "node_error_cancelled": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-8",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 8,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 8.0,
+    "event_type": "error",
+    "status": "cancelled",
+    "graph_definition_id": "generic-domain@v1",
+    "graph_instance_id": "gi-gen",
+    "parent_graph_instance_id": "gi-orch",
+    "node_id": "candidate_gather",
+    "run_id": "c1",
+    "parent_run_id": "c0",
+    "runnable_type": "graph_node",
+    "duration_ms": null,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": null,
+    "error": {
+      "code": "cancelled",
+      "error_class": "CancelledError",
+      "safe_message": "Run was cancelled",
+      "retryable": false
+    },
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "root_graph_error": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-9",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 9,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 9.0,
+    "event_type": "error",
+    "status": "error",
+    "graph_definition_id": "request-orchestrator@v1",
+    "graph_instance_id": "gi-orch",
+    "parent_graph_instance_id": null,
+    "node_id": null,
+    "run_id": "r0",
+    "parent_run_id": null,
+    "runnable_type": "graph",
+    "duration_ms": null,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": null,
+    "error": {
+      "code": "graph_failed",
+      "error_class": "RuntimeError",
+      "safe_message": "Graph failed",
+      "retryable": false
+    },
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "graph_end": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-10",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 10,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 10.0,
+    "event_type": "graph_end",
+    "status": "completed",
+    "graph_definition_id": "generic-domain@v1",
+    "graph_instance_id": "gi-gen",
+    "parent_graph_instance_id": "gi-orch",
+    "node_id": null,
+    "run_id": "c0",
+    "parent_run_id": "r4",
+    "runnable_type": "graph",
+    "duration_ms": 100.0,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": null,
+    "error": null,
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  },
+  "trace_truncated": {
+    "schema_version": "graph-run-event/1.0",
+    "event_id": "ev-11",
+    "trace_id": "tr-1",
+    "debug_run_id": "dr-1",
+    "sequence": 11,
+    "timestamp_utc": "2026-08-20T10:30:00.123Z",
+    "monotonic_offset_ms": 11.0,
+    "event_type": "trace_truncated",
+    "status": "incomplete",
+    "graph_definition_id": "request-orchestrator@v1",
+    "graph_instance_id": "gi-orch",
+    "parent_graph_instance_id": null,
+    "node_id": null,
+    "run_id": null,
+    "parent_run_id": null,
+    "runnable_type": "trace_system",
+    "duration_ms": null,
+    "input_summary": null,
+    "output_summary": null,
+    "state_diff": null,
+    "metadata": null,
+    "error": null,
+    "redaction": {
+      "policy_id": "metarec-debug-safe-v1",
+      "redacted_paths": [],
+      "truncated_paths": [],
+      "stored_bytes": 0
+    }
+  }
+}

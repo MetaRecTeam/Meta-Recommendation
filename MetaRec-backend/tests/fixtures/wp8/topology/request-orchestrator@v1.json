@@ -1,0 +1,85 @@
+{
+  "graph_definition_id": "request-orchestrator@v1",
+  "name": "Request orchestrator",
+  "nodes": [
+    {
+      "node_id": "__start__",
+      "label": "Start",
+      "kind": "start"
+    },
+    {
+      "node_id": "intention",
+      "label": "Intention",
+      "kind": "node"
+    },
+    {
+      "node_id": "collect_confirm",
+      "label": "Collect confirm",
+      "kind": "node"
+    },
+    {
+      "node_id": "routing",
+      "label": "Routing",
+      "kind": "node"
+    },
+    {
+      "node_id": "domain_dispatch",
+      "label": "Domain dispatch",
+      "kind": "node"
+    },
+    {
+      "node_id": "result",
+      "label": "Result",
+      "kind": "node"
+    },
+    {
+      "node_id": "__end__",
+      "label": "End",
+      "kind": "end"
+    }
+  ],
+  "edges": [
+    {
+      "source": "__start__",
+      "target": "intention",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "intention",
+      "target": "collect_confirm",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "collect_confirm",
+      "target": "routing",
+      "kind": "conditional",
+      "label": "routing"
+    },
+    {
+      "source": "collect_confirm",
+      "target": "result",
+      "kind": "conditional",
+      "label": "result"
+    },
+    {
+      "source": "routing",
+      "target": "domain_dispatch",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "domain_dispatch",
+      "target": "result",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "result",
+      "target": "__end__",
+      "kind": "normal",
+      "label": null
+    }
+  ]
+}

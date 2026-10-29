@@ -1,0 +1,117 @@
+{
+  "$defs": {
+    "TopologyEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "normal",
+            "conditional"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Label"
+        },
+        "source": {
+          "minLength": 1,
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "minLength": 1,
+          "title": "Target",
+          "type": "string"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "kind"
+      ],
+      "title": "TopologyEdge",
+      "type": "object"
+    },
+    "TopologyNode": {
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "enum": [
+            "start",
+            "end",
+            "node",
+            "tool",
+            "llm"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "label": {
+          "minLength": 1,
+          "title": "Label",
+          "type": "string"
+        },
+        "node_id": {
+          "minLength": 1,
+          "title": "Node Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "node_id",
+        "label",
+        "kind"
+      ],
+      "title": "TopologyNode",
+      "type": "object"
+    }
+  },
+  "$id": "metarec:wp8/graph-definition-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Possible nodes and edges of one compiled graph. Not what ran.",
+  "properties": {
+    "edges": {
+      "items": {
+        "$ref": "#/$defs/TopologyEdge"
+      },
+      "title": "Edges",
+      "type": "array"
+    },
+    "graph_definition_id": {
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*@v[1-9][0-9]*$",
+      "title": "Graph Definition Id",
+      "type": "string"
+    },
+    "name": {
+      "minLength": 1,
+      "title": "Name",
+      "type": "string"
+    },
+    "nodes": {
+      "items": {
+        "$ref": "#/$defs/TopologyNode"
+      },
+      "title": "Nodes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "graph_definition_id",
+    "name",
+    "nodes",
+    "edges"
+  ],
+  "title": "GraphDefinition",
+  "type": "object"
+}

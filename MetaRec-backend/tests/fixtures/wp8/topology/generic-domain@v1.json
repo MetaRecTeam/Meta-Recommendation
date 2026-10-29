@@ -1,0 +1,57 @@
+{
+  "graph_definition_id": "generic-domain@v1",
+  "name": "Generic domain graph",
+  "nodes": [
+    {
+      "node_id": "__start__",
+      "label": "Start",
+      "kind": "start"
+    },
+    {
+      "node_id": "candidate_gather",
+      "label": "Candidate gather",
+      "kind": "node"
+    },
+    {
+      "node_id": "normalize_and_rank",
+      "label": "Normalize and rank",
+      "kind": "node"
+    },
+    {
+      "node_id": "recommendation_result",
+      "label": "Recommendation result",
+      "kind": "node"
+    },
+    {
+      "node_id": "__end__",
+      "label": "End",
+      "kind": "end"
+    }
+  ],
+  "edges": [
+    {
+      "source": "__start__",
+      "target": "candidate_gather",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "candidate_gather",
+      "target": "normalize_and_rank",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "normalize_and_rank",
+      "target": "recommendation_result",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "recommendation_result",
+      "target": "__end__",
+      "kind": "normal",
+      "label": null
+    }
+  ]
+}

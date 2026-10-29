@@ -1,0 +1,68 @@
+{
+  "graph_definition_id": "restaurant-domain@v1",
+  "name": "Restaurant domain graph",
+  "nodes": [
+    {
+      "node_id": "__start__",
+      "label": "Start",
+      "kind": "start"
+    },
+    {
+      "node_id": "candidate_gather",
+      "label": "Candidate gather",
+      "kind": "node"
+    },
+    {
+      "node_id": "rerank_and_summarize",
+      "label": "Rerank and summarize",
+      "kind": "node"
+    },
+    {
+      "node_id": "validation_and_calibration",
+      "label": "Validation and calibration",
+      "kind": "node"
+    },
+    {
+      "node_id": "recommendation_result",
+      "label": "Recommendation result",
+      "kind": "node"
+    },
+    {
+      "node_id": "__end__",
+      "label": "End",
+      "kind": "end"
+    }
+  ],
+  "edges": [
+    {
+      "source": "__start__",
+      "target": "candidate_gather",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "candidate_gather",
+      "target": "rerank_and_summarize",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "rerank_and_summarize",
+      "target": "validation_and_calibration",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "validation_and_calibration",
+      "target": "recommendation_result",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "recommendation_result",
+      "target": "__end__",
+      "kind": "normal",
+      "label": null
+    }
+  ]
+}

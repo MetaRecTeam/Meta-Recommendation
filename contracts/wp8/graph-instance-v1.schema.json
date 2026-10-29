@@ -1,0 +1,75 @@
+{
+  "$id": "metarec:wp8/graph-instance-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "One execution of one graph definition inside a trace.",
+  "properties": {
+    "ended_sequence": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Ended Sequence"
+    },
+    "graph_definition_id": {
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*@v[1-9][0-9]*$",
+      "title": "Graph Definition Id",
+      "type": "string"
+    },
+    "graph_instance_id": {
+      "minLength": 1,
+      "title": "Graph Instance Id",
+      "type": "string"
+    },
+    "namespace": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Namespace",
+      "type": "array"
+    },
+    "parent_graph_instance_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parent Graph Instance Id"
+    },
+    "parent_node_run_id": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parent Node Run Id"
+    },
+    "started_sequence": {
+      "minimum": 1,
+      "title": "Started Sequence",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "graph_instance_id",
+    "graph_definition_id",
+    "parent_graph_instance_id",
+    "parent_node_run_id",
+    "namespace",
+    "started_sequence",
+    "ended_sequence"
+  ],
+  "title": "GraphInstance",
+  "type": "object"
+}

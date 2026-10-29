@@ -1,0 +1,1843 @@
+{
+  "$defs": {
+    "ChangedValue": {
+      "additionalProperties": false,
+      "properties": {
+        "after": {
+          "$ref": "#/$defs/SafeValueLevel0",
+          "description": "null, boolean, finite number, string of at most 512 characters, or list/object of at most 50 safe values, nested at most 6 levels"
+        },
+        "before": {
+          "$ref": "#/$defs/SafeValueLevel0",
+          "description": "null, boolean, finite number, string of at most 512 characters, or list/object of at most 50 safe values, nested at most 6 levels"
+        }
+      },
+      "required": [
+        "before",
+        "after"
+      ],
+      "title": "ChangedValue",
+      "type": "object"
+    },
+    "EventMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "attempt": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attempt"
+        },
+        "domain": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Domain"
+        },
+        "llm_attempt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LlmAttempt"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "model": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "task_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Id"
+        },
+        "tool": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tool"
+        },
+        "tool_health": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolHealth"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "tool_scope": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ToolScope"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "title": "EventMetadata",
+      "type": "object"
+    },
+    "ExcludedTool": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "title": "Name",
+          "type": "string"
+        },
+        "reason_code": {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "title": "Reason Code",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "reason_code"
+      ],
+      "title": "ExcludedTool",
+      "type": "object"
+    },
+    "LlmAttempt": {
+      "additionalProperties": false,
+      "description": "WP5 physical attempt. Start-only events leave the outcome fields null.",
+      "properties": {
+        "attempt_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Attempt Id"
+        },
+        "cost_usd": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Cost Usd"
+        },
+        "model_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Model Id"
+        },
+        "outcome": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Outcome"
+        },
+        "policy_leg": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Policy Leg"
+        },
+        "pricing_snapshot_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Pricing Snapshot Id"
+        },
+        "provider_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provider Id"
+        },
+        "provider_price_table_version": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Provider Price Table Version"
+        },
+        "request_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Request Id"
+        },
+        "total_tokens": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Total Tokens"
+        },
+        "validation_status": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Validation Status"
+        }
+      },
+      "required": [
+        "request_id",
+        "attempt_id",
+        "provider_id",
+        "model_id",
+        "policy_leg",
+        "outcome",
+        "validation_status",
+        "total_tokens",
+        "cost_usd",
+        "pricing_snapshot_id",
+        "provider_price_table_version"
+      ],
+      "title": "LlmAttempt",
+      "type": "object"
+    },
+    "Omission": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "maxLength": 512,
+          "title": "Path",
+          "type": "string"
+        },
+        "reason": {
+          "pattern": "^[a-z][a-z0-9_]{0,63}$",
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "reason"
+      ],
+      "title": "Omission",
+      "type": "object"
+    },
+    "PayloadSummary": {
+      "additionalProperties": false,
+      "properties": {
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "item_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Item Count"
+        },
+        "keys": {
+          "items": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "maxItems": 50,
+          "title": "Keys",
+          "type": "array"
+        },
+        "omitted_count": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Omitted Count"
+        },
+        "value_types": {
+          "anyOf": [
+            {
+              "additionalProperties": {
+                "maxLength": 512,
+                "type": "string"
+              },
+              "maxProperties": 50,
+              "propertyNames": {
+                "maxLength": 512
+              },
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Value Types"
+        }
+      },
+      "required": [
+        "keys",
+        "bytes"
+      ],
+      "title": "PayloadSummary",
+      "type": "object"
+    },
+    "RedactionInfo": {
+      "additionalProperties": false,
+      "properties": {
+        "policy_id": {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "title": "Policy Id",
+          "type": "string"
+        },
+        "redacted_paths": {
+          "items": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "maxItems": 50,
+          "title": "Redacted Paths",
+          "type": "array"
+        },
+        "stored_bytes": {
+          "minimum": 0,
+          "title": "Stored Bytes",
+          "type": "integer"
+        },
+        "truncated_paths": {
+          "items": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "maxItems": 50,
+          "title": "Truncated Paths",
+          "type": "array"
+        }
+      },
+      "required": [
+        "policy_id",
+        "redacted_paths",
+        "truncated_paths",
+        "stored_bytes"
+      ],
+      "title": "RedactionInfo",
+      "type": "object"
+    },
+    "SafeError": {
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "title": "Code",
+          "type": "string"
+        },
+        "error_class": {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "title": "Error Class",
+          "type": "string"
+        },
+        "retryable": {
+          "title": "Retryable",
+          "type": "boolean"
+        },
+        "safe_message": {
+          "maxLength": 512,
+          "title": "Safe Message",
+          "type": "string"
+        }
+      },
+      "required": [
+        "code",
+        "error_class",
+        "safe_message",
+        "retryable"
+      ],
+      "title": "SafeError",
+      "type": "object"
+    },
+    "SafeValueLevel0": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number"
+          ]
+        },
+        {
+          "maxLength": 512,
+          "type": "string"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/SafeValueLevel1"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/SafeValueLevel1"
+          },
+          "maxProperties": 50,
+          "propertyNames": {
+            "maxLength": 512
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "SafeValueLevel1": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number"
+          ]
+        },
+        {
+          "maxLength": 512,
+          "type": "string"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/SafeValueLevel2"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/SafeValueLevel2"
+          },
+          "maxProperties": 50,
+          "propertyNames": {
+            "maxLength": 512
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "SafeValueLevel2": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number"
+          ]
+        },
+        {
+          "maxLength": 512,
+          "type": "string"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/SafeValueLevel3"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/SafeValueLevel3"
+          },
+          "maxProperties": 50,
+          "propertyNames": {
+            "maxLength": 512
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "SafeValueLevel3": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number"
+          ]
+        },
+        {
+          "maxLength": 512,
+          "type": "string"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/SafeValueLevel4"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/SafeValueLevel4"
+          },
+          "maxProperties": 50,
+          "propertyNames": {
+            "maxLength": 512
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "SafeValueLevel4": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number"
+          ]
+        },
+        {
+          "maxLength": 512,
+          "type": "string"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/SafeValueLevel5"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/SafeValueLevel5"
+          },
+          "maxProperties": 50,
+          "propertyNames": {
+            "maxLength": 512
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "SafeValueLevel5": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number"
+          ]
+        },
+        {
+          "maxLength": 512,
+          "type": "string"
+        },
+        {
+          "items": {
+            "$ref": "#/$defs/SafeValueLevel6"
+          },
+          "maxItems": 50,
+          "type": "array"
+        },
+        {
+          "additionalProperties": {
+            "$ref": "#/$defs/SafeValueLevel6"
+          },
+          "maxProperties": 50,
+          "propertyNames": {
+            "maxLength": 512
+          },
+          "type": "object"
+        }
+      ]
+    },
+    "SafeValueLevel6": {
+      "anyOf": [
+        {
+          "type": [
+            "null",
+            "boolean",
+            "number"
+          ]
+        },
+        {
+          "maxLength": 512,
+          "type": "string"
+        }
+      ]
+    },
+    "StateDiff": {
+      "additionalProperties": false,
+      "properties": {
+        "added": {
+          "additionalProperties": {
+            "$ref": "#/$defs/SafeValueLevel0",
+            "description": "null, boolean, finite number, string of at most 512 characters, or list/object of at most 50 safe values, nested at most 6 levels"
+          },
+          "maxProperties": 50,
+          "propertyNames": {
+            "maxLength": 512
+          },
+          "title": "Added",
+          "type": "object"
+        },
+        "basis": {
+          "const": "node_input_to_update",
+          "title": "Basis",
+          "type": "string"
+        },
+        "changed": {
+          "additionalProperties": {
+            "$ref": "#/$defs/ChangedValue"
+          },
+          "maxProperties": 50,
+          "propertyNames": {
+            "maxLength": 512
+          },
+          "title": "Changed",
+          "type": "object"
+        },
+        "omitted": {
+          "items": {
+            "$ref": "#/$defs/Omission"
+          },
+          "maxItems": 50,
+          "title": "Omitted",
+          "type": "array"
+        },
+        "removed": {
+          "items": {
+            "maxLength": 512,
+            "type": "string"
+          },
+          "maxItems": 50,
+          "title": "Removed",
+          "type": "array"
+        }
+      },
+      "required": [
+        "basis",
+        "added",
+        "changed",
+        "removed",
+        "omitted"
+      ],
+      "title": "StateDiff",
+      "type": "object"
+    },
+    "ToolHealth": {
+      "additionalProperties": false,
+      "description": "Provider health only; never probe bodies, credentials or quota.",
+      "properties": {
+        "checked_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "(Z|[+-]00:00)$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Checked At"
+        },
+        "expires_at": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "pattern": "(Z|[+-]00:00)$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Expires At"
+        },
+        "provider_id": {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "title": "Provider Id",
+          "type": "string"
+        },
+        "reason_code": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Reason Code"
+        },
+        "state": {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "title": "State",
+          "type": "string"
+        }
+      },
+      "required": [
+        "provider_id",
+        "state",
+        "reason_code",
+        "checked_at",
+        "expires_at"
+      ],
+      "title": "ToolHealth",
+      "type": "object"
+    },
+    "ToolScope": {
+      "additionalProperties": false,
+      "description": "WP7 pre-LLM tool-scope decision.",
+      "properties": {
+        "catalog_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Catalog Id"
+        },
+        "eligible_tool_names": {
+          "items": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "type": "string"
+          },
+          "maxItems": 50,
+          "title": "Eligible Tool Names",
+          "type": "array"
+        },
+        "excluded": {
+          "items": {
+            "$ref": "#/$defs/ExcludedTool"
+          },
+          "maxItems": 50,
+          "title": "Excluded",
+          "type": "array"
+        },
+        "health_snapshot_id": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Health Snapshot Id"
+        },
+        "policy_version": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Policy Version"
+        }
+      },
+      "required": [
+        "catalog_id",
+        "health_snapshot_id",
+        "policy_version",
+        "eligible_tool_names",
+        "excluded"
+      ],
+      "title": "ToolScope",
+      "type": "object"
+    }
+  },
+  "$id": "metarec:wp8/graph-run-event-v1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "graph_start"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "duration_ms": {
+            "type": "null"
+          },
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "type": "null"
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "graph"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "const": "running"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "graph_end"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "type": "null"
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "graph"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "not": {
+              "const": "running"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "node_start"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "duration_ms": {
+            "type": "null"
+          },
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "graph_node"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "const": "running"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "node_end"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "graph_node"
+            ]
+          },
+          "status": {
+            "not": {
+              "const": "running"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "tool_start"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "duration_ms": {
+            "type": "null"
+          },
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "tool"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "const": "running"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "tool_end"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "tool"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "not": {
+              "const": "running"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "llm_start"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "duration_ms": {
+            "type": "null"
+          },
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "llm",
+              "llm_attempt_adapter"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "const": "running"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "llm_end"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "llm",
+              "llm_attempt_adapter"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "not": {
+              "const": "running"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "policy_start"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "duration_ms": {
+            "type": "null"
+          },
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "policy",
+              "tool_scope_adapter"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "const": "running"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "policy_end"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "node_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "policy",
+              "tool_scope_adapter"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "not": {
+              "const": "running"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "error"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "error": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "graph_instance_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "run_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "runnable_type": {
+            "enum": [
+              "graph",
+              "graph_node",
+              "llm",
+              "llm_attempt_adapter",
+              "policy",
+              "tool",
+              "tool_scope_adapter"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          },
+          "status": {
+            "enum": [
+              "cancelled",
+              "error"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "trace_truncated"
+          }
+        },
+        "required": [
+          "event_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "node_id": {
+            "type": "null"
+          },
+          "parent_run_id": {
+            "type": "null"
+          },
+          "run_id": {
+            "type": "null"
+          },
+          "runnable_type": {
+            "enum": [
+              "trace_system"
+            ]
+          },
+          "state_diff": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "event_type": {
+            "const": "error"
+          },
+          "runnable_type": {
+            "not": {
+              "const": "graph"
+            }
+          }
+        },
+        "required": [
+          "event_type",
+          "runnable_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "node_id": {
+            "not": {
+              "type": "null"
+            }
+          },
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "graph_instance_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "graph_instance_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "graph_definition_id": {
+            "not": {
+              "type": "null"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "parent_graph_instance_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "parent_graph_instance_id"
+        ]
+      },
+      "then": {
+        "properties": {
+          "parent_run_id": {
+            "not": {
+              "type": "null"
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metadata": {
+            "properties": {
+              "llm_attempt": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "llm_attempt"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "metadata"
+        ]
+      },
+      "then": {
+        "properties": {
+          "runnable_type": {
+            "enum": [
+              "llm_attempt_adapter"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metadata": {
+            "properties": {
+              "tool_scope": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "tool_scope"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "metadata"
+        ]
+      },
+      "then": {
+        "properties": {
+          "runnable_type": {
+            "enum": [
+              "tool_scope_adapter"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "metadata": {
+            "properties": {
+              "tool_health": {
+                "type": "object"
+              }
+            },
+            "required": [
+              "tool_health"
+            ],
+            "type": "object"
+          }
+        },
+        "required": [
+          "metadata"
+        ]
+      },
+      "then": {
+        "properties": {
+          "runnable_type": {
+            "enum": [
+              "tool",
+              "tool_scope_adapter"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "description": "One accepted trace event. Every key is present; unavailable values are null.",
+  "properties": {
+    "debug_run_id": {
+      "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+      "title": "Debug Run Id",
+      "type": "string"
+    },
+    "duration_ms": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Duration Ms"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/SafeError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "event_id": {
+      "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+      "title": "Event Id",
+      "type": "string"
+    },
+    "event_type": {
+      "enum": [
+        "graph_start",
+        "graph_end",
+        "node_start",
+        "node_end",
+        "tool_start",
+        "tool_end",
+        "llm_start",
+        "llm_end",
+        "policy_start",
+        "policy_end",
+        "error",
+        "trace_truncated"
+      ],
+      "title": "Event Type",
+      "type": "string"
+    },
+    "graph_definition_id": {
+      "anyOf": [
+        {
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*@v[1-9][0-9]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Graph Definition Id"
+    },
+    "graph_instance_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Graph Instance Id"
+    },
+    "input_summary": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PayloadSummary"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "metadata": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EventMetadata"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "monotonic_offset_ms": {
+      "minimum": 0,
+      "title": "Monotonic Offset Ms",
+      "type": "number"
+    },
+    "node_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Node Id"
+    },
+    "output_summary": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/PayloadSummary"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "parent_graph_instance_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parent Graph Instance Id"
+    },
+    "parent_run_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Parent Run Id"
+    },
+    "redaction": {
+      "$ref": "#/$defs/RedactionInfo"
+    },
+    "run_id": {
+      "anyOf": [
+        {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Run Id"
+    },
+    "runnable_type": {
+      "enum": [
+        "graph",
+        "graph_node",
+        "tool",
+        "llm",
+        "policy",
+        "llm_attempt_adapter",
+        "tool_scope_adapter",
+        "trace_system"
+      ],
+      "title": "Runnable Type",
+      "type": "string"
+    },
+    "schema_version": {
+      "const": "graph-run-event/1.0",
+      "title": "Schema Version",
+      "type": "string"
+    },
+    "sequence": {
+      "minimum": 1,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "state_diff": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/StateDiff"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "enum": [
+        "running",
+        "completed",
+        "error",
+        "cancelled",
+        "incomplete"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "timestamp_utc": {
+      "format": "date-time",
+      "pattern": "(Z|[+-]00:00)$",
+      "title": "Timestamp Utc",
+      "type": "string"
+    },
+    "trace_id": {
+      "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+      "title": "Trace Id",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schema_version",
+    "event_id",
+    "trace_id",
+    "debug_run_id",
+    "sequence",
+    "timestamp_utc",
+    "monotonic_offset_ms",
+    "event_type",
+    "status",
+    "graph_definition_id",
+    "graph_instance_id",
+    "parent_graph_instance_id",
+    "node_id",
+    "run_id",
+    "parent_run_id",
+    "runnable_type",
+    "duration_ms",
+    "input_summary",
+    "output_summary",
+    "state_diff",
+    "metadata",
+    "error",
+    "redaction"
+  ],
+  "title": "GraphRunEventV1",
+  "type": "object"
+}

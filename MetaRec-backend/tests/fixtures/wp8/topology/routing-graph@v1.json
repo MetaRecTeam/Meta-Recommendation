@@ -1,0 +1,120 @@
+{
+  "graph_definition_id": "routing-graph@v1",
+  "name": "Routing graph",
+  "nodes": [
+    {
+      "node_id": "__start__",
+      "label": "Start",
+      "kind": "start"
+    },
+    {
+      "node_id": "domain_classification",
+      "label": "Domain classification",
+      "kind": "node"
+    },
+    {
+      "node_id": "retry_domain",
+      "label": "Retry domain",
+      "kind": "node"
+    },
+    {
+      "node_id": "single_domain",
+      "label": "Single domain",
+      "kind": "node"
+    },
+    {
+      "node_id": "multi_domain",
+      "label": "Multi domain",
+      "kind": "node"
+    },
+    {
+      "node_id": "itinerary",
+      "label": "Itinerary",
+      "kind": "node"
+    },
+    {
+      "node_id": "domain_error",
+      "label": "Domain error",
+      "kind": "node"
+    },
+    {
+      "node_id": "__end__",
+      "label": "End",
+      "kind": "end"
+    }
+  ],
+  "edges": [
+    {
+      "source": "__start__",
+      "target": "domain_classification",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "domain_classification",
+      "target": "retry_domain",
+      "kind": "conditional",
+      "label": "retry_domain"
+    },
+    {
+      "source": "domain_classification",
+      "target": "single_domain",
+      "kind": "conditional",
+      "label": "single_domain"
+    },
+    {
+      "source": "domain_classification",
+      "target": "multi_domain",
+      "kind": "conditional",
+      "label": "multi_domain"
+    },
+    {
+      "source": "domain_classification",
+      "target": "itinerary",
+      "kind": "conditional",
+      "label": "itinerary"
+    },
+    {
+      "source": "retry_domain",
+      "target": "single_domain",
+      "kind": "conditional",
+      "label": "single_domain"
+    },
+    {
+      "source": "retry_domain",
+      "target": "multi_domain",
+      "kind": "conditional",
+      "label": "multi_domain"
+    },
+    {
+      "source": "retry_domain",
+      "target": "domain_error",
+      "kind": "conditional",
+      "label": "domain_error"
+    },
+    {
+      "source": "single_domain",
+      "target": "__end__",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "multi_domain",
+      "target": "__end__",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "itinerary",
+      "target": "__end__",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "domain_error",
+      "target": "__end__",
+      "kind": "normal",
+      "label": null
+    }
+  ]
+}

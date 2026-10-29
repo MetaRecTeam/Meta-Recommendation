@@ -1,0 +1,57 @@
+{
+  "graph_definition_id": "task-graph@v1",
+  "name": "Task graph",
+  "nodes": [
+    {
+      "node_id": "__start__",
+      "label": "Start",
+      "kind": "start"
+    },
+    {
+      "node_id": "task_started",
+      "label": "Task started",
+      "kind": "node"
+    },
+    {
+      "node_id": "domain_graph_dispatch",
+      "label": "Domain graph dispatch",
+      "kind": "node"
+    },
+    {
+      "node_id": "result_projection",
+      "label": "Result projection",
+      "kind": "node"
+    },
+    {
+      "node_id": "__end__",
+      "label": "End",
+      "kind": "end"
+    }
+  ],
+  "edges": [
+    {
+      "source": "__start__",
+      "target": "task_started",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "task_started",
+      "target": "domain_graph_dispatch",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "domain_graph_dispatch",
+      "target": "result_projection",
+      "kind": "normal",
+      "label": null
+    },
+    {
+      "source": "result_projection",
+      "target": "__end__",
+      "kind": "normal",
+      "label": null
+    }
+  ]
+}
