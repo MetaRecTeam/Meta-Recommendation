@@ -14,6 +14,33 @@ trace-creation route that builds `TraceContext`, and the paged
 trace-status derivation, the `useGraphTrace` hook and the `TraceSelection`
 context.
 
+## Waiting on you now (from Member A, 2026-10-29)
+
+Full list with reasons in [DECISIONS.md](DECISIONS.md). In short:
+
+1. **Produce the TypeScript types and send them to A (H1, by 20 Dec).** Add
+   the `GraphTraceV1` page model and a `GET …/graph-trace` route (a stub
+   behind the new flag is enough) so the event and topology models reach
+   OpenAPI; run `scripts/export_openapi.py` and `npm run contract:gen`; commit
+   the generated files and tell A.
+2. **Wrap the golden event lists into `GraphTraceV1` pages (H2).** A has
+   generated 10 cases from the real D0 runs in
+   [`tests/fixtures/wp8/golden/`](../../../tests/fixtures/wp8/golden/README.md)
+   — nested routing, the task outliving the request, the itinerary anchor,
+   repeated domain graphs, caught and uncaught failure, cancellation, timeout,
+   truncation and a crash. Each has a manifest with the instances, visited
+   nodes and expected trace status your page needs.
+3. **Confirm the event sub-shapes (H3)** in
+   [`models.py`](../../../langgraph_metarec/wp8_trace/models.py) — you own
+   which values fill them.
+4. **Answer rules R1–R10** in [DECISIONS.md](DECISIONS.md): how cancellation
+   and failure are recorded, where `state_diff` and adapter metadata may
+   appear, who assigns `sequence`, and the trace status for each outcome.
+
+Already available to build on: `GraphRunEventV1` and the topology models,
+JSON Schemas in [`contracts/wp8/`](../../../../contracts/wp8/) that encode the
+event matrix, and `jsonschema` as a dev dependency for schema tests.
+
 ---
 
 ## B1. Safe trace store & API (backend, D1–D3, diff in D5)

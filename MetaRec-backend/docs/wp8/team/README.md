@@ -11,6 +11,8 @@ the views and Member B with most of the visible UI plus the diff.
 | [FRAMEWORK.md](FRAMEWORK.md) | The whole WP8 system: data flow, components, contracts, interfaces, test map |
 | [MEMBER_A.md](MEMBER_A.md) | Member A's features, files, interfaces, done-criteria and schedule |
 | [MEMBER_B.md](MEMBER_B.md) | Member B's features, files, interfaces, done-criteria and schedule |
+| [DECISIONS.md](DECISIONS.md) | Contract decisions both members must agree on, and who is waiting on whom |
+| [member-a/](member-a/ROADMAP.md) | Member A's milestone roadmap and progress tracker |
 
 ## 1. The rule
 
@@ -112,7 +114,33 @@ parallel.
 | D5 | 22 Feb – 7 Mar | Fidelity matrix, 100-pair overhead, no-behaviour-change evidence | Diff engine + diff view, frozen diff fixtures, privacy byte inspection | All acceptance rows evidenced |
 | D6 | 8 – 21 Mar | Backend/runtime chapter, rollback demo | Frontend/privacy chapter, operator guide | Final report 22 Mar, viva |
 
-## 7. Joint responsibilities
+## 7. Branch workflow
+
+`WP8-LangGraph-Recommendation-Trace` on `MetaRecTeam/Meta-Recommendation` is
+the **shared WP8 branch**: the team's "main" for WP8. Only tested work lands
+there, and it is never force-pushed.
+
+1. **One branch per milestone or large feature**, named
+   `wp8/<member>-<milestone>-<topic>`, for example
+   `wp8/a-m3-invocation-helper` or `wp8/b-store-api`.
+2. **Stack the next branch on the previous one** when it builds on unmerged
+   work (`wp8/a-m4-…` branches from `wp8/a-m3-…`); otherwise branch from the
+   shared branch.
+3. **Merge into the shared branch when the work is done and tested**: the full
+   backend suite passes (and the frontend tests, for UI work), the milestone's
+   "done when" check is met, and the other member has reviewed it (§5). A pull
+   request inside `MetaRecTeam/Meta-Recommendation` is the easiest way to get
+   that review.
+4. **Merge stacked branches in order.** Once `m3` is merged, `m4` already
+   contains it and merges cleanly. If `m3` changed during review, rebase the
+   later branch onto the updated shared branch before merging it.
+5. **Pull the other member's work in early.** When the other member merges into
+   the shared branch, merge the shared branch into your current feature
+   branch and fix conflicts there, not at the end.
+6. **Record it.** Each member's tracker notes which branch each milestone is
+   on and when it merged.
+
+## 8. Joint responsibilities
 
 - D1 schemas, golden fixtures, and Python ↔ JSON Schema ↔ OpenAPI ↔ TypeScript parity.
 - The redaction allowlist itself (B implements; both approve which fields are safe).

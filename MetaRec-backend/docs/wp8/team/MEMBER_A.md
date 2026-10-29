@@ -5,6 +5,9 @@ path is drawn. Heavy backend: **A1 Capture & propagation**. Heavy frontend:
 **A2 Live trace explorer**. Read [FRAMEWORK.md](FRAMEWORK.md) first; this page
 assumes its vocabulary and interfaces.
 
+**Build plan and status:** [member-a/ROADMAP.md](member-a/ROADMAP.md) (milestones M1–M13) and
+[member-a/PROGRESS.md](member-a/PROGRESS.md) (tracker).
+
 **You provide** to Member B: draft events in lifecycle order, graph instance
 open/close calls, trace-status derivation, the `useGraphTrace` hook and the
 `TraceSelection` context.
