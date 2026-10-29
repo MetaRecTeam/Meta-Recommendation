@@ -1,0 +1,167 @@
+{
+  "manifest": {
+    "case": "timeout",
+    "description": "The request times out while the intention node waits on the LLM.",
+    "source": {
+      "experiment": "E10_request_timeout",
+      "root_turn": 1,
+      "synthetic": null
+    },
+    "expected_trace_status": "cancelled",
+    "truncated": false,
+    "dropped_event_count": 0,
+    "graph_instances": [
+      {
+        "graph_instance_id": "gi-01",
+        "graph_definition_id": "request-orchestrator@v1",
+        "parent_graph_instance_id": null,
+        "parent_node_run_id": null,
+        "closed": true
+      }
+    ],
+    "visited_nodes_by_instance": {
+      "gi-01": [
+        "intention"
+      ]
+    },
+    "lifecycle_counts": {
+      "error": 2,
+      "graph_start": 1,
+      "node_start": 1
+    },
+    "unmatched_start_run_ids": [],
+    "error_count": 2
+  },
+  "events": [
+    {
+      "schema_version": "graph-run-event/1.0",
+      "event_id": "ev-0001",
+      "trace_id": "trace-timeout",
+      "debug_run_id": "debug-timeout",
+      "sequence": 1,
+      "timestamp_utc": "2026-10-04T00:00:00.010289Z",
+      "monotonic_offset_ms": 0.0,
+      "event_type": "graph_start",
+      "status": "running",
+      "graph_definition_id": "request-orchestrator@v1",
+      "graph_instance_id": "gi-01",
+      "parent_graph_instance_id": null,
+      "node_id": null,
+      "run_id": "run-001",
+      "parent_run_id": null,
+      "runnable_type": "graph",
+      "duration_ms": null,
+      "input_summary": null,
+      "output_summary": null,
+      "state_diff": null,
+      "metadata": null,
+      "error": null,
+      "redaction": {
+        "policy_id": "metarec-debug-safe-v1",
+        "redacted_paths": [],
+        "truncated_paths": [],
+        "stored_bytes": 0
+      }
+    },
+    {
+      "schema_version": "graph-run-event/1.0",
+      "event_id": "ev-0002",
+      "trace_id": "trace-timeout",
+      "debug_run_id": "debug-timeout",
+      "sequence": 2,
+      "timestamp_utc": "2026-10-04T00:00:00.010578Z",
+      "monotonic_offset_ms": 0.289,
+      "event_type": "node_start",
+      "status": "running",
+      "graph_definition_id": "request-orchestrator@v1",
+      "graph_instance_id": "gi-01",
+      "parent_graph_instance_id": null,
+      "node_id": "intention",
+      "run_id": "run-002",
+      "parent_run_id": "run-001",
+      "runnable_type": "graph_node",
+      "duration_ms": null,
+      "input_summary": null,
+      "output_summary": null,
+      "state_diff": null,
+      "metadata": null,
+      "error": null,
+      "redaction": {
+        "policy_id": "metarec-debug-safe-v1",
+        "redacted_paths": [],
+        "truncated_paths": [],
+        "stored_bytes": 0
+      }
+    },
+    {
+      "schema_version": "graph-run-event/1.0",
+      "event_id": "ev-0003",
+      "trace_id": "trace-timeout",
+      "debug_run_id": "debug-timeout",
+      "sequence": 3,
+      "timestamp_utc": "2026-10-04T00:00:00.503128Z",
+      "monotonic_offset_ms": 492.839,
+      "event_type": "error",
+      "status": "cancelled",
+      "graph_definition_id": "request-orchestrator@v1",
+      "graph_instance_id": "gi-01",
+      "parent_graph_instance_id": null,
+      "node_id": "intention",
+      "run_id": "run-002",
+      "parent_run_id": "run-001",
+      "runnable_type": "graph_node",
+      "duration_ms": 492.55,
+      "input_summary": null,
+      "output_summary": null,
+      "state_diff": null,
+      "metadata": null,
+      "error": {
+        "code": "cancelled",
+        "error_class": "CancelledError",
+        "safe_message": "Run was cancelled",
+        "retryable": false
+      },
+      "redaction": {
+        "policy_id": "metarec-debug-safe-v1",
+        "redacted_paths": [],
+        "truncated_paths": [],
+        "stored_bytes": 0
+      }
+    },
+    {
+      "schema_version": "graph-run-event/1.0",
+      "event_id": "ev-0004",
+      "trace_id": "trace-timeout",
+      "debug_run_id": "debug-timeout",
+      "sequence": 4,
+      "timestamp_utc": "2026-10-04T00:00:00.503565Z",
+      "monotonic_offset_ms": 493.276,
+      "event_type": "error",
+      "status": "cancelled",
+      "graph_definition_id": "request-orchestrator@v1",
+      "graph_instance_id": "gi-01",
+      "parent_graph_instance_id": null,
+      "node_id": null,
+      "run_id": "run-001",
+      "parent_run_id": null,
+      "runnable_type": "graph",
+      "duration_ms": 493.276,
+      "input_summary": null,
+      "output_summary": null,
+      "state_diff": null,
+      "metadata": null,
+      "error": {
+        "code": "cancelled",
+        "error_class": "CancelledError",
+        "safe_message": "Run was cancelled",
+        "retryable": false
+      },
+      "redaction": {
+        "policy_id": "metarec-debug-safe-v1",
+        "redacted_paths": [],
+        "truncated_paths": [],
+        "stored_bytes": 0
+      }
+    }
+  ]
+}
