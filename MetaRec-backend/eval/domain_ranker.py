@@ -97,6 +97,7 @@ BOOTSTRAP_SEED = 42
 TARGET_LIFT = 0.03        # frozen decision rule: M2 over B1, NDCG@10
 NON_INFERIORITY = -0.02   # frozen decision rule: lower bound on the complex slice
 TOP_K = 10
+MIN_BASELINE = 0.005      # below this metric value a relative lift is shown as n/a
 DIRECTIONAL_LIFT = 0.05   # the proposal calls a 5% relative lift "directional", not the pass mark
 P95_TARGET_MS = 25.0      # ranker-only p95 for 100 candidates
 # the rule compares M2 with the stronger of B0 and B1 (the proposal's wording); ItemKNN is reported, not part of the rule
@@ -108,8 +109,8 @@ SLICES: List[Tuple[str, str]] = [
     ("warm", "warm (has history)"),
     ("keyword", f"keyword-like (1 to {CUT_WORDS} words of history)"),
     ("complex", f"complex (more than {CUT_WORDS} words of history)"),
-    ("head", "head target (12+ train reviews)"),
-    ("tail", "tail target (fewer than 12 train reviews)"),
+    ("head", "head target ({h}+ train reviews)"),          # {h} is filled with the run's head threshold
+    ("tail", "tail target (fewer than {h} train reviews)"),
     ("no_price", "target price missing"),
 ]
 METRICS = ("recall", "ndcg", "mrr", "gndcg")
@@ -829,11 +830,20 @@ def run_acceptance_tests() -> Dict[str, Any]:
 
 
 def git_commit() -> Optional[str]:
-    try:
-        return subprocess.run(["git", "rev-parse", "--short", "HEAD"], cwd=BACKEND_DIR, capture_output=True,
-                              text=True, timeout=10).stdout.strip() or None
-    except Exception:
+    """The commit the code was run from; '+uncommitted changes' when the code that ran is not what that commit holds,
+    so a report can never point at a commit that lacks the evaluator."""
+    def git(*args: str) -> Optional[str]:
+        try:
+            return subprocess.run(["git", *args], cwd=BACKEND_DIR, capture_output=True, text=True, timeout=30).stdout
+        except Exception:
+            return None
+
+    head = (git("rev-parse", "--short", "HEAD") or "").strip()
+    if not head:
         return None
+    code = ["eval", "langgraph_metarec", "scripts", "tests/wp4"]
+    dirty = (git("status", "--porcelain", "--", *code) or "").strip()
+    return f"{head} + uncommitted changes" if dirty else head
 
 
 def write_per_case(out_dir: Path, data: Dict[str, Any], systems: List[str], grade: Optional[np.ndarray], held: np.ndarray) -> None:
@@ -980,6 +990,7 @@ def render_report(meta: Dict[str, Any], an: Dict[str, Any], systems: List[str], 
 
     L += ["", "## 2. Held-out users, all slices", ""]
     for sl, desc in SLICES:
+        desc = desc.replace("{h}", str(meta["head_threshold"]))
         t = an["table"][sl]
         L += [f"### {desc}: {t['_n_cases']['v']:,} cases, {t['_n_users']['v']:,} users", ""]
         L += [md_table(["System"] + [METRIC_LABELS[m] for m in an["metric_names"]],
@@ -990,9 +1001,15 @@ def render_report(meta: Dict[str, Any], an: Dict[str, Any], systems: List[str], 
         for key, per_slice in an["comparisons"].items():
             base = key.replace("m2_over_", "")
             L += [f"### M2 over {SYSTEM_LABELS[base]}", ""]
+            def cell(sl: str, m: str) -> str:
+                if an["table"][sl][base][m] < MIN_BASELINE:  # a relative lift over almost nothing is not a number worth printing
+                    return f"n/a (baseline {an['table'][sl][base][m]:.4f})"
+                x = per_slice[sl][m]
+                return f"{pc(x['point'], sign=True)} [{pc(x['lo'], sign=True)}, {pc(x['hi'], sign=True)}]"
+
             L += [md_table(["Slice"] + [METRIC_LABELS[m] for m in an["metric_names"]],
-                           [[desc] + [f"{pc(per_slice[sl][m]['point'], sign=True)} [{pc(per_slice[sl][m]['lo'], sign=True)}, {pc(per_slice[sl][m]['hi'], sign=True)}]"
-                                      for m in an["metric_names"]] for sl, desc in SLICES]), ""]
+                           [[desc.replace("{h}", str(meta["head_threshold"]))] + [cell(sl, m) for m in an["metric_names"]]
+                            for sl, desc in SLICES]), ""]
 
     L += ["## 4. Exposure and coverage (held-out users, top 10)", ""]
     L += [md_table(["System", "Head share of top 10", "Mean log(1+reviews)", "Distinct items shown", "Catalogue coverage"],

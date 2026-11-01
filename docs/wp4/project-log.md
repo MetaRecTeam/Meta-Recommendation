@@ -6,7 +6,7 @@ D0 interim report: [`D0-interim-report.md`](D0-interim-report.md) — pipeline t
 This file is the running work log; `D0-interim-report.md` is the deliverable.
 
 **Models:** B0 = existing generic order (`_item_score`). B1 = classical BM25 +
-calibrated popularity (+ CF) — *not started*. M2 = constraint-aware hybrid: hard
+calibrated popularity (built, D2). M2 = constraint-aware hybrid: hard
 eligibility gate → relevance + user affinity + calibrated popularity / head-tail.
 Selected at runtime by `METAREC_PRODUCT_RANKER` (accepts `legacy|domain_v1`, default `legacy`).
 
@@ -17,14 +17,19 @@ ranker (constraints + hybrid scoring + fallback + explanations) · D4 integratio
 latency p50/p95, per-slice).
 
 **Acceptance:** (1) feature-off == B0 fixtures, offline; (2) zero hard-constraint
-violations on the labelled corpus; (3) M2 NDCG@10 > B0/B1 (≥5% rel. lift);
+violations on the labelled corpus; (3) M2 NDCG@10 beats the stronger of B0/B1 under a frozen minimum effect (3%; a 5% relative lift is directional);
 (4) complex-query slice improves, head/tail reported; (5) p95 ≤ 25 ms / 100
 candidates, always a valid fallback.
 
-**Progress vs plan (S1):** W1–4 audit → done for the constraint/price/ID axes
-(this log). W5–8 B0/B1 → B0 reproduced, B1 not started. W9–13 M2 → the hard
-eligibility gate (D3, part 1) is built early and behind the flag; hybrid scoring,
-affinity, head/tail, and the NDCG/latency harness remain.
+**Status on 1 Nov 2026:** D0–D5 are built and pushed on `feat/wp4-constraint-aware-product`.
+D1 data and split, D2 baselines (B0, B1 at BM25 weight 0.25, ItemKNN), D3 M2 (re-tuned weights),
+D4 live integration behind the flag ([`D4-integration.md`](D4-integration.md)) and D5 the
+one-command evaluation ([`D5-evaluation.md`](D5-evaluation.md)). Dev-set result (held-out users): M2 over
+B1 NDCG@10 +0.81% (95% interval +0.69% to +0.94%), so the 3% minimum effect is **not met**; complex-query
+slice +2.91%; 0 of 52 labelled violators surfaced (B0 52 of 52); ranker p95 about 9 ms for 100 candidates.
+Still to do: the sealed test split (one run, at the very end, weights unchanged), a live SerpApi smoke
+test (needs a key), the Final Report (16 Nov) and the demo. The sections below are the dated log of the
+D0 and D3-part-1 work and are kept as written, so their "next steps" lists are history, not the plan.
 
 ## Baseline
 

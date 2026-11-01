@@ -16,7 +16,7 @@ and the slice labels. The report is computed from that record, so any table can 
 | File | Content | In git |
 |---|---|---|
 | `eval/domain_ranker.py` | the evaluator | yes |
-| `tests/wp4/test_d5_evaluator.py` | 41 tests, no fixture file needed | yes |
+| `tests/wp4/test_d5_evaluator.py` | 44 tests, no fixture file needed | yes |
 | `artifacts/wp4_d5_dev/report.md`, `report.json` | the dev-set report | yes |
 | `artifacts/*/per_case.csv`, `per_case.npz` | per-case artifacts (rank per system, top 10 as candidate positions, slice labels, retrieved flag, valid-top-10 flag) | no (large; reproducible from the fixture) |
 
@@ -73,7 +73,8 @@ the past is train plus dev, and every user is scored (nothing was tuned on it).
 * **Latency (idle machine, Intel64 Family 6 Model 140, 8 logical CPUs, 15.7 GB):** M2 p95 9.4 ms on 500 dev cases; the live
   ranker on 100 provider-shaped candidates p95 4.1 ms. Target 25 ms.
 * **Acceptance tests:** the four pytest files pass (153 tests).
-* **Not run:** the live smoke test (no key given), and the sealed test split.
+* **Not run against the real provider:** the live smoke test (no key given). Its code path is exercised in
+  the tests against a stub provider, so it will not fail on a typo at the demo. The sealed test split is untouched.
 
 Reading a negative result honestly: the offline cases have no stated budget, brand or model, so the part of M2
 that is new (the hard constraints) cannot show up in the accuracy numbers; it shows up in §6. The accuracy gain
@@ -91,6 +92,10 @@ re-tuned for the final run.
   `eval/checksums.sha256`.
 
 ## Limits
+
+* B1's BM25 weight (0.25) was chosen on all development users, M2's weights on the 1 in 10 tuning users only.
+  This favours B1 slightly, so the comparison is, if anything, conservative for M2.
+* The report names the commit it ran from and adds "+ uncommitted changes" if the code differed from it.
 
 * "Provider candidate recall" is 100% by construction offline; it checks the fixture, not any provider.
 * Hardware is declared from the machine that ran the report; rerun on the demo machine if it differs.

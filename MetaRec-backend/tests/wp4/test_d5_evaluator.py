@@ -505,6 +505,67 @@ def test_the_live_smoke_test_is_recorded_as_not_run_without_a_key_or_without_the
     assert off["ran"] is False and "SERPAPI_KEY" in off["reason"]
 
 
+def test_the_live_smoke_path_runs_end_to_end_against_a_stub_provider(monkeypatch):
+    """The live smoke test is optional and needs a key, so its code would otherwise never run before the demo."""
+    from langgraph_metarec import tool_registry as TR
+    from langgraph_metarec.tool_registry import ToolRegistry, ToolSpec
+    from tests.wp4.dataset import load_cases
+
+    pools = {c.query: c.pool for c in load_cases()}
+
+    def pool_for(params):
+        # the graph appends terms to the search text ("... Corsair < 120 USD"), so match on the start of it
+        text = (params or {}).get("query") or ""
+        return next(pool for query, pool in pools.items() if text.startswith(query))
+
+    def stub_registry():
+        registry = ToolRegistry()
+        registry.register(ToolSpec(
+            name="amazon.product.search", domain="product", tags={"#thing", "#product", "#shopping"},
+            input_schema={"type": "object"}, output_schema={"type": "array"},
+            adapter=lambda params: list(pool_for(params)),
+        ))
+        return registry
+
+    monkeypatch.setenv("SERPAPI_KEY", "not-a-real-key")  # present, but the stub registry never uses the network
+    monkeypatch.setattr(TR, "build_default_tool_registry", stub_registry)
+    out = D.live_smoke(True)
+    assert out["ran"] is True and len(out["rows"]) == 2 * D.SMOKE_QUERIES
+    assert {r["ranker"] for r in out["rows"]} == {"legacy", "domain_v1"}
+    assert all(0 < r["returned"] <= 10 for r in out["rows"])
+    assert all(r["violators_by_checker"] == 0 and not r["fell_back"] for r in out["rows"] if r["ranker"] == "domain_v1")
+    legacy_violators = sum(r["violators_by_checker"] for r in out["rows"] if r["ranker"] == "legacy")
+    assert legacy_violators > 0, "the unfiltered order leaks violators on these searches, which is what the filter removes"
+
+
+def test_the_report_names_the_commit_and_says_when_the_code_that_ran_was_not_committed(monkeypatch):
+    def fake_run(cmd, **_):
+        if cmd[1] == "rev-parse":
+            return type("R", (), {"stdout": "abc1234\n"})()
+        return type("R", (), {"stdout": state["porcelain"]})()
+
+    state = {"porcelain": ""}
+    monkeypatch.setattr(D.subprocess, "run", fake_run)
+    assert D.git_commit() == "abc1234"
+    state["porcelain"] = "?? eval/domain_ranker.py\n"
+    assert D.git_commit() == "abc1234 + uncommitted changes"
+
+
+def test_slice_labels_follow_the_run_s_head_threshold_and_a_lift_over_almost_nothing_is_not_printed():
+    users = _held_users(60)
+    n = len(users)
+    data = _analysis_data([2] * n, [5] * n, [60] * n, users, [100] * n)  # an extra system that never hits
+    data["head_threshold"] = 37
+    an = D.analyse(data, ["b0_reviews", "b1", "m2"], "dev", None, 20)
+    meta = {"split": "dev", "fixture": "f.jsonl", "fixture_check": {"sha256": "ab" * 32, "verified": True}, "draws": 20,
+            "head_threshold": 37, "git": "abc1234", "started": "now", "elapsed_s": 1, "limit": None,
+            "hardware": {"processor": "x"}}
+    text = D.render_report(meta, an, ["b0_reviews", "b1", "m2"], None, None, {"ran": False, "reason": "x"})
+    assert "head target (37+ train reviews)" in text and "tail target (fewer than 37 train reviews)" in text
+    assert "12+" not in text
+    assert "n/a (baseline 0.0000)" in text, "M2 over a baseline that never hits would otherwise print an infinite lift"
+
+
 def test_the_report_renders_for_a_partial_run_and_says_so():
     users = [u for u in range(1, 200) if u % 10 != 0][:60]
     users = [u for u in users for _ in range(4)]

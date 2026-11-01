@@ -1,5 +1,10 @@
 # WP4: constraint-aware product ranking — M2 hard-eligibility gate (behind flag)
 
+> **Update, 1 Nov 2026.** This draft describes the first slice only. The branch now also carries D1 to D5:
+> the frozen data and split, the baselines, the full M2 ranker, the live integration
+> ([`D4-integration.md`](D4-integration.md)) and the one-command evaluation
+> ([`D5-evaluation.md`](D5-evaluation.md)). Rewrite this description from those two documents before it is used.
+
 Draft. First slice of WP4 (Constraint-Aware Product Recommendation,
 [proposal](https://github.com/Hanny658/FYP26-Proposals/tree/main/WP4-product-recommendation)).
 Everything here is **off by default** — `METAREC_PRODUCT_RANKER` defaults to `legacy`
