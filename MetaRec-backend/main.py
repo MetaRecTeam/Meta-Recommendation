@@ -126,6 +126,11 @@ async def _seed_admin_user_from_env() -> None:
 
 @asynccontextmanager
 async def _lifespan(_app: "FastAPI"):
+    # WP4: METAREC_PRODUCT_RANKER accepts exactly legacy|domain_v1; anything else stops startup
+    # instead of silently running the wrong product ranker.
+    from langgraph_metarec.product_ranker_live import validate_product_ranker_setting
+
+    validate_product_ranker_setting()
     await _seed_admin_user_from_env()
     await _promote_admins_from_allowlist()
     yield
@@ -1071,7 +1076,14 @@ async def process_user_request(query_data: ProcessRequestAPI, request: Request):
 # them; stripping at the API boundary keeps them out of responses AND out of the
 # conversation message metadata the client persists from a result. The durable result
 # store keeps full detail for admin/debug.
-_INTERNAL_METADATA_KEYS = ("executions", "plan_calls", "selected_tools", "skipped_tools", "progress_events")
+_INTERNAL_METADATA_KEYS = (
+    "executions",
+    "plan_calls",
+    "selected_tools",
+    "skipped_tools",
+    "progress_events",
+    "product_ranker",  # WP4 D4: scores, components and reason codes stay server-side
+)
 
 
 def client_safe_metadata(metadata: Optional[Dict[str, Any]]) -> Optional[Dict[str, Any]]:

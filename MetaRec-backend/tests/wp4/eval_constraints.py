@@ -74,6 +74,9 @@ class CaseResult:
     first_violator_rank: Optional[int]
     constraint_filter: Optional[Dict[str, Any]] = None
     label_checker_disagreements: List[str] = field(default_factory=list)
+    # compliant items the strict missing-price policy removes on purpose (a budget is
+    # stated and the price is unknown): they are not mistakes of the gate
+    policy_excluded: int = 0
 
     @property
     def leaked(self) -> int:
@@ -118,6 +121,12 @@ async def _run_case(case: Case) -> CaseResult:
             disagreements.append(f"{title!r}: label={human} checker={checker}")
 
     pool_violators = len(case.pool_violator_titles)
+    ranker_meta = result.metadata.get("product_ranker") or {}
+    policy_excluded = sum(
+        1
+        for e in ranker_meta.get("excluded_detail", [])
+        if "UNKNOWN_PRICE_STRICT_MODE" in e.get("reason_codes", []) and not labels.get(e.get("title") or "", [])
+    )
     return CaseResult(
         id=case.id,
         surfaced_titles=surfaced_titles,
@@ -129,6 +138,7 @@ async def _run_case(case: Case) -> CaseResult:
         first_violator_rank=first_violator_rank,
         constraint_filter=result.metadata.get("constraint_filter"),
         label_checker_disagreements=disagreements,
+        policy_excluded=policy_excluded,
     )
 
 
@@ -154,7 +164,7 @@ class Report:
 
     @property
     def total_compliant_retainable(self) -> int:
-        return sum(min(c.compliant_available, 10) for c in self.cases)
+        return sum(min(c.compliant_available - c.policy_excluded, 10) for c in self.cases)
 
     @property
     def total_compliant_surfaced(self) -> int:
@@ -174,7 +184,7 @@ class Report:
             "-" * width,
         ]
         for c in self.cases:
-            avail = min(c.compliant_available, 10)
+            avail = min(c.compliant_available - c.policy_excluded, 10)
             cf = c.constraint_filter or {}
             if cf.get("exhausted"):
                 note = "EXHAUSTED (nothing within budget)"
@@ -194,6 +204,8 @@ class Report:
             f"hard-constraint violators surfaced: {self.total_leaked}/{self.total_pool_violators}  "
             f"(leak rate {self.leak_rate:.0%})",
             f"compliant items dropped by mistake: {self.false_drops}",
+            f"compliant items excluded on purpose by the missing-price policy: "
+            f"{sum(c.policy_excluded for c in self.cases)}",
             f"cases with a violator in the top 3: {self.cases_with_top3_violation}/{len(self.cases)}",
         ]
         drift = [d for c in self.cases for d in c.label_checker_disagreements]

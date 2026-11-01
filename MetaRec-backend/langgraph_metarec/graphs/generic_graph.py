@@ -6,12 +6,13 @@ import inspect
 import math
 import os
 from dataclasses import dataclass, field
-from typing import Any, Awaitable, Callable, Dict, Iterable, List, Optional, Set, TypedDict
+from typing import Any, Awaitable, Callable, Dict, Iterable, List, Optional, Set, Tuple, TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
 from langgraph_metarec.genres import detect_genres_in_text
-from langgraph_metarec.product_constraints import apply_hard_constraints, resolve_constraints
+from langgraph_metarec.product_constraints import resolve_constraints
+from langgraph_metarec.product_ranker_live import asin_of, candidate_id, rank_live
 from langgraph_metarec.tool_registry import DEFAULT_TOOL_REGISTRY, ToolRegistry
 
 
@@ -58,6 +59,7 @@ class GenericRuntimeState(TypedDict, total=False):
     gather_iterations: int
     candidate_count: int
     constraint_filter: Optional[Dict[str, Any]]
+    product_ranker: Optional[Dict[str, Any]]
 
 
 @dataclass
@@ -74,6 +76,13 @@ class GenericGraphAdapters:
     tool_registry: ToolRegistry = field(default_factory=lambda: DEFAULT_TOOL_REGISTRY)
     # Optional LLM-backed reasoner for the ReAct gather loop; None -> deterministic.
     reasoner: Optional[GatherReasoner] = None
+    # WP4 D4. Loads the signed-in user's product interactions for the live ranker, as
+    # (ItemInteractionV1 dicts, content events). It is only called when
+    # METAREC_PRODUCT_RANKER=domain_v1, so the legacy path never touches the database.
+    ranker_history: Optional[Callable[[], Awaitable[Tuple[List[Dict[str, Any]], List[Any]]]]] = None
+    # Tests inject a scorer or a timeout here; production leaves both at their defaults.
+    ranker_scorer: Optional[Callable[..., Any]] = None
+    ranker_timeout_s: Optional[float] = None
 
 
 async def _emit(
@@ -200,7 +209,11 @@ def normalize_tool_items(tool: str, output: Any, domain: str) -> List[Dict[str, 
                     source="Amazon",
                     tags=[tag for tag in [raw_item.get("brand"), raw_item.get("price")] if tag],
                     why="Matched the product search query.",
-                    item_id=raw_item.get("product_id") or raw_item.get("asin"),
+                    # ASIN-first identity belongs to the constraint-aware path only. With the
+                    # flag off the id stays the title hash, so saved items keep matching and the
+                    # output is identical to B0.
+                    item_id=raw_item.get("product_id")
+                    or (asin_of(raw_item) if _product_ranker() != "legacy" else None),
                 )
             )
         elif tool == "hardcover.book.search":
@@ -776,6 +789,73 @@ async def _safe_propose(reasoner: GatherReasoner, context: Dict[str, Any]) -> Op
     return action if isinstance(action, dict) else None
 
 
+async def _rank_product_with_m2(
+    state: GenericRuntimeState,
+    ranked: List[Dict[str, Any]],
+    errors: List[str],
+    adapters: "GenericGraphAdapters",
+) -> List[Dict[str, Any]]:
+    """The WP4 D4 seam: M2 replaces the sort, after normalisation and de-duplication and
+    before the top-10 cut. It only reorders or removes the items it is given. Any failure
+    inside it returns the original order (still behind the hard-constraint gate), so a
+    ranker problem never breaks the request."""
+    query = state.get("query", "")
+    preferences = state.get("preferences", {})
+    constraints = resolve_constraints(query, preferences)
+    interactions: List[Dict[str, Any]] = []
+    events: List[Any] = []
+    warnings: List[str] = []
+    if adapters.ranker_history is not None:
+        try:
+            interactions, events = await adapters.ranker_history()
+        except Exception:  # an unreadable history is a cold start, never an error
+            warnings.append("HISTORY_UNAVAILABLE")
+    try:
+        outcome = rank_live(
+            items=ranked,
+            query=query,
+            preferences=preferences,
+            constraints=constraints,
+            interactions=interactions,
+            events=events,
+            timeout_s=adapters.ranker_timeout_s,
+            scorer=adapters.ranker_scorer,
+        )
+    except Exception:  # the contract or the gate itself failed: original order, unfiltered, flagged
+        state["product_ranker"] = {
+            "mode": "domain_v1",
+            "fell_back": True,
+            "warnings": ["FALLBACK_ERROR", *warnings],
+        }
+        state["constraint_filter"] = None
+        return ranked
+
+    result = outcome.result
+    titles = {candidate_id(i): i.get("title") for i in ranked}
+    state["constraint_filter"] = {
+        "dropped": len(outcome.excluded_codes),
+        "dropped_reasons": sorted({c for codes in outcome.excluded_codes.values() for c in codes}),
+        "relaxed": [],
+        "exhausted": outcome.exhausted,
+    }
+    state["product_ranker"] = {
+        "mode": "domain_v1",
+        "fell_back": outcome.fell_back,
+        **result.model_dump(),
+        "warnings": [*result.warnings, *warnings],
+        "excluded_detail": [
+            {"item_id": cid, "title": titles.get(cid), "reason_codes": codes}
+            for cid, codes in outcome.excluded_codes.items()
+        ],
+    }
+    if outcome.exhausted:
+        errors.append(
+            "No products matched the stated hard constraints "
+            "(e.g. every candidate was over budget)."
+        )
+    return outcome.items
+
+
 def build_generic_domain_graph(
     *,
     adapters: Optional[GenericGraphAdapters] = None,
@@ -917,15 +997,7 @@ def build_generic_domain_graph(
         # Default "legacy" leaves ordering byte-identical to the pre-WP4 baseline
         # (acceptance criterion 1: feature-off == B0, no network needed).
         if domain == "product" and _product_ranker() != "legacy":
-            constraints = resolve_constraints(state.get("query", ""), state.get("preferences", {}))
-            outcome = apply_hard_constraints(ranked, constraints)
-            state["constraint_filter"] = outcome.to_metadata()
-            ranked = outcome.kept
-            if outcome.exhausted:
-                errors.append(
-                    "No products matched the stated hard constraints "
-                    "(e.g. every candidate was over budget)."
-                )
+            ranked = await _rank_product_with_m2(state, ranked, errors, adapters)
         state["items"] = ranked[:10]
         state["errors"] = errors
         await _emit(
@@ -954,6 +1026,7 @@ def build_generic_domain_graph(
             "gather_iterations": state.get("gather_iterations", 0),
             "candidate_count": state.get("candidate_count", 0),
             "constraint_filter": state.get("constraint_filter"),
+            "product_ranker": state.get("product_ranker"),
         }
         await _emit(
             state,

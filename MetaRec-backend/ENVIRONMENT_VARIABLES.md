@@ -21,13 +21,19 @@
 
 - product ranking (WP4)
     - `METAREC_PRODUCT_RANKER` (accepts exactly `legacy|domain_v1`, default
-      `legacy`; an unrecognised value falls back to `legacy`) — selects the
+      `legacy`; any other value stops the service at startup) — selects the
       `product` domain ranker: `legacy` = pre-WP4 generic order (rating,
-      reviews, popularity), byte-identical to B0, no network/ranker access;
-      `domain_v1` (M2) = constraint-aware — enforces the stated hard
-      constraints (budget, brand, category, model) before ranking and drops or
-      explains violations. Flag name and values per the WP4 proposal's runtime
-      contract.
+      reviews, popularity), byte-identical to B0, with no ranker, history or
+      ASIN access; `domain_v1` (M2) = constraint-aware — enforces the stated
+      hard constraints (budget, brand, category, model) and the missing-price
+      policy before scoring, ranks the survivors with the six M2 components,
+      uses the signed-in user's saved/bought/hidden items as affinity when
+      they exist, identifies products by ASIN, and falls back to the original
+      order (still behind the hard gate) on any ranker failure. Scores and
+      reason codes go to the server-side result metadata (`product_ranker`),
+      never to a public field. See `docs/wp4/D4-integration.md`.
+    - `METAREC_PRODUCT_RANKER_TIMEOUT_S` (default `1.0`) — how long the live
+      ranker may take before the request falls back to the original order.
 
 - for live task-progress streaming (`GET /api/status/{task_id}/stream`, used in `main.py`)
     - The frontend watches in-flight recommendation tasks over Server-Sent Events

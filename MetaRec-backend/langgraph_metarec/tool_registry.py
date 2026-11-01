@@ -923,6 +923,9 @@ def _amazon_product_search_adapter(parameters: Dict[str, Any]) -> Any:
                 "price": item.get("price"),
                 "thumbnail": item.get("thumbnail"),
                 "source": "amazon",
+                # WP4: kept for ASIN-first identity. Only the constraint-aware path uses it, so
+                # the legacy ids (title hash) and output do not change.
+                "asin": item.get("asin"),
             }
         )
     return compact_tool_output("amazon.product.search", items)
