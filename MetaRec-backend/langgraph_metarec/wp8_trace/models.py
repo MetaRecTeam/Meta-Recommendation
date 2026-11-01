@@ -458,3 +458,137 @@ def contract_json_schema(model: type) -> Dict[str, Any]:
     if found:
         schema.setdefault("$defs", {}).update(_safe_value_defs())
     return schema
+
+
+# ---------------------------------------------------------------------------
+# GraphTraceConfigV1 and GraphTraceV1 (Member B)
+# ---------------------------------------------------------------------------
+
+# Hard caps from the WP8 brief. A request may ask for less, never more.
+MAX_EVENTS = 5_000
+MAX_EVENT_BYTES = 16_384
+MAX_TRACE_BYTES = 2_097_152
+MAX_RETENTION_DAYS = 30
+DEFAULT_RETENTION_DAYS = 7
+
+# One response page.
+MAX_PAGE_EVENTS = 500
+DEFAULT_PAGE_EVENTS = 200
+MAX_PAGE_BYTES = 512 * 1024
+
+TraceStatus = Literal["running", "completed", "failed", "cancelled", "incomplete"]
+
+CorrelationId = Annotated[str, Field(pattern=r"^[A-Za-z0-9._-]{1,64}$")]
+
+
+class CaptureOptions(_Strict):
+    """All five keys are required; the brief allows no partial capture."""
+
+    graph_lifecycle: bool
+    node_lifecycle: bool
+    nested_graphs: bool
+    child_events: Literal["none", "tool_llm_metadata"]
+    state_diff: Literal["none", "allowlisted_node_update"]
+
+
+class TraceLimits(_Strict):
+    """Requested limits. Each is positive and at most the hard cap."""
+
+    max_events: int = Field(ge=1, le=MAX_EVENTS)
+    max_event_bytes: int = Field(ge=1, le=MAX_EVENT_BYTES)
+    max_trace_bytes: int = Field(ge=1, le=MAX_TRACE_BYTES)
+    max_string_chars: int = Field(ge=1, le=MAX_STRING_CHARS)
+    max_collection_items: int = Field(ge=1, le=MAX_COLLECTION_ITEMS)
+    max_nesting_depth: int = Field(ge=1, le=MAX_NESTING_DEPTH)
+
+
+class TraceCorrelation(_Strict):
+    """Test labels only. Never user or conversation text."""
+
+    fixture_id: Optional[CorrelationId] = None
+    case_id: Optional[CorrelationId] = None
+
+
+class GraphTraceConfigV1(_Strict):
+    """Opt-in capture request. `enabled` cannot override the server flag."""
+
+    schema_version: Literal["graph-trace-config/1.0"]
+    enabled: bool
+    capture: CaptureOptions
+    redaction_policy_id: SafeId
+    limits: TraceLimits
+    retention_days: int = Field(ge=1, le=MAX_RETENTION_DAYS)
+    correlation: Optional[TraceCorrelation] = None
+
+
+class TraceConfigSnapshot(_Strict):
+    """What was actually applied, echoed back on every page."""
+
+    redaction_policy_id: SafeId
+    capture: CaptureOptions
+    limits: TraceLimits
+    retention_days: int = Field(ge=1, le=MAX_RETENTION_DAYS)
+
+
+class TraceTopology(_Strict):
+    """Static definitions (what could run) and dynamic instances (what did)."""
+
+    definitions: List[GraphDefinition]
+    instances: List[GraphInstance]
+
+
+class EventWindow(_Strict):
+    """Where this page sits in the trace, and how to ask for the next one."""
+
+    after_sequence: int = Field(ge=0)
+    returned: int = Field(ge=0)
+    next_after_sequence: int = Field(ge=0)
+    has_more: bool
+
+
+class TraceSummary(_Strict):
+    """Counts for the whole trace, not just the returned page."""
+
+    started_at: UtcDatetime
+    completed_at: Optional[UtcDatetime]
+    duration_ms: Optional[float] = Field(ge=0, allow_inf_nan=False)
+    visited_nodes: int = Field(ge=0)
+    error_count: int = Field(ge=0)
+
+
+class RedactionSummary(_Strict):
+    """Whole-trace redaction counts, so a reader knows what is withheld."""
+
+    redacted_value_count: int = Field(ge=0)
+    truncated_value_count: int = Field(ge=0)
+
+
+class GraphTraceV1(_Strict):
+    """One page of a trace. The same shape serves an in-progress and a final read."""
+
+    schema_version: Literal["graph-trace/1.0"]
+    trace_id: SafeId
+    debug_run_id: SafeId
+    status: TraceStatus
+    config_snapshot: TraceConfigSnapshot
+    topology: TraceTopology
+    events: List[GraphRunEventV1]
+    event_window: EventWindow
+    summary: TraceSummary
+    redaction_summary: RedactionSummary
+    truncated: bool
+    dropped_event_count: int = Field(ge=0)
+    created_at: UtcDatetime
+    expires_at: UtcDatetime
+
+    @model_validator(mode="after")
+    def _check_window(self) -> "GraphTraceV1":
+        if self.event_window.returned != len(self.events):
+            raise ValueError("event_window.returned must match the number of events on the page")
+        if len(self.events) > MAX_PAGE_EVENTS:
+            raise ValueError(f"a page carries at most {MAX_PAGE_EVENTS} events")
+        if self.event_window.next_after_sequence < self.event_window.after_sequence:
+            raise ValueError("next_after_sequence may not move backwards")
+        if self.expires_at <= self.created_at:
+            raise ValueError("expires_at must be after created_at")
+        return self
