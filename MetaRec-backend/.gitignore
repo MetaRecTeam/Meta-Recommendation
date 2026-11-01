@@ -11,3 +11,9 @@ data/wp4/processed/split/*.tsv
 # frozen D1 data with a fixed seed, so only the generator script is tracked.
 eval/*.jsonl
 eval/*.npy
+
+# WP4 D5 evaluator output (python -m eval.domain_ranker): the per-case files are large and reproduce from the
+# fixed fixture, so only report.md and report.json are tracked.
+artifacts/*/per_case.csv
+artifacts/*/per_case.npz
+artifacts/*.log

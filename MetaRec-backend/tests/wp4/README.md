@@ -17,6 +17,7 @@ dataset and the end-to-end evaluation.
 | `eval_constraints.py` | runs every case through the real graph (fake search adapter), prints B1; `--baseline` prints B0. |
 | `test_wp4_baseline.py` | acceptance tests: no leak, no false drops, all-violating → empty, label/checker consistency. |
 | `test_d4_live_ranker.py` | D4: the flag, the contracts, feature-off equality, constraints, currency, ASIN ids, fallback, history, projection. No network, database or key. |
+| `test_d5_evaluator.py` | D5: the evaluator in `eval/domain_ranker.py`: the sealed-test-split guard, slices, bootstrap, decision rule and the scoring pass on a synthetic catalogue. No fixture file needed. |
 
 ## Run
 
@@ -25,6 +26,12 @@ dataset and the end-to-end evaluation.
 python -m tests.wp4.eval_constraints             # B1 report (filter on)
 python -m tests.wp4.eval_constraints --baseline  # B0 report (no filter)
 python -m pytest tests/wp4/ tests/test_product_constraints.py -q
+```
+
+The D5 evaluation over the dev cases (about half an hour, needs `eval/product_dev_v1.jsonl`; see `docs/wp4/D5-evaluation.md`):
+
+```bash
+python -m eval.domain_ranker --domain product --fixture eval/product_dev_v1.jsonl --systems generic classical domain_v1 --out artifacts/wp4_d5_dev
 ```
 
 ## Adding a case
