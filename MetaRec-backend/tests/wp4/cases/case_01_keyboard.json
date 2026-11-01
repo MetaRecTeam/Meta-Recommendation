@@ -1,0 +1,88 @@
+{
+  "id": "case_01_keyboard",
+  "query": "recommend me a quiet mechanical keyboard under $120 for Mac",
+  "brand_followup": "Corsair",
+  "preferences": {
+    "product": "mechanical keyboard",
+    "budget": "< 120 USD",
+    "category": "mechanical keyboard",
+    "brand": "Corsair",
+    "use_case": "Mac"
+  },
+  "hard_constraints": {
+    "budget_max": 120,
+    "currency": "USD",
+    "category_terms": ["mechanical"],
+    "category_exclude_terms": ["membrane"]
+  },
+  "soft_constraints": ["quiet", "mac-compatible"],
+  "notes": "First-hand B0 capture, 28 Aug 2026, commit 9c09346, LLM openai/gpt-oss-20b via Groq. Log recorded 9 results; 6 are transcribed here with prices. Complete to 9 from the raw SerpApi capture when available. SerpApi amazon results frequently omit `brand`; titles are the reliable signal.",
+  "candidates": [
+    {
+      "title": "Corsair K65 PLUS WIRELESS RGB 75% Mechanical Gaming Keyboard",
+      "brand": "Corsair",
+      "price": "$129.99",
+      "rating": 4.5,
+      "reviews": 1180,
+      "link": "https://www.amazon.com/dp/B0CV4C3JJ8",
+      "thumbnail": "https://m.media-amazon.com/images/I/k65plus.jpg",
+      "source": "amazon",
+      "expect_violations": ["budget"]
+    },
+    {
+      "title": "Corsair K100 AIR WIRELESS RGB Ultra-Thin Mechanical Gaming Keyboard",
+      "brand": "Corsair",
+      "price": "$186.03",
+      "rating": 4.6,
+      "reviews": 2450,
+      "link": "https://www.amazon.com/dp/B09Y5C6NF3",
+      "thumbnail": "https://m.media-amazon.com/images/I/k100air.jpg",
+      "source": "amazon",
+      "expect_violations": ["budget"]
+    },
+    {
+      "title": "Corsair K55 CORE RGB Membrane Wired Gaming Keyboard",
+      "brand": "Corsair",
+      "price": "$39.99",
+      "rating": 4.4,
+      "reviews": 3100,
+      "link": "https://www.amazon.com/dp/B0C9X2W7RT",
+      "thumbnail": "https://m.media-amazon.com/images/I/k55core.jpg",
+      "source": "amazon",
+      "expect_violations": ["category"]
+    },
+    {
+      "title": "Corsair K70 CORE TKL Wired Mechanical Gaming Keyboard",
+      "brand": "Corsair",
+      "price": "$89.99",
+      "rating": 4.7,
+      "reviews": 640,
+      "link": "https://www.amazon.com/dp/B0CT2WZ8YV",
+      "thumbnail": "https://m.media-amazon.com/images/I/k70coretkl.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Corsair K70 CORE RGB Mechanical Gaming Keyboard with Palmrest",
+      "brand": "Corsair",
+      "price": "$109.99",
+      "rating": 4.7,
+      "reviews": 1520,
+      "link": "https://www.amazon.com/dp/B0CGYHQ9VN",
+      "thumbnail": "https://m.media-amazon.com/images/I/k70core.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Corsair K65 PLUS WIRELESS 75% RGB Mechanical Gaming Keyboard (Renewed)",
+      "brand": "Corsair",
+      "price": "$69.99",
+      "rating": 4.2,
+      "reviews": 95,
+      "link": "https://www.amazon.com/dp/B0CV4C3JJ8-renewed",
+      "thumbnail": "https://m.media-amazon.com/images/I/k65plusrenewed.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}

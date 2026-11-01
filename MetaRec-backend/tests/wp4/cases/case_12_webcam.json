@@ -1,0 +1,135 @@
+{
+  "id": "case_12_webcam",
+  "query": "Logitech 1080p webcam under 50 USD",
+  "preferences": {
+    "product": "webcam",
+    "budget": "< 50 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 50,
+    "currency": "USD",
+    "category_terms": [
+      "webcam"
+    ],
+    "require_terms": [
+      "1080p"
+    ]
+  },
+  "soft_constraints": [
+    "autofocus",
+    "USB-C"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. LEAKY - brand-include + budget: query asked for Logitech; every result IS a Logitech line (Brio / C920 / Pro Stream) but SerpApi returns `brand: null` on most, so brand_in cannot be machine-checked - hand-verified. #5/#6 (C920x/C920S) are $59.99, over the $50 ceiling.",
+  "candidates": [
+    {
+      "title": "Brio 101 Full HD 1080p Webcam for Streaming and Meetings - Black | 1080p with auto-light correction, built-in mic, privacy shutter, USB-A, compatible with Teams, Google Meet, Zoom and more",
+      "brand": "Logitech",
+      "price": "$24.99",
+      "rating": 4.4,
+      "reviews": 7600,
+      "link": "https://www.amazon.com/Logitech-Webcam-Meetings-Streaming-Built/dp/B0BXGFFSL1/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71A0Pp767BL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Logitech 960001580 Brio 100 1080p Full HD Webcam (Graphite) (Renewed) | Full HD",
+      "price": "$22.51",
+      "rating": 4.5,
+      "reviews": 129,
+      "link": "https://www.amazon.com/Logitech-960001580-Webcam-Graphite-Renewed/dp/B0CZ2HFV2Z/",
+      "thumbnail": "https://m.media-amazon.com/images/I/31KUnY4GxYL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Brio 105 Full HD 1080p Business Webcam with Auto-Light Balance | 1080p with auto-light correction, built-in mic, privacy shutter, USB-C, compatible with Teams, Google Meet, Zoom and more",
+      "brand": "Logitech",
+      "price": "$39.99",
+      "rating": 4.5,
+      "reviews": 29,
+      "link": "https://www.amazon.com/Logitech-Business-Auto-Light-Compatible-ChromeOS/dp/B0CGZJR7WK/",
+      "thumbnail": "https://m.media-amazon.com/images/I/610mfIGUznL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Logitech Brio 100 Full HD 1080p Webcam for Meetings and Streaming, Auto-Light Balance, Built-in Mic, Privacy Shutter, USB-A, for Microsoft Teams, Google Meet, Zoom and More - Off White (Renewed)",
+      "price": "$21.44",
+      "rating": 4.8,
+      "reviews": 18,
+      "link": "https://www.amazon.com/Logitech-Meetings-Streaming-Auto-Light-Microsoft/dp/B0D5N5G5WG/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51YvZ8Sd4VL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "C920x HD Pro PC Webcam Full 1080p/30fps Video - Black | 30fps Video, Clear Audio, Light Correction, Works with Teams, Meet, Zoom, Nintendo Switch 2, Mac, Tablet",
+      "brand": "Logitech",
+      "price": "$59.99",
+      "rating": 4.6,
+      "reviews": 21900,
+      "link": "https://www.amazon.com/Logitech-C920x-Pro-HD-Webcam/dp/B085TFF7M1/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71YN85pLGcL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "C920S HD Pro Webcam Full 1080p/30fps Video Calling Clear Stereo | 30fps video calling, clear stereo audio, light correction, works with Skype, Zoom, FaceTime, Hangouts, PC, Mac, laptop",
+      "brand": "Logitech",
+      "price": "$59.99",
+      "rating": 4.6,
+      "reviews": 3500,
+      "link": "https://www.amazon.com/Logitech-C920S-Pro-HD-Webcam/dp/B07K986YLL/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61-6uAf8soL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Brio 300 Full HD Webcam, 1080p, Auto Light Correction, Noise reducing mic, Privacy Shutter, USB-C, Works with Microsoft Teams, Google Meet, Zoom, for Streaming and Video Calling - White",
+      "brand": "Logitech",
+      "price": "$49.99",
+      "rating": 4.4,
+      "reviews": 1100,
+      "link": "https://www.amazon.com/Logitech-Reduction-Microphone-ceritified-Correction/dp/B09RGJWVG7/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51nJjNRoNLL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Logitech 1080p Pro Stream Webcam for HD Video Streaming and Recording at 1080p 30FPS (Renewed)",
+      "price": "$43.44",
+      "rating": 4.5,
+      "reviews": 312,
+      "link": "https://www.amazon.com/Logitech-Streaming-Recording-Certified-Refurbished/dp/B07B54Y4TZ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/814Pq5czeFL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "960001580 Brio 100 1080p Full HD Webcam (Graphite)",
+      "brand": "Logitech",
+      "price": "$24.49",
+      "rating": 4.0,
+      "reviews": 56,
+      "link": "https://www.amazon.com/Logitech-960001580-1080p-Webcam-Graphite/dp/B0CJQ3QB55/",
+      "thumbnail": "https://m.media-amazon.com/images/I/41InvWg8TWL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Logitech - Brio 300 1920x1080p USB-C Webcam with Privacy Shutter, Auto Light Correction - Graphite (Renewed)",
+      "price": "$28.44",
+      "rating": 4.4,
+      "reviews": 172,
+      "link": "https://www.amazon.com/Logitech-1920x1080p-Privacy-Correction-Graphite/dp/B0CX2VP556/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61peaV41Q7L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}

@@ -1,0 +1,140 @@
+{
+  "id": "case_06_monitor",
+  "query": "4K monitor under 150 USD",
+  "preferences": {
+    "product": "4K monitor",
+    "budget": "< 150 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 150,
+    "currency": "USD",
+    "category_terms": [
+      "4k"
+    ],
+    "require_terms": [
+      "monitor"
+    ]
+  },
+  "soft_constraints": [
+    "27 inch or larger",
+    "desktop (not portable)",
+    "IPS"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. LEAKY - tight budget vs category price band: real desktop 4K monitors start ~$160, so 7/10 results are over $150. Items 2-4 are 15-16in portable monitors (in budget, kept compliant; 'desktop' is a soft pref).",
+  "candidates": [
+    {
+      "title": "Dell 27 Monitor S2725QS, 4K UHD IPS, 120Hz, 5ms, FreeSync Premium | 350 cd/m2 Brightness, 1,500:1 Contrast, 99% sRGB, Anti-Glare, HDMI, DisplayPort, USB‑C, Height Adjustable, Swivel, Pivot",
+      "price": "$268.99",
+      "rating": 4.4,
+      "reviews": 986,
+      "link": "https://www.amazon.com/Dell-Plus-Monitor-Integrated-Comfortview/dp/B0F1GF1KFC/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61pF09VcRPL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "16” 4K Portable Monitor, 3840×2400 IPS 16:10 Gaming Display | 400-Nit HDR Second Screen with Speakers, Stand, Vertical Mode & VESA Mount for Laptop, Mac, PC, PS5 and Xbox",
+      "price": "$137.99",
+      "rating": 3.9,
+      "reviews": 20,
+      "link": "https://www.amazon.com/MAFNKOU-Portable-Monitor-3840%C3%972160-Nits/dp/B0FND8BYQS/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81toJzFx7fL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "4K Portable Monitor 15.6\" UHD 3840x2400 16:10 IPS 450 Nits 139% sRGB HDR with 2 USB-C & Mini HDMI Ports, Built-in Stand Speakers,Aluminum Body, VESA Travel Monitor for Laptop Mac PC PS5 Xbox",
+      "price": "$139.99",
+      "rating": 4.4,
+      "reviews": 8,
+      "link": "https://www.amazon.com/Forzola-Portable-Monitor-3840x2400-Built/dp/B0GQXR5Y81/",
+      "thumbnail": "https://m.media-amazon.com/images/I/710eoamqtJL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "4K Portable Monitor - 15.6\" UHD 3840 * 2400 for Laptop/Mac(Metallic Black) | 16:10,400 Nits,135% sRGB,IPS Screen,2 USB-C,HDMI Ports,Speakers,Standf,VESA for PC/PS5/Xbox",
+      "price": "$139.99",
+      "rating": 4.5,
+      "reviews": 8,
+      "link": "https://www.amazon.com/4K-Portable-Monitor-Laptop-Metallic/dp/B0GRGRMBS8/",
+      "thumbnail": "https://m.media-amazon.com/images/I/817DLgnNbeL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "UPERFECT 17.3'' 4K Portable Monitor QLED, 600 Nits 150% sRGB 3840*2160 UHD | Dual Speakers Eye Care Travel Monitor, 2 Fully Functional Type-C Port & MINI HDMI for Laptop PC Phone, VESA & Stand",
+      "price": "$289.98",
+      "rating": 4.5,
+      "reviews": 617,
+      "link": "https://www.amazon.com/UPERFECT-17-3-Portable-Monitor-QLED/dp/B0CQN3SX4Q/",
+      "thumbnail": "https://m.media-amazon.com/images/I/812Nb4SB1sL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "32 Inch 4K UHD Monitor, Computer Monitor, 4000:1 Contrast Display | 3840×2160 UHD Resolution, VA Panel, 100% sRGB, AMD FreeSync, 60Hz, HDMI 2.0 & DisplayPort 1.4, VESA 100x100mm",
+      "price": "$172.99",
+      "rating": 5.0,
+      "reviews": 6,
+      "link": "https://www.amazon.com/HGFRTEE-Inch-Monitor-Computer-4000/dp/B0GLF93H74/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71Kxxjpom1L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "32\" 4K UHD IPS Monitor, 60Hz HDMI DP Ergo, MacBook Home Office & PS5 Gaming | 32\" 4K UHD IPS, 60Hz FreeSync, 100% sRGB HDR10, HDMI 2.0 & DP 1.4, Blue Light Filter, Flicker-Free, Slim Bezel, Ergo VESA",
+      "price": "$169.99",
+      "rating": 4.3,
+      "reviews": 309,
+      "link": "https://www.amazon.com/Monitor-60Hz-MacBook-Office-Gaming/dp/B0FQJ2QJX3/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71bQ1THHlbL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Acer Nitro 27in 4K 3840x2160 IPS 72Hz DFR 144Hz Gaming Monitor VG270K L1 | 0.5ms, AMD FreeSync, DCI-P3 95%, 2xHDMI, DisplayPort, Speaker, VESA Mountable, Bluelight Filter, Flickerless Technology",
+      "price": "$159.99",
+      "rating": 4.1,
+      "reviews": 19,
+      "link": "https://www.amazon.com/Acer-3840x2160-Gaming-Monitor-VG270K/dp/B0GS3FHR7L/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81RJ711MYwL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Sceptre 32-inch 4K UHD 3840 x 2160 Monitor 70Hz DisplayPort x2 HDMI x2 100% sRGB Build-in Speakers, Machine Black 2026 (U325W-UPT Series)",
+      "price": "$199.97",
+      "rating": 4.0,
+      "reviews": 354,
+      "link": "https://www.amazon.com/SCEPTRE-32-inch-DisplayPort-Speakers-U325W-UPT/dp/B0CC6RTL44/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71IphoOYD6L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "ASUS TUF Gaming 27” 4K HDR Monitor (VG27UQ1A) – 160Hz, 1ms, Extreme Low Motion Blur Sync, NVIDIA G-SYNC Compatible, AMD FreeSync Premium, 95% DCI-P3, DisplayWidget, 3 yr Warranty",
+      "price": "$269.00",
+      "rating": 4.2,
+      "reviews": 168,
+      "link": "https://www.amazon.com/ASUS-Gaming-Monitor-VG27UQ1A-DisplayWidget/dp/B0DHG1GTG2/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71cWF5GsRwL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    }
+  ]
+}

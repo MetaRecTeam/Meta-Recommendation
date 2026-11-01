@@ -1,0 +1,140 @@
+{
+  "id": "case_05_sony_headphones",
+  "query": "Sony wireless noise cancelling headphones under 120 USD",
+  "preferences": {
+    "product": "noise cancelling headphones",
+    "budget": "< 120 USD",
+    "brand": "Sony"
+  },
+  "hard_constraints": {
+    "budget_max": 120,
+    "currency": "USD",
+    "category_terms": [
+      "headphone"
+    ],
+    "brand_in": [
+      "Sony"
+    ],
+    "require_terms": [
+      "wireless"
+    ]
+  },
+  "soft_constraints": [
+    "active noise cancelling",
+    "over-ear"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon, query 'Sony wireless noise cancelling headphones under 120 USD'. LEAKY: budget $120 is tight vs Sony's premium line. All results are Sony models (brand field is None in SerpApi - brand_in cannot be machine-verified, labelled by hand). Candidate 8 has no price (SerpApi omitted it) - left unlabelled for budget.",
+  "candidates": [
+    {
+      "title": "WH-CH520 Wireless On-Ear Bluetooth Headphones with Mic, Cappuccino | Comfortable Lightweight Design, Up to 50 Hrs Battery with Quick Charging, Multipoint Connection, Clear Calls, Swivel design",
+      "brand": "Sony",
+      "price": "$38.00",
+      "rating": 4.4,
+      "reviews": 34700,
+      "link": "https://www.amazon.com/Sony-Headphones-Bluetooth-Microphone-Cappuccino/dp/B0BSGQL41X/",
+      "thumbnail": "https://m.media-amazon.com/images/I/41fn3hNjnRL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "WH-CH720N Wireless Noise Cancelling Over-Ear Headphones, Pink | Comfortable Lightweight Design, Dual Noise Sensor technology, Up to 35 Hrs Battery with Quick Charging, Multipoint Connection",
+      "brand": "Sony",
+      "price": "$98.00",
+      "rating": 4.3,
+      "reviews": 16500,
+      "link": "https://www.amazon.com/Sony-WH-CH720N-Canceling-Headphones-Microphone/dp/B0DY8TS92J/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61c3099gnFL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Sony WH-CH720N Noise Canceling Wireless Headphones (Renewed) | Quick charging",
+      "price": "$54.99",
+      "rating": 4.4,
+      "reviews": 358,
+      "link": "https://www.amazon.com/Sony-WH-CH720N-Canceling-Headphones-Microphone/dp/B0BWSJSLJZ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/31oAniReIAL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Sony - WH-CH720N Wireless Noise Canceling Headphones - Blue (Renewed)",
+      "price": "$59.99",
+      "rating": 4.5,
+      "reviews": 14,
+      "link": "https://www.amazon.com/Sony-WH-CH720N-Canceling-Bluetooth-Headphones/dp/B0CQN3QDX1/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51V9cFzSwTL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "WH-1000XM5 Premium Noise Cancelling Wireless Headphones, Black | Auto NC Optimizer, Up to 30 Hrs of Battery, Carrying Case, Crystal Clear Calls, Touch Control, Multipoint Connection",
+      "brand": "Sony",
+      "price": "$199.99",
+      "rating": 4.2,
+      "reviews": 20000,
+      "link": "https://www.amazon.com/Sony-WH-1000XM5-Canceling-Headphones-Hands-Free/dp/B09XS7JWHH/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61O3iMlnJIL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "MDRZX110NC Noise Canceling On Ear Headphones, Black, Wired",
+      "brand": "Sony",
+      "price": "$48.00",
+      "rating": 4.2,
+      "reviews": 11900,
+      "link": "https://www.amazon.com/Sony-MDRZX110NC-Noise-Cancelling-Headphones/dp/B00NG57H4S/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51h-raTj9sL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "compat"
+      ]
+    },
+    {
+      "title": "WH-1000XM6 The Best Noise Cancelling Wireless Headphones Midnight Blue | HD NC Processor QN3, 12 Microphones, Adaptive NC Optimizer, Mastered by Engineers, Studio-Quality, Up to 30 Hrs of Battery",
+      "brand": "Sony",
+      "price": "$398.00",
+      "rating": 4.2,
+      "reviews": 3600,
+      "link": "https://www.amazon.com/Sony-WH-1000XM6-Headphones-Microphones-Studio-Quality/dp/B0F3PT1VBL/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61drDn6HJRL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "ULT WEAR Over-Ear Noise Canceling Wireless Headphones, Black | Massive Bass, Comfortable Design, 30-Hour Battery, Signature Noise Canceling Found in 1000X Series, Alexa Built-in, Bluetooth",
+      "brand": "Sony",
+      "rating": 4.2,
+      "reviews": 3500,
+      "link": "https://www.amazon.com/Sony-Canceling-Wireless-Headphones-Comfortable/dp/B0CWVX1GNX/",
+      "thumbnail": "https://m.media-amazon.com/images/I/610DB8Cwm7L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Sony ULT WEAR 900N Wireless Noise Canceling Bluetooth Headphones - Forest Gray (Renewed)",
+      "price": "$69.99",
+      "rating": 4.2,
+      "reviews": 93,
+      "link": "https://www.amazon.com/Sony-Wireless-Canceling-Bluetooth-Headphones/dp/B0D5W2WYXZ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51xDxsOSw6L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Sony WH-CH720N Noise Canceling Wireless Headphones - White (Renewed)",
+      "price": "$62.99",
+      "rating": 4.5,
+      "reviews": 93,
+      "link": "https://www.amazon.com/Sony-WH-CH720N-Canceling-Headphones-Microphone/dp/B0C6QTNPMT/",
+      "thumbnail": "https://m.media-amazon.com/images/I/41tp0JPPlmL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}

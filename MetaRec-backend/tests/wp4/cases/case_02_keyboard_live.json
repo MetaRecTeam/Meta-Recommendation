@@ -1,0 +1,132 @@
+{
+  "id": "case_02_keyboard_live",
+  "query": "quiet mechanical keyboard under 120 USD for Mac",
+  "preferences": {
+    "product": "mechanical keyboard",
+    "budget": "< 120 USD",
+    "category": "mechanical keyboard"
+  },
+  "hard_constraints": {
+    "budget_max": 120,
+    "currency": "USD",
+    "category_terms": [
+      "mechanical"
+    ],
+    "category_exclude_terms": [
+      "membrane"
+    ]
+  },
+  "soft_constraints": [
+    "quiet",
+    "mac-compatible"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon, query as shown. All 10 titles contain 'Mechanical' (no category violations). brand absent from every SerpApi result. Mac-compat kept soft: most keyboards work on Mac and titles are an unreliable signal.",
+  "candidates": [
+    {
+      "title": "KINESIS mWave Quiet Ergonomic Keyboard for Mac (White) | Quiet Mechanical Switches | Bluetooth & USB | Programmable | Backlit | macOS Modifiers & Hotkeys",
+      "price": "$124.95",
+      "rating": 4.4,
+      "reviews": 10,
+      "link": "https://www.amazon.com/KINESIS-Ergonomic-Mechanical-Bluetooth-Programmable/dp/B0G772BRRL/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61GCR3OZMJL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Keychron K8 Wireless Mechanical Keyboard – Silent Red Switch for Quiet Office and Gaming, TKL 87 Keys, Soft White LED Backlight, Bluetooth & USB-C Wired Connectivity, Compatible with Mac and Windows",
+      "price": "$72.99",
+      "rating": 4.1,
+      "reviews": 36,
+      "link": "https://www.amazon.com/Keychron-Wireless-Mechanical-Keyboard-Connectivity/dp/B0DT3F35D4/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61dBqSe5-bL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "X9 Slim Mechanical Keyboard Wireless – Low Profile Red Switches, Triple Mode (Bluetooth + 2.4GHz + USB), Full Size 107-Key with Number Pad, Backlit, Rechargeable – Quiet Typing for Mac and PC",
+      "price": "$32.79",
+      "rating": 4.1,
+      "reviews": 33,
+      "link": "https://www.amazon.com/X9-Performance-Mechanical-Keyboard-Wireless/dp/B0FN7N22YM/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71sWvvbHlmL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "KiiBoom Phantom98 Lite 96% Wireless Mechanical Gaming Keyboard, VIA Custom | Creamy Keyboard with Gasket, 8000mAh Battery, Hot Swap, RGB Backlits, NKRO for Win/Mac (Clear, Mossy Silent Switch)",
+      "price": "$87.19",
+      "rating": 4.7,
+      "reviews": 75,
+      "link": "https://www.amazon.com/KiiBoom-Phantom98-Wireless-Mechanical-Programmable/dp/B0GCFHZC7S/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61r4BTsQJKL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Logitech MX Mechanical Wireless Illuminated Keyboard Tactile - Graphite | Low-profile full-size, 3 device Bluetooth pairing, Smart backlight auto-adjusts, USB-C rechargeable, Up to 15 day battery",
+      "price": "$152.99",
+      "rating": 4.2,
+      "reviews": 2200,
+      "link": "https://www.amazon.com/Logitech-Mechanical-Illuminated-Performance-Bluetooth/dp/B09LK1P1RD/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61++ok6AqtL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Logitech Alto Keys K98M Wireless Mechanical Gasket Keyboard - Graphite | Customizable, clicky, vibration absorbing gasket, white backlit keys, Bluetooth, USB-C charging, for PC, Mac, Laptops",
+      "price": "$109.99",
+      "rating": 4.4,
+      "reviews": 282,
+      "link": "https://www.amazon.com/Logitech-Mechanical-Customizable-Vibration-Absorbing/dp/B0FMD1DGS8/",
+      "thumbnail": "https://m.media-amazon.com/images/I/613zl8HXvqL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Logitech MX Mechanical Mini Mac Wireless Keyboard Low-Profile - Space Grey | Tactile quiet mechanical switches, Smart backlit keys, Bluetooth pairs with 3 devices, USB-C rechargeable, 15 days",
+      "price": "$139.99",
+      "rating": 4.2,
+      "reviews": 530,
+      "link": "https://www.amazon.com/Logitech-Mechanical-Illuminated-Low-Profile-Performance/dp/B09LK3JCHX/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61+6kI9ATAL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "SOLAKAKA KI99 Pro Wireless Mechanical Keyboard with Quiet Switch, Hot Swappable Pre-Lubed Switches with RGB Backlit, Gasket Structure Computer Gaming Keyboard (BlackBlue, Silent Switch)",
+      "price": "$79.89",
+      "rating": 4.4,
+      "reviews": 119,
+      "link": "https://www.amazon.com/SOLAKAKA-Mechanical-Swappable-Pre-Lubed-Structure/dp/B0FWCG4NDG/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61tA+J22rYL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "AUSDOM Wireless Mechanical Silent Office Keyboard, Low-Profile Linear Switches, Tri-Mode BT/2.4G/USB-C Computer Keyboard with Number Pad, Hot Swappable Illuminated Performance Keyboard",
+      "price": "$59.99",
+      "rating": 4.3,
+      "reviews": 21,
+      "link": "https://www.amazon.com/AUSDOM-Mechanical-Low-Profile-Illuminated-Performance/dp/B0H1BR6687/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61TFVB2dQQL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Keychron K3 Version 2 QMK 75% Wireless Low-Profile Mechanical Keyboard | Bluetooth 5.1 for 3 devices, USB-C wired, Keychron Launcher, White LED backlight, Brown switches, Compatible with Mac Windows",
+      "price": "$84.00",
+      "rating": 4.2,
+      "reviews": 805,
+      "link": "https://www.amazon.com/Keychron-Profile-Wireless-Mechanical-Keyboard/dp/B08LSJ4RHH/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61x3nRatR9L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}

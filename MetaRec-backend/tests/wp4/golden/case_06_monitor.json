@@ -1,0 +1,176 @@
+{
+  "case_id": "case_06_monitor",
+  "query": "4K monitor under 150 USD",
+  "items": [
+    {
+      "id": "product_11715c51758775b1",
+      "domain": "product",
+      "title": "32 Inch 4K UHD Monitor, Computer Monitor, 4000:1 Contrast Display | 3840×2160 UHD Resolution, VA Panel, 100% sRGB, AMD FreeSync, 60Hz, HDMI 2.0 & DisplayPort 1.4, VESA 100x100mm",
+      "subtitle": "$172.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71Kxxjpom1L._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/HGFRTEE-Inch-Monitor-Computer-4000/dp/B0GLF93H74/",
+      "rating": 5.0,
+      "reviews_count": 6,
+      "source": "Amazon",
+      "tags": [
+        "$172.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_89c97237a5503fb7",
+      "domain": "product",
+      "title": "UPERFECT 17.3'' 4K Portable Monitor QLED, 600 Nits 150% sRGB 3840*2160 UHD | Dual Speakers Eye Care Travel Monitor, 2 Fully Functional Type-C Port & MINI HDMI for Laptop PC Phone, VESA & Stand",
+      "subtitle": "$289.98",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/812Nb4SB1sL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/UPERFECT-17-3-Portable-Monitor-QLED/dp/B0CQN3SX4Q/",
+      "rating": 4.5,
+      "reviews_count": 617,
+      "source": "Amazon",
+      "tags": [
+        "$289.98"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_18c8b55a325e2fe6",
+      "domain": "product",
+      "title": "4K Portable Monitor - 15.6\" UHD 3840 * 2400 for Laptop/Mac(Metallic Black) | 16:10,400 Nits,135% sRGB,IPS Screen,2 USB-C,HDMI Ports,Speakers,Standf,VESA for PC/PS5/Xbox",
+      "subtitle": "$139.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/817DLgnNbeL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/4K-Portable-Monitor-Laptop-Metallic/dp/B0GRGRMBS8/",
+      "rating": 4.5,
+      "reviews_count": 8,
+      "source": "Amazon",
+      "tags": [
+        "$139.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_71e55b9013b34d7c",
+      "domain": "product",
+      "title": "Dell 27 Monitor S2725QS, 4K UHD IPS, 120Hz, 5ms, FreeSync Premium | 350 cd/m2 Brightness, 1,500:1 Contrast, 99% sRGB, Anti-Glare, HDMI, DisplayPort, USB‑C, Height Adjustable, Swivel, Pivot",
+      "subtitle": "$268.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61pF09VcRPL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Dell-Plus-Monitor-Integrated-Comfortview/dp/B0F1GF1KFC/",
+      "rating": 4.4,
+      "reviews_count": 986,
+      "source": "Amazon",
+      "tags": [
+        "$268.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_3da8b8ee6a99969d",
+      "domain": "product",
+      "title": "4K Portable Monitor 15.6\" UHD 3840x2400 16:10 IPS 450 Nits 139% sRGB HDR with 2 USB-C & Mini HDMI Ports, Built-in Stand Speakers,Aluminum Body, VESA Travel Monitor for Laptop Mac PC PS5 Xbox",
+      "subtitle": "$139.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/710eoamqtJL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Forzola-Portable-Monitor-3840x2400-Built/dp/B0GQXR5Y81/",
+      "rating": 4.4,
+      "reviews_count": 8,
+      "source": "Amazon",
+      "tags": [
+        "$139.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_e4ea6b102f7a7a3f",
+      "domain": "product",
+      "title": "32\" 4K UHD IPS Monitor, 60Hz HDMI DP Ergo, MacBook Home Office & PS5 Gaming | 32\" 4K UHD IPS, 60Hz FreeSync, 100% sRGB HDR10, HDMI 2.0 & DP 1.4, Blue Light Filter, Flicker-Free, Slim Bezel, Ergo VESA",
+      "subtitle": "$169.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71bQ1THHlbL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Monitor-60Hz-MacBook-Office-Gaming/dp/B0FQJ2QJX3/",
+      "rating": 4.3,
+      "reviews_count": 309,
+      "source": "Amazon",
+      "tags": [
+        "$169.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_ad6daa2e31112e46",
+      "domain": "product",
+      "title": "ASUS TUF Gaming 27” 4K HDR Monitor (VG27UQ1A) – 160Hz, 1ms, Extreme Low Motion Blur Sync, NVIDIA G-SYNC Compatible, AMD FreeSync Premium, 95% DCI-P3, DisplayWidget, 3 yr Warranty",
+      "subtitle": "$269.00",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71cWF5GsRwL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/ASUS-Gaming-Monitor-VG27UQ1A-DisplayWidget/dp/B0DHG1GTG2/",
+      "rating": 4.2,
+      "reviews_count": 168,
+      "source": "Amazon",
+      "tags": [
+        "$269.00"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_cc1f7ddaa26f74d9",
+      "domain": "product",
+      "title": "Acer Nitro 27in 4K 3840x2160 IPS 72Hz DFR 144Hz Gaming Monitor VG270K L1 | 0.5ms, AMD FreeSync, DCI-P3 95%, 2xHDMI, DisplayPort, Speaker, VESA Mountable, Bluelight Filter, Flickerless Technology",
+      "subtitle": "$159.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/81RJ711MYwL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Acer-3840x2160-Gaming-Monitor-VG270K/dp/B0GS3FHR7L/",
+      "rating": 4.1,
+      "reviews_count": 19,
+      "source": "Amazon",
+      "tags": [
+        "$159.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_a810c54b0cf2fb85",
+      "domain": "product",
+      "title": "Sceptre 32-inch 4K UHD 3840 x 2160 Monitor 70Hz DisplayPort x2 HDMI x2 100% sRGB Build-in Speakers, Machine Black 2026 (U325W-UPT Series)",
+      "subtitle": "$199.97",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71IphoOYD6L._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/SCEPTRE-32-inch-DisplayPort-Speakers-U325W-UPT/dp/B0CC6RTL44/",
+      "rating": 4.0,
+      "reviews_count": 354,
+      "source": "Amazon",
+      "tags": [
+        "$199.97"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_eb940db1ef79c6fb",
+      "domain": "product",
+      "title": "16” 4K Portable Monitor, 3840×2400 IPS 16:10 Gaming Display | 400-Nit HDR Second Screen with Speakers, Stand, Vertical Mode & VESA Mount for Laptop, Mac, PC, PS5 and Xbox",
+      "subtitle": "$137.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/81toJzFx7fL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/MAFNKOU-Portable-Monitor-3840%C3%972160-Nits/dp/B0FND8BYQS/",
+      "rating": 3.9,
+      "reviews_count": 20,
+      "source": "Amazon",
+      "tags": [
+        "$137.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    }
+  ]
+}

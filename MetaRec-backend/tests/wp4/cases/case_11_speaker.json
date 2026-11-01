@@ -1,0 +1,129 @@
+{
+  "id": "case_11_speaker",
+  "query": "waterproof bluetooth speaker under 30 USD",
+  "preferences": {
+    "product": "bluetooth speaker",
+    "budget": "< 40 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 30,
+    "currency": "USD",
+    "category_terms": [
+      "speaker"
+    ],
+    "require_terms": [
+      "waterproof"
+    ]
+  },
+  "soft_constraints": [
+    "IPX7",
+    "30h+ battery"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. LEAKY - compound (budget + attribute): at $30 two picks are over ($39.99, $33.99) and #8 INFURTURE names no waterproof/IPX rating at all. #9/#10 have no price (SerpApi omitted) - unlabelled for budget, they are waterproof.",
+  "candidates": [
+    {
+      "title": "Ortizan Portable Bluetooth Speaker Wireless (2nd Gen), 40W Loud Sound and Deep Bass, 30 Hours Playtime, IPX7 Waterproof, TWS for 2 Speakers Pairing for Shower, Outdoor, Electronics Gift (Black)",
+      "price": "$39.99",
+      "rating": 4.4,
+      "reviews": 5300,
+      "link": "https://www.amazon.com/Ortizan-Portable-Bluetooth-Waterproof-Electronics/dp/B0GRNFP6L1/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71M0CsO2YuL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Bluetooth Speaker, 20W HD Sound, Portable Wireless, IPX5 Waterproof, Up to 24H Playtime, TWS Pairing, for Home/Party/Outdoor/Camping/Beach Essentials, Electronic Gadgets, Birthday Gift (Black)",
+      "price": "$26.99",
+      "rating": 4.5,
+      "reviews": 38400,
+      "link": "https://www.amazon.com/Bluetooth-Waterproof-Playtime-Portable-Electronic/dp/B0BRKPVZB4/",
+      "thumbnail": "https://m.media-amazon.com/images/I/8165VSHcJlL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Portable Bluetooth Speaker Beach Essentials: IPX5 Waterproof for Outdoor | Powerful HD Sound,Dynamic Light,All Day Playtime,Wireless BT 5.3,TWS Pairing,Travel|Camping|Pool Accessorie,School Supplies",
+      "price": "$19.97",
+      "rating": 4.5,
+      "reviews": 7800,
+      "link": "https://www.amazon.com/CHIFENCHY-Portable-Bluetooth-Powerful-Waterproof/dp/B0CX1FRR27/",
+      "thumbnail": "https://m.media-amazon.com/images/I/91chDri2ibL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Portable Bluetooth Speaker Line-in Support: IPX5 Waterproof, Black | Up to 24H Playtime, HD Sound, TWS Pairing, LED Light, Outdoor Speaker for Beach, Pool, Travel, School Supplies for Adult Teen",
+      "price": "$14.97",
+      "rating": 4.4,
+      "reviews": 1300,
+      "link": "https://www.amazon.com/Portable-Bluetooth-Speaker-Waterproof-Gift/dp/B0F998HYS5/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81X2qix5jKL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "OHAYO 40W Wireless Portable Bluetooth Speaker with Lights, IPX7 Waterproof, Loud Sound, RGB Lights,TWS Pairing, AUX&TF-Card in, for Home/Party/Travel/Outdoor/Beach",
+      "price": "$29.99",
+      "rating": 4.5,
+      "reviews": 377,
+      "link": "https://www.amazon.com/OHAYO-Wireless-Portable-Bluetooth-Waterproof/dp/B0DGQ4XX2D/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81C4pA3W3yL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Portable Bluetooth Speaker Wireless, 40W Super Bass with Smart Display, IP67 Waterproof, 40H Playtime, RGB Colorful Lights, Bluetooth 5.4, for Home Party Outdoor Travel Beach Gift",
+      "price": "$33.99",
+      "rating": 4.2,
+      "reviews": 44,
+      "link": "https://www.amazon.com/SMILEBOP-Portable-Bluetooth-Wireless-Waterproof/dp/B0GHN67FRX/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81MMcbQJHKL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Monster S320 Bluetooth Speaker, 40W True Wireless,360° Stereo Sound Effect,IPX7 Waterproof, 32 Hour Playing Time,Suitable for Outdoor Portable Speaker,Black",
+      "price": "$29.99",
+      "rating": 5.0,
+      "reviews": 3,
+      "link": "https://www.amazon.com/Monster-S320-Bluetooth-Wireless-Waterproof/dp/B0H9XZR5ZJ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81G78WszghL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "INFURTURE Portable Bluetooth Speaker with Powerful Sound, RGB Lights, Bluetooth Speaker for Home/Party/Outdoor, TWS Pairing, 15H Playtime, Gifts for Teens/Men/Women",
+      "price": "$14.99",
+      "rating": 4.4,
+      "reviews": 52,
+      "link": "https://www.amazon.com/INFURTURE-Portable-Bluetooth-Versatile-Connectivity/dp/B0FNW6QBTV/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71Q4itc5JuL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "compat"
+      ]
+    },
+    {
+      "title": "BassBloom Roar 3 Portable Bluetooth Speaker,20W Powerful Sound with Deep Bass,IPX6 Waterproof,24H Playtime,Bluetooth 5.4,RGB Lights,Wireless TWS Pairing (White)",
+      "rating": 4.9,
+      "reviews": 42,
+      "link": "https://www.amazon.com/BassBloom-Roar-Portable-Bluetooth-Waterproof/dp/B0H48XYGTB/",
+      "thumbnail": "https://m.media-amazon.com/images/I/814GiufhCnL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "BassBloom Roar 3 Portable Bluetooth Speaker,20W Powerful Sound with Deep Bass,IPX6 Waterproof,24H Playtime,Bluetooth 5.4,RGB Lights,Wireless TWS Pairing (Purple)",
+      "rating": 4.5,
+      "reviews": 26,
+      "link": "https://www.amazon.com/BassBloom-Roar-Portable-Bluetooth-Waterproof/dp/B0H493BTJ1/",
+      "thumbnail": "https://m.media-amazon.com/images/I/810fE2LWmkL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}

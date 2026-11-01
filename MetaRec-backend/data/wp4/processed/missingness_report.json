@@ -1,0 +1,12 @@
+{
+  "total_items": 80181,
+  "missing_price": 26846,
+  "missing_price_pct": 0.3348,
+  "missing_price_naive_null_check": 26686,
+  "missing_price_naive_vs_real_gap": 160,
+  "missing_title": 3,
+  "missing_average_rating": 0,
+  "missing_store": 361,
+  "missing_brand_field": 4950,
+  "missing_categories": 2858
+}

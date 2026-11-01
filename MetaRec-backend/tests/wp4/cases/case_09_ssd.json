@@ -1,0 +1,147 @@
+{
+  "id": "case_09_ssd",
+  "query": "2TB portable external SSD under 100 USD",
+  "preferences": {
+    "product": "external SSD",
+    "budget": "< 100 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 100,
+    "currency": "USD",
+    "category_terms": [
+      "ssd"
+    ],
+    "require_terms": [
+      "2tb"
+    ]
+  },
+  "soft_constraints": [
+    "USB-C",
+    "1000MB/s+"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. LEAKY (worst case): a real 2TB portable SSD floors around $130, so EVERY result violates - 7 SSDs over $100, plus 2 spinning HDDs (#8 Seagate, #9 WD My Passport) that are not SSDs at all. Tests the 'nothing satisfies the constraints' path.",
+  "candidates": [
+    {
+      "title": "Samsung T7 Portable SSD 2TB Titan Gray, USB 3.2 Gen 2, Up to 1,050MB/s | Reliable External Solid State Drive Storage for Gaming, Students, Professionals (MU-PC2T0T/AM)",
+      "price": "$394.00",
+      "rating": 4.7,
+      "reviews": 9800,
+      "link": "https://www.amazon.com/Samsung-Portable-Titan-Gray-050MB/dp/B0874XWW23/",
+      "thumbnail": "https://m.media-amazon.com/images/I/91YfRIy7kYL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "SSK 2TB Portable SSD External Hard Drive Solid State Drive Up to 550MB/s | USB 3.2 Gen2 6Gbps External SSD, USB-C cable and USB-A adapter, LED, Trim & SMART, On-The-Go (OTG), Compact Design,",
+      "price": "$215.99",
+      "rating": 4.0,
+      "reviews": 824,
+      "link": "https://www.amazon.com/SSK-External-Portable-Windows-Supported/dp/B0DPQ5Y3SP/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61ErdrQXdYL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "TEAMGROUP 2TB X2 MAX External/Portable SSD 1000MB/s, Dual USB Hard Drive Compatible with iPhone17&iPad&Mac, Steam Deck/PC/Windows/Android/PS5/Laptop/Tesla, Type C &A, USB 3.2 Gen2 TX2MAX32TBT01",
+      "price": "$209.99",
+      "rating": 4.2,
+      "reviews": 26,
+      "link": "https://www.amazon.com/TEAMGROUP-Interface-Compatible-Smartphone-TX2MAX32TBT01/dp/B0DRYJ8TX2/",
+      "thumbnail": "https://m.media-amazon.com/images/I/41YJfR6npCL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Sandisk 2TB Portable SSD, Up to 800MB/s Read Speeds, Black (Old Model) | External Solid State Drive, Compatible with Laptops & Tablets, Up to 2M Drop Protection, USB 3.2 Gen 2, USB-C to USB-A Cable",
+      "price": "$279.39",
+      "rating": 4.5,
+      "reviews": 11200,
+      "link": "https://www.amazon.com/Sandisk-Portable-800MB-Speeds-Black/dp/B0C5JNWF58/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71bBCTIvIIL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Samsung T9 Portable SSD 2TB, USB 3.2 Gen 2x2 External SSD, Up to 2,000 MB/s | External Solid State Drive for Gaming, Students and Professionals, MU-PG2T0B/AM, Black",
+      "price": "$405.99",
+      "rating": 4.6,
+      "reviews": 2900,
+      "link": "https://www.amazon.com/Samsung-Portable-SSD-2TB-External/dp/B0CHFS9K14/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71EESd1deTL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Lexar 2TB ES3 External SSD, 1050MB/s Read, USB-C, Sleek & Sturdy | Compatible w/ PC, Mac, Tablet, Smartphone, Camera, Gaming, Drop/Dust/Water Resistant, 2in1 USB-C/A cable, LES3XXX002T-RNSAU",
+      "price": "$243.08",
+      "rating": 4.4,
+      "reviews": 251,
+      "link": "https://www.amazon.com/Lexar-External-1050MB-USB-C-Sturdy/dp/B0DG6WRD8L/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71qZJcbmUuL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Crucial X10 2TB Portable SSD, Up to 2,100MB/s, USB 3.2 USB-C, External Solid State Drive, Compatible with Windows, Mac & Android, Durable Storage for Games, Photos & Files, Blue - CT2000X10SSD9-02",
+      "price": "$366.99",
+      "rating": 4.5,
+      "reviews": 2400,
+      "link": "https://www.amazon.com/Crucial-Portable-External-Compatible-Windows/dp/B0F332MNX7/",
+      "thumbnail": "https://m.media-amazon.com/images/I/41rI1J9FcZL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Seagate 2TB Portable Hard Drive | USB 3.0 (STGX2000400) | Everyday HDD storage. Plug-and-play backup. Windows & macOS. Adobe CC trial included. 1-Year Warranty",
+      "price": "$138.68",
+      "rating": 4.6,
+      "reviews": 272700,
+      "link": "https://www.amazon.com/Seagate-Portable-External-Hard-Drive/dp/B07CRG94G3/",
+      "thumbnail": "https://m.media-amazon.com/images/I/41MuI-7iHIL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget",
+        "category"
+      ]
+    },
+    {
+      "title": "WD 2TB My Passport, Portable External Hard Drive, Black, backup software with defense against ransomware, and password protection, USB 3.1/USB 3.0 compatible - WDBYVG0020BBK-WESN",
+      "price": "$136.90",
+      "rating": 4.6,
+      "reviews": 31200,
+      "link": "https://www.amazon.com/Passport-Portable-External-Drive-Black/dp/B07VTFN6HM/",
+      "thumbnail": "https://m.media-amazon.com/images/I/510+J06fz0L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget",
+        "category"
+      ]
+    },
+    {
+      "title": "Amazon Basics Portable External SSD, 2TB, 2000MB/s Speeds, USB 3.2 Gen 2, IP65 Water & Dust Resistant, Black",
+      "price": "$369.99",
+      "rating": 4.5,
+      "reviews": 800,
+      "link": "https://www.amazon.com/Amazon-Basics-Portable-External-Solid/dp/B0DX68TWW4/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61ncSs-cVpL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    }
+  ]
+}

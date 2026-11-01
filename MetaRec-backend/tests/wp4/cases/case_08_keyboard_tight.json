@@ -1,0 +1,125 @@
+{
+  "id": "case_08_keyboard_tight",
+  "query": "mechanical keyboard under 60 USD",
+  "preferences": {
+    "product": "mechanical keyboard",
+    "budget": "< 60 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 60,
+    "currency": "USD",
+    "category_terms": [
+      "mechanical"
+    ],
+    "category_exclude_terms": [
+      "membrane"
+    ]
+  },
+  "soft_constraints": [
+    "wireless",
+    "hot-swappable"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. CLEAN CONTROL #3: $60 sounds tight but 60%/compact mechanical keyboards floor around $14-50, so all 10 comply. Confirms the finding: a budget only leaks when it sits BELOW the category's typical price, not just at a low absolute number.",
+  "candidates": [
+    {
+      "title": "60% Wired Mechanical Gaming Keyboard with Blue Switches, LED Backlit | 61 Keys Ultra-Compact Mini Portable Office Keyboard for PC/Mac/Xbox, 18 LED Backlight, Easy to Carry On Trip, Black",
+      "price": "$22.99",
+      "rating": 4.5,
+      "reviews": 1800,
+      "link": "https://www.amazon.com/Portable-Mechanical-Keyboard-Customization-Ultra-Compact/dp/B09P4Q7K9X/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61ufcvDd66L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Guiheng Wired Portable 60% Mechanical Gaming Keyboard,RGB LED Backlit Compact 68 Keys Mini Wired Office Keyboard with Red Switch for Windows Laptop PC Mac - White",
+      "price": "$13.99",
+      "rating": 4.4,
+      "reviews": 460,
+      "link": "https://www.amazon.com/Guiheng-Portable-Mechanical-Keyboard-Backlit/dp/B0DT1CMZVY/",
+      "thumbnail": "https://m.media-amazon.com/images/I/717-8IMMfYL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "MageGee Portable 60% Mechanical Gaming Keyboard, MK-Box LED Backlit Compact 68 Keys Mini Wired Office Keyboard with Red Switch for Windows Laptop PC Mac - Black/Grey",
+      "price": "$29.99",
+      "rating": 4.2,
+      "reviews": 3900,
+      "link": "https://www.amazon.com/Portable-Mechanical-Keyboard-MageGee-Backlit/dp/B098LG3N6R/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61fHEBY8IVL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Aula WIN60 HE - 60% Mechanical Gaming Keyboard Wired, Magnetic Switch Hot Swappable, Adjustable Actuation Rapid Trigger Mode, 8000 Hz Polling Rate, RGB Small Keyboard 60 Percent Compact Design for PC",
+      "price": "$37.61",
+      "rating": 4.5,
+      "reviews": 967,
+      "link": "https://www.amazon.com/Aula-WIN60-HE-Mechanical-Adjustable/dp/B0DSMWJD6M/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61Qmeh+O2yL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "TMKB 60% Mechanical Gaming Keyboard, Red Linear Switch, Wired, White | LED Backlight, Anti-Ghosting, Detachable USB-C, Double-Shot Keycaps, 61 Keys",
+      "price": "$29.99",
+      "rating": 4.5,
+      "reviews": 404,
+      "link": "https://www.amazon.com/TMKB-Mechanical-Anti-Ghosting-Detachable-Double-Shot/dp/B0DSL67F2B/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61sE0VH0paL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "DIERYA T68SE 60% Gaming Mechanical Keyboard,Ultra Compact Mini 68 Key with Red Switches Wired Keyboard,Anti-Ghosting Keys, for Windows Laptops and PC Gamers,White",
+      "price": "$26.99",
+      "rating": 4.5,
+      "reviews": 947,
+      "link": "https://www.amazon.com/DIERYA-T68SE-Mechanical-Ultra-Compact-Stand-Alone/dp/B0BGXZF1MD/",
+      "thumbnail": "https://m.media-amazon.com/images/I/610yFgBrH6L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Newmen GM682 Wired Mechanical Keyboard,60% Percent Gaming Keyboard | Wired Mechanical Keyboard,60% Percent Gaming Keyboard,LED Backlit,Compact,USB C,Custom,Ergonomic,Mini,PC,Black,Red Switch",
+      "price": "$21.99",
+      "rating": 4.3,
+      "reviews": 76,
+      "link": "https://www.amazon.com/Newmen-Mechanical-Keyboard-Percent-Gaming/dp/B0GK9YF2KF/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71toEFtfC7L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Redragon K617 Wired 60% Compact Hot-Swap RGB Gaming Mechanical Keyboard | 61 Keys Design for More Room to Aim, Swap-Ready Socket for Mod, Vibrant 20-Mode Lighting Hype Vibing, Pro Software Supported",
+      "price": "$29.99",
+      "rating": 4.6,
+      "reviews": 5700,
+      "link": "https://www.amazon.com/Redragon-Keyboard-Mechanical-Software-Supported/dp/B09BVCVTBC/",
+      "thumbnail": "https://m.media-amazon.com/images/I/610P9MPegbL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "RK ROYAL KLUDGE RK61 Wired 60% Mechanical Gaming Keyboard, Compact PC Game Keyboards with QMK/VIA Programmable RGB Backlit, Hot Swappable Custom Keyboard for Win/Mac, Pre-lubed Red Switch, White",
+      "price": "$49.99",
+      "rating": 4.6,
+      "reviews": 6500,
+      "link": "https://www.amazon.com/RK-ROYAL-KLUDGE-Mechanical-Ultra-Compact/dp/B089GN2KBT/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61nghmq8GPL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "AULA WIN68 HE Mechanical Gaming Keyboard 60%, Hall Effect Magnetic Switch, Fast Trigger Mode Adjustable Actuation, 8000Hz Polling Rate, RGB Backlit, Wired Black Keyboard for Laptop/PC Gamer",
+      "price": "$49.99",
+      "rating": 4.5,
+      "reviews": 646,
+      "link": "https://www.amazon.com/AULA-Mechanical-Keyboard-Adjustable-Actuation/dp/B0DT43NNNF/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61uArG8glcL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}

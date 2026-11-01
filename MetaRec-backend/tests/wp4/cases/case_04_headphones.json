@@ -1,0 +1,131 @@
+{
+  "id": "case_04_headphones",
+  "query": "over-ear noise cancelling headphones under 100 USD",
+  "preferences": {
+    "product": "noise cancelling headphones",
+    "budget": "< 100 USD",
+    "category": "over-ear headphones"
+  },
+  "hard_constraints": {
+    "budget_max": 100,
+    "currency": "USD",
+    "category_terms": [
+      "over ear",
+      "over-ear",
+      "over the ear"
+    ],
+    "category_exclude_terms": [
+      "earbud",
+      "in-ear",
+      "in ear",
+      "neckband"
+    ]
+  },
+  "soft_constraints": [
+    "active noise cancelling",
+    "wireless"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. SECOND CLEAN CONTROL: a loose budget ($100) on a category with many cheap options -> SerpApi relevance alone returns 10 compliant items, 0 violators. Finding: B0 leak needs a TIGHT budget, a brand constraint, a category Amazon ignores, or a compound constraint - not a generous single budget.",
+  "candidates": [
+    {
+      "title": "Active Noise Cancelling Headphones, Bluetooth Over Ear, Hi-Fi Stereo,100H Playback Time, High-Resolution Audio, Water Resistant, Deep Bass, Memory Foam Ear Cups, Home, Office, Studio,Travel, Work, Gym",
+      "price": "$49.97",
+      "rating": 4.8,
+      "reviews": 85,
+      "link": "https://www.amazon.com/Cancelling-Headphones-Bluetooth-High-Resolution-Resistant/dp/B0FNFCNSTP/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81dY2KCp1AL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "RUNOLIM Active Noise Cancelling Headphones, Wireless Bluetooth Over Ear | 100H Playtime, Transparency Mode, Deep Bass Hi-Fi Stereo, Built-in Mic, Lightweight Comfort for Travel, Office and Home",
+      "price": "$21.99",
+      "rating": 4.4,
+      "reviews": 7500,
+      "link": "https://www.amazon.com/Cancelling-Headphones-Wireless-Bluetooth-Microphone/dp/B0BKPRTRXK/",
+      "thumbnail": "https://m.media-amazon.com/images/I/6162JJuKpbL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "TOZO HT3 Hybrid Noise Cancelling Wireless Headphones, 90H Over Ear Headset | Hi Res Audio, AI Voice Assistant, Dual Device Connection, 32 Custom EQs, Built In 5 Mics, ANC, Foldable, Bluetooth 6.0 Black",
+      "price": "$29.99",
+      "rating": 4.5,
+      "reviews": 3200,
+      "link": "https://www.amazon.com/TOZO-Cancelling-Headphones-Bluetooth-Assistant/dp/B0FPCGMXJB/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61LOj4pKq9L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "1Mii Y8+ Noise Cancelling Headphones for Gaming, Airplane & Travel, Black | Bluetooth 6.0 Over-Ear Wireless, Hybrid ANC, 100 hrs Playtime, Comfortable, LDAC Hi-Res Audio, Deep Bass, Custom EQ via APP",
+      "price": "$39.97",
+      "rating": 4.5,
+      "reviews": 1300,
+      "link": "https://www.amazon.com/1Mii-Y8-Cancelling-Headphones-Bluetooth/dp/B0DZHNWPKD/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71tlPl6QnSL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Upgrade Pro‑Level Hybrid Active Noise Cancelling Headphones | HD Sound, Wireless Bluetooth Headphones Over The Ear Unequaled Comfort, Vivid Deep Bass, for Home Office Travel Gift, Black",
+      "price": "$29.99",
+      "rating": 4.4,
+      "reviews": 2000,
+      "link": "https://www.amazon.com/vibeadio-Cancelling-Headphones-Bluetooth-Transparency/dp/B0D14R85TZ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71-Nso9qP6L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "KVIDIO Hybrid Active Noise Cancelling Headphones Over Ear | Bluetooth Wireless ANC 70H Playtime, Transparency Mode, Microphone, Deep Bass, HiFi Stereo Sound for Home, Travel, Office",
+      "price": "$22.99",
+      "rating": 4.4,
+      "reviews": 15300,
+      "link": "https://www.amazon.com/KVIDIO-Cancelling-Headphones-Microphone-Transparency/dp/B0CFGVDDH6/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61BcRmV5jdL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "JLab, JBuds Lux ANC, Over Ear Headphones, Active Noise Cancelling, Bluetooth, Spatial Audio, Sage",
+      "price": "$49.95",
+      "rating": 4.5,
+      "reviews": 8700,
+      "link": "https://www.amazon.com/JLab-Headphones-Cancelling-Customizable-Compatible/dp/B0CRMB9Z84/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71ow8D+hkbL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Hybrid Active Noise Cancelling Headphones Over Ear 120H Playtime | Smart Knob, Bluetooth 6.0 Wireless, Customize EQ, Transparency Mode, Hi-Res Audio, NC95, Silky Matte Finish, Travel/Workout",
+      "price": "$69.99",
+      "rating": 4.3,
+      "reviews": 1500,
+      "link": "https://www.amazon.com/FOFUN-NC95-Cancelling-Headphones-Bluetooth/dp/B0FY562CBX/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51WPr7N0L2L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "TOZO Hybrid Active Noise Cancelling Headphones, Hi Res Audio | Wireless Over Ear Bluetooth Headset, 60H Playtime, Custom EQ via App Deep Bass Comfort Fit Ear Cups, for Home Office Travel",
+      "price": "$30.36",
+      "rating": 4.5,
+      "reviews": 4600,
+      "link": "https://www.amazon.com/TOZO-HT2-Cancelling-Headphones-Bluetooth/dp/B07KY8G9NM/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71VxRF78LRL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Soundcore Anker Life Q20 Hybrid Active Noise Cancelling Headphones, Wireless Over Ear Bluetooth Headphones, 60H Playtime, Hi-Res Audio, Deep Bass, Foam Ear Cups, Travel, Office, USB-C Charging",
+      "price": "$39.99",
+      "rating": 4.4,
+      "reviews": 7400,
+      "link": "https://www.amazon.com/Soundcore-Cancelling-Headphones-Wireless-Bluetooth/dp/B0D1QR8NL8/",
+      "thumbnail": "https://m.media-amazon.com/images/I/717y1XSK9EL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}
