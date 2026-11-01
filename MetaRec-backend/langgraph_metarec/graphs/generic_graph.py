@@ -63,6 +63,7 @@ class GenericRuntimeState(TypedDict, total=False):
     candidate_count: int
     constraint_filter: Optional[Dict[str, Any]]
     product_ranker: Optional[Dict[str, Any]]
+    task_id: Optional[str]
 
 
 @dataclass
@@ -827,6 +828,7 @@ async def _rank_product_with_m2(
             events=events,
             timeout_s=adapters.ranker_timeout_s,
             scorer=adapters.ranker_scorer,
+            task_id=state.get("task_id"),
         )
     except Exception:  # the ranker or its contract failed: original order, still behind the hard gate
         try:
@@ -1073,6 +1075,7 @@ async def run_generic_domain_graph(
     tool_tags: Optional[List[str]] = None,
     adapters: Optional[GenericGraphAdapters] = None,
     progress_callback: Optional[ProgressCallback] = None,
+    task_id: Optional[str] = None,
 ) -> GenericGraphResult:
     graph = build_generic_domain_graph(adapters=adapters, progress_callback=progress_callback)
     final_state = await graph.ainvoke(
@@ -1082,6 +1085,7 @@ async def run_generic_domain_graph(
             "preferences": preferences or {},
             "use_online_agent": use_online_agent,
             "tool_tags": tool_tags or [],
+            "task_id": task_id,
             "selected_tools": [],
             "skipped_tools": [],
             "executions": [],

@@ -210,6 +210,10 @@ The proposal asks for frozen provider-style candidates. There are two sets.
 
 ## Data handling
 
+- **Consent and ethics.** No consent was collected, and none could be: the data is a public research dataset of
+  reviews released by its authors, and the project recruits and contacts nobody, does not try to identify any
+  reviewer and does not use MetaRec user data. No formal ethics determination has been asked for. Whether the
+  university needs one for the secondary use of public, pseudonymous data is to be confirmed with the supervisor.
 - **Personal data.** The raw files hold pseudonymous reviewer ids supplied by the dataset,
   review text and ratings. No names or contact details. MetaRec user data is not used and
   not published (its interaction table is empty).

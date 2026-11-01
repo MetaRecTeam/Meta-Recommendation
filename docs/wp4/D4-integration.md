@@ -45,6 +45,9 @@ de-duplication and before the top-10 cut.
   items. The only field it changes is `why`, which a fixed template fills from real fields. No new public field.
 * **Fallback.** An error, a timeout, an empty output, or a duplicate, unknown or missing id returns the original
   B0 order, still behind the hard gate, with a `FALLBACK_*` warning. If the ranker itself raises, the same applies.
+* **Task id.** The id of the running task is passed from `run_recommendation_task_graph` through
+  `_execute_generic_domain_task` and the graph state into `RankerRequestV1.task_id`. A call without one (the
+  refine-slot path, tests) leaves it empty.
 * **Injection.** `GenericGraphAdapters.ranker` takes the whole ranker (`rank_live`'s signature), so tests need
   no monkeypatching; `ranker_history`, `ranker_scorer` and `ranker_timeout_s` are narrower hooks.
 
@@ -56,7 +59,6 @@ ranker-only p95 is about 3.5 ms with a budget and about 10 ms with no constraint
 
 ## Known limits
 
-* `task_id` is optional in the request: the service does not pass a task id into the generic graph.
 * The proposal's third identity rule, a normalised `(brand, model)` when there is no ASIN or provider id, is not
   implemented: the provider results carry no model field. Such an item keeps its title-and-link hash id.
 * The live weights are the offline ones. There are no live relevance labels, so they cannot be re-tuned.

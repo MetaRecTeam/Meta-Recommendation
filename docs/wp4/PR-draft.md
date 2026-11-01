@@ -6,7 +6,7 @@
 > ([`D5-evaluation.md`](D5-evaluation.md)). Rewrite this description from those two documents before it is used.
 
 Draft. First slice of WP4 (Constraint-Aware Product Recommendation,
-[proposal](https://github.com/Hanny658/FYP26-Proposals/tree/main/WP4-product-recommendation)).
+[proposal](https://github.com/Hanny658/FYP26-Proposals/tree/main/%5Btaken%5D%20WP4-product-recommendation)).
 Everything here is **off by default** — `METAREC_PRODUCT_RANKER` defaults to `legacy`
 and product output is unchanged.
 

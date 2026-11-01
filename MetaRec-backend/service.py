@@ -1948,6 +1948,7 @@ class MetaRecService:
         use_online_agent: bool,
         tool_tags: Optional[List[str]],
         progress_callback,
+        task_id: Optional[str] = None,
     ) -> RecommendationResult:
         from langgraph_metarec.graphs.generic_graph import (
             GenericGraphAdapters,
@@ -1994,6 +1995,7 @@ class MetaRecService:
                 use_online_agent=use_online_agent,
                 tool_tags=tool_tags,
                 progress_callback=progress_callback,
+                task_id=task_id,
                 adapters=GenericGraphAdapters(
                     reasoner=_gather_reasoner,
                     ranker_history=_ranker_history if domain == "product" else None,
@@ -2242,6 +2244,7 @@ class MetaRecService:
                     use_online_agent=use_online_agent,
                     tool_tags=task_tool_tags,
                     progress_callback=scoped_progress_callback,
+                    task_id=task_id,
                 )
 
             if active_route.get("mode") == "multi_domain":

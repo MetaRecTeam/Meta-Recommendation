@@ -57,6 +57,7 @@ def _graph(case, adapters=None, **kwargs):
             preferences=kwargs.pop("preferences", case.preferences_with_constraints),
             tool_tags=PRODUCT_TAGS,
             adapters=adapters,
+            task_id=kwargs.pop("task_id", None),
         )
     )
 
@@ -509,7 +510,7 @@ def test_the_result_contract_is_exactly_the_proposals_fields():
 # ---------------------------------------------------------------------------
 
 
-def _service_run(monkeypatch, case, *, user_id, flag, records=None):
+def _service_run(monkeypatch, case, *, user_id, flag, records=None, task_id=None):
     import business_repositories
     from tests.conftest import make_service
 
@@ -535,6 +536,7 @@ def _service_run(monkeypatch, case, *, user_id, flag, records=None):
             use_online_agent=False,
             tool_tags=PRODUCT_TAGS,
             progress_callback=None,
+            task_id=task_id,
         )
     )
     return result, calls
@@ -775,3 +777,82 @@ def test_one_hundred_candidates_rank_within_the_latency_target():
     times.sort()
     p95 = times[int(0.95 * len(times)) - 1]
     assert p95 < 50, f"p95 {p95:.1f} ms for 100 candidates is far above the 25 ms target"
+
+
+# ---------------------------------------------------------------------------
+# The task id of the request reaches the ranker (RankerRequestV1.task_id)
+# ---------------------------------------------------------------------------
+
+
+def _task_id_spy(seen):
+    def spy(*, items, **kwargs):
+        seen.append(kwargs.get("task_id", "NOT PASSED"))
+        return rank_live(items=items, **kwargs)
+
+    return spy
+
+
+def test_the_task_id_given_to_the_graph_reaches_the_ranker(monkeypatch):
+    monkeypatch.setenv(PRODUCT_RANKER_ENV, "domain_v1")
+    case = _fallback_case()
+    seen: List[Any] = []
+    adapters = GenericGraphAdapters(tool_registry=_registry_returning(case.pool), ranker=_task_id_spy(seen))
+    _graph(case, adapters, task_id="task-42")
+    assert seen == ["task-42"]
+
+
+def test_a_graph_run_without_a_task_id_hands_the_ranker_none(monkeypatch):
+    monkeypatch.setenv(PRODUCT_RANKER_ENV, "domain_v1")
+    case = _fallback_case()
+    seen: List[Any] = []
+    _graph(case, GenericGraphAdapters(tool_registry=_registry_returning(case.pool), ranker=_task_id_spy(seen)))
+    assert seen == [None]
+
+
+def test_the_service_passes_the_current_task_id_down_to_the_ranker(monkeypatch):
+    seen: List[Any] = []
+    real = generic_graph.rank_live
+
+    def spy(**kwargs):
+        seen.append(kwargs.get("task_id", "NOT PASSED"))
+        return real(**kwargs)
+
+    monkeypatch.setattr(generic_graph, "rank_live", spy)
+    case = next(c for c in CASES if c.id == "case_12_webcam")
+    _service_run(monkeypatch, case, user_id=REGISTERED, flag="domain_v1", task_id="task-77")
+    assert seen == ["task-77"]
+    seen.clear()
+    _service_run(monkeypatch, case, user_id=REGISTERED, flag="domain_v1")
+    assert seen == [None]
+
+
+def test_the_task_id_is_validated_as_part_of_the_request_contract():
+    item = _items([_provider_item("Desk lamp", "$30", 200, asin="B0LLLLLLL1")])[0]
+    req = RankerRequestV1(request_id="r", task_id="task-42", query="lamp", candidates=[item])
+    assert req.task_id == "task-42" and RankerRequestV1(request_id="r", query="lamp", candidates=[item]).task_id is None
+
+
+def test_the_task_runner_hands_its_own_task_id_to_the_product_task(monkeypatch):
+    """run_recommendation_task_graph is what the API calls; its task id must reach _execute_generic_domain_task."""
+    from service import RecommendationResult
+    from tests.conftest import make_service
+
+    service, _ = make_service([])
+    seen: List[Any] = []
+
+    async def fake_generic_task(**kwargs):
+        seen.append(kwargs.get("task_id", "NOT PASSED"))
+        return RecommendationResult(restaurants=[], items=[], thinking_steps=[], confidence_score=0.4, metadata={})
+
+    service._execute_generic_domain_task = fake_generic_task
+    route = {
+        "domain": "product", "execution_domain": "product", "mode": "single_domain", "status": "ready",
+        "tool_tags": PRODUCT_TAGS,
+        "domain_tasks": [{"domain": "product", "status": "ready", "tool_tags": PRODUCT_TAGS}],
+    }
+    asyncio.run(
+        service.run_recommendation_task_graph(
+            "task-from-the-runner", "quiet keyboard under 120 USD", {}, user_id="default", session_id="s-1", route=route
+        )
+    )
+    assert seen == ["task-from-the-runner"]

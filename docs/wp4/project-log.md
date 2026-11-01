@@ -1,6 +1,6 @@
 # FYP Project Log — Ong Chuan Hau — WP4: Constraint-aware Product Recommendation
 
-Proposal: https://github.com/Hanny658/FYP26-Proposals/tree/main/WP4-product-recommendation
+Proposal: https://github.com/Hanny658/FYP26-Proposals/tree/main/%5Btaken%5D%20WP4-product-recommendation
 D0 interim report: [`D0-interim-report.md`](D0-interim-report.md) — pipeline trace, B0 repro, ID/price/field/feedback audit, freeze list.
 
 This file is the running work log; `D0-interim-report.md` is the deliverable.

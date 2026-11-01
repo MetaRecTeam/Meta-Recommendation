@@ -5,7 +5,7 @@
 %affil Nanyang Technological University, Singapore
 %affil Supervisor: Prof Zhang Jie
 %affil Work package: WP4, Constraint-Aware Product Recommendation, MetaRec multi-domain recommender
-%affil Proposal: github.com/Hanny658/FYP26-Proposals, WP4-product-recommendation
+%affil Proposal: github.com/Hanny658/FYP26-Proposals, folder [taken] WP4-product-recommendation
 %affil Code: MetaRec, branch `feat/wp4-constraint-aware-product`
 
 %abstract WP4 aims to make the product recommendations in MetaRec respect what the user asked for (budget, brand, category and compatibility) and to rank the products that remain by relevance. This report covers the whole project: an audit of the current pipeline, the frozen evaluation data, the baselines, a constraint-aware ranker (M2), its integration into the live request path behind a feature flag, and a one-command evaluation. In the audit, 52 of the 146 products returned by 15 frozen searches broke a stated constraint, and the existing rating-first sort surfaced every one of them. The evaluation data is a time-split subset of Amazon Reviews 2023 with 1,888,667 interactions on 80,181 items. Along the way I found that future reviews were leaking into item popularity. Removing the leak brought the B1 baseline down from a Recall@10 of 0.5140 to 0.3711. On held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), which is short of the 3% target, and by +2.91% for users with long histories. With the flag on, none of the 52 violators reaches the user, and the ranker-only p95 latency for 100 candidates is under 11 ms, against a 25 ms limit. With the flag off, the output is identical to the old ranking. The sealed test split has not been opened.
@@ -15,6 +15,8 @@
 ## Introduction {#intro}
 
 The aim of WP4 is simple to state. When a user asks for a product, the recommendations should respect what they asked for, such as budget, brand, category and compatibility, and the products that pass should then be ranked by relevance. The ranker I built for this is called M2. Offline, it has to beat the current sort (B0) and a text-plus-popularity baseline (B1), with a point estimate of at least 3% relative NDCG@10 (Project Plan §6). With its feature flag off, the live output has to stay identical to B0. The evidence comes from a frozen Amazon Reviews 2023 dataset {cite:1}, a development split that I use for tuning, and a sealed test split that is still closed ({sec:testsplit}).
+
+The research question in the proposal is whether a constraint-first hybrid of complex-query text relevance, user affinity and calibrated popularity can rerank MetaRec's existing product candidates better than the generic ranker, without violating an explicit budget, brand, category or model requirement. The project ranks frozen candidates and plugs in after the existing normalisation. It does not replace the Amazon or SerpApi retrieval, crawl products, predict prices, change the routing or the itinerary logic, or make up product attributes that the provider did not supply. One frozen Amazon Reviews 2023 category is enough for the offline study, and I use `Office_Products` ({sec:dataset}).
 
 {tab:t01} summarises the main results. Each figure in it is explained in the section named in the last column.
 
@@ -42,7 +44,7 @@ Sections {secn:pipeline} to {secn:freeze} give the full D0 audit. After that com
 | D1 data and features | **Done**, including the star ratings, leak-free item features and a complete data sheet | {sec:dataset}; `docs/wp4/D1-data-sheet.md` |
 | D2 baselines | **Done** on development data. A popularity leak was found and the numbers were re-run; confidence intervals, the weight sweep and the leak-free legacy B0 were added ({sec:baselines}) | {sec:baselines}; `scripts/wp4_build_eval_cases.py`, `scripts/wp4_run_baselines.py`, `scripts/wp4_sweep_ranks.py` |
 | D3 M2 ranker | **Done**: built, re-tuned with train-only popularity, tested (63 WP4 tests pass), ranker-only p95 11 to 19 ms against the 25 ms limit. On held-out users M2 beats B1 by +0.81% NDCG@10 (95% interval +0.69% to +0.94%), short of the 3% target, but by +2.91% on the long-history slice ({sec:slices}) | {sec:m2}; `langgraph_metarec/product_ranker_m2.py`, `scripts/wp4_m2_*.py` |
-| D4 integration | **Done**: M2 runs in the live product path behind `METAREC_PRODUCT_RANKER` (flag off equals B0), with typed contracts, ASIN ids, a safe fallback and 90 network-free tests. Not yet tried against the real provider, because that needs a SerpApi key | {sec:live}; `langgraph_metarec/product_ranker_live.py` |
+| D4 integration | **Done**: M2 runs in the live product path behind `METAREC_PRODUCT_RANKER` (flag off equals B0), with typed contracts, ASIN ids, a safe fallback and 95 network-free tests. Not yet tried against the real provider, because that needs a SerpApi key | {sec:live}; `langgraph_metarec/product_ranker_live.py` |
 | D5 evaluation | **Done on development data**: one command, per-case artifacts, user-level bootstrap intervals, slices, exposure, latency and an acceptance table. The live smoke test is built and tested against a stub but has not run against the real provider, and the sealed test split has not been scored | {sec:eval}; `eval/domain_ranker.py` |
 
 ## Pipeline Trace: A Product Request, End to End {#pipeline}
@@ -186,7 +188,7 @@ All 80,181 items matched a metadata record by `parent_asin`. The price is missin
 
 My first pass dropped the star rating. A second pass re-read the raw reviews and kept the rating in a new file, which I checked row for row against the 5-core file without changing any existing file. From it I get per-item counts and mean ratings computed from train rows only, which is all that was known at the train cutoff. I also get a graded relevance label for each dev row (76.1% are 2, 10.4% are 1 and 13.5% are 0). 40.3% of the items have no train rows yet, because they were first reviewed later. I recounted all of this independently and found no mismatch.
 
-The 100-candidate pools used in {sec:baselines} are frozen by checksum, and rebuilding all 534,128 cases from scratch gave a byte-identical file. The data sheet now states the licence position: neither the dataset's homepage nor its Hugging Face card gives a licence or terms, only a request to cite. I have flagged this for the supervisor to confirm. It also covers the personal data that is held, minimisation, access, retention, deletion and custody of the sealed test set. The raw and processed files are not in git, but their SHA-256 checksums, the data sheet and the scripts that produce them are.
+The 100-candidate pools used in {sec:baselines} are frozen by checksum, and rebuilding all 534,128 cases from scratch gave a byte-identical file. The data sheet now states the licence position: neither the dataset's homepage nor its Hugging Face card gives a licence or terms, only a request to cite. I have flagged this for the supervisor to confirm. It also covers consent and ethics, the personal data that is held, minimisation, access, retention, deletion and custody of the sealed test set. The raw and processed files are not in git, but their SHA-256 checksums, the data sheet and the scripts that produce them are.
 
 ## Baselines on Development Data (D2) {#baselines}
 
@@ -197,6 +199,8 @@ The 100-candidate pools used in {sec:baselines} are frozen by checksum, and rebu
 ### Evaluation Protocol {#protocol}
 
 The frozen data has interactions and an item catalogue, but no search queries and no candidate lists, which meant I had to construct the evaluation cases myself. These choices are my own, and the proposal does not dictate them.
+
+Each case is one row of `eval/product_dev_v1.jsonl`, shaped like the proposal's `DomainEvalCaseV1`. It holds `case_id`, an anonymous `user_key` (a hash, never a MetaRec user), `cutoff_time`, `query`, `fused_preferences`, the frozen `candidates` (as ASINs), the chronological `history`, the future `ground_truth_item_ids`, `strict_constraints` and `slice_labels`. The item features of each candidate, with their provenance and missingness (for example whether the price was parsed or is unknown), are built from the catalogue when a case is scored. The offline cases state no constraints, so `fused_preferences` and `strict_constraints` are empty, and `slice_labels` holds only cold or warm. Whether the real item was retrieved is recorded for every case in the D5 output ({sec:eval}).
 
 Every development interaction gives one case, and "the real next item" in this report means the item of that interaction. A user with several development interactions gets one case for each, all sharing the same train-only history. As a result, the item of a given case is not necessarily the first one the user bought after the cutoff. The query is the user's history: the titles of the user's last 20 train items (fewer if there are fewer), oldest first, joined with single spaces. Users with no train history (39.6% of the development cases) have no query, and every system falls back to popularity for them. For B1, the query and the candidate titles are lowercased and split into runs of letters and digits (the regular expression `[a-z0-9]+`), so "0.7 mm" becomes `0`, `7` and `mm`.
 
@@ -632,7 +636,7 @@ D3 asks for a hard-constraint engine, the hybrid score, a cold fallback, reason 
 
 The evaluation itself did not change. The offline Amazon cases state no constraints, so the gate removes nothing there. On 3,000 development cases every one of the five component values is identical to the saved ones (the largest difference is 0), and the official runner gives the same Recall, NDCG and MRR@10 on 2,000 cases as before (0.2615, 0.1647, 0.1349).
 
-There were 25 new tests, 63 WP4 tests in all at that point, and they all passed (`python -m pytest tests/wp4`; D4 and D5 later brought the total to 197). They check that each of the nine allow-listed reason codes is produced and that nothing outside the list is. They also cover an unknown price with and without a budget, a currency that cannot be compared, eligibility first (an extreme item that the gate removes does not change the scores of the survivors), scores equal to the plain weighted sum when nothing is stated, ties keeping the input order, each fallback case, and the gate on the 15 labelled fixtures. To make sure the tests can fail, I broke the code on purpose in six ways: the gate blind to price and brand, the price policy switched off, z-scores over the whole pool, the output never validated, the timeout not enforced and ties reversed. Every break was caught.
+There were 25 new tests, 63 WP4 tests in all at that point, and they all passed (`python -m pytest tests/wp4`; D4 and D5 later brought the total to 202). They check that each of the nine allow-listed reason codes is produced and that nothing outside the list is. They also cover an unknown price with and without a budget, a currency that cannot be compared, eligibility first (an extreme item that the gate removes does not change the scores of the survivors), scores equal to the plain weighted sum when nothing is stated, ties keeping the input order, each fallback case, and the gate on the 15 labelled fixtures. To make sure the tests can fail, I broke the code on purpose in six ways: the gate blind to price and brand, the price policy switched off, z-scores over the whole pool, the output never validated, the timeout not enforced and ties reversed. Every break was caught.
 
 On the fixtures, the gate of M2 removes all 52 labelled violators and keeps 91 of the 94 compliant products. The other 3 (one in the Sony search, two in the speaker search) have no price while a budget is stated, so the strict policy excludes them. The live gate in {app:B} has no missing-price policy and keeps all 94. That completes D3 as a build. D4 then wires M2 into the live path ({sec:live}).
 
@@ -652,20 +656,21 @@ D4 puts M2 into the live product request, behind `METAREC_PRODUCT_RANKER`. With 
 | A read adapter over the item-interaction seam | `service._execute_generic_domain_task`, `item_interaction_repository.list_for_user`, `history_from_records` |
 | The ASIN kept by the provider adapter | `tool_registry._amazon_product_search_adapter` |
 | Scores kept on the server | `result.metadata["product_ranker"]`, removed for clients by `main._INTERNAL_METADATA_KEYS` |
-| Tests, with no network, database or key | `tests/wp4/test_d4_live_ranker.py` (90 tests) |
+| Tests, with no network, database or key | `tests/wp4/test_d4_live_ranker.py` (95 tests) |
 
 ### Behaviour {#livebehaviour}
 
 1. The flag. It accepts exactly `legacy` or `domain_v1`. Unset or empty means `legacy`, and any other value stops the backend at start-up, so a typo cannot leave the ranker half on. The graph reads the flag by the same exact rule (`DOMAIN_V1` or ` domain_v1` count as `legacy`).
 2. Flag off. The ranker, the history read and the ASIN are never used. Ids stay the title hash, so items that users saved earlier still match, and the output equals the frozen golden files ({sec:b0repro}).
-3. Contracts. `RankerRequestV1` rejects unknown top-level fields, so a user id cannot slip in by accident. It needs candidates with exactly the 14 internal item fields (at most 100 of them), validates each interaction as `ItemInteractionV1` (an RFC 3339 time with an offset, at most 200 events) and carries typed preferences together with the hard constraints. `RankerResultV1` has exactly the fields the proposal names, and every candidate that is not ranked appears in `excluded` with a reason code.
+3. Contracts. `RankerRequestV1` rejects unknown top-level fields, so a user id cannot slip in by accident. It needs candidates with exactly the 14 internal item fields (at most 100 of them), validates each interaction as `ItemInteractionV1` (an RFC 3339 time with an offset, at most 200 events) and carries typed preferences together with the hard constraints. The id of the running task goes into `task_id`. `RankerResultV1` has exactly the fields the proposal names, with the pinned `model_name`, `model_version` and `feature_version` among them, and every candidate that is not ranked appears in `excluded` with a reason code.
 4. Eligibility first. The stated budget, brand, category and compatibility terms are hard rules, and history can never override them. An unknown price is excluded with `UNKNOWN_PRICE_STRICT_MODE` when a budget is stated, and kept and flagged with `PRICE_MISSING` when none is.
 5. Currency. A budget carries its currency: `S$120` is SGD, while `US$120` and a bare `$` are USD. A price is read from its symbol. A price in a different currency from the budget is excluded under the same reason code, because no exchange table is pinned. A versioned table can be pinned in `PINNED_FX_TABLE`, and its version is then added to the warnings. A price with no symbol is kept with a `CURRENCY_MISSING` warning. Reading a bare `$` as USD is my decision: the app treats it as SGD elsewhere, but SerpApi's Amazon results are in USD ({sec:prices}).
-6. Scoring. The weights are the re-tuned offline ones (text 0.25, attribute 0, collaborative 0.05, popularity 0.65, tail 0.05), because there are no live relevance labels to tune on. For a live request the text is the real query plus the stated attributes, scored with BM25 over the candidates. Affinity is the similarity to what the user saved, bought or marked positive, where an exact ASIN match counts most, and an item the user hid goes below everything else. A user with no history is a cold start (`POPULAR_FALLBACK`). Only the latest 200 interactions are read, and the read is cut off by the same timeout as the ranker.
+6. Scoring. The weights are the re-tuned offline ones (text 0.25, attribute 0, collaborative 0.05, popularity 0.65, tail 0.05), because there are no live relevance labels to tune on. For a live request the text is the real query plus the stated attributes, scored with BM25 over the candidates. Affinity is the similarity to what the user saved, bought or marked positive, where an exact ASIN match counts most, and an item the user hid goes below everything else. A user with no history is a cold start (`POPULAR_FALLBACK`). Only the latest 200 interactions are read, and the read is cut off by the same timeout as the ranker. Repeats are kept, because a second "Purchased" is a second event. Interactions saved before D4 carry a title-hash id, so the history read takes the ASIN from the link in each interaction's stored snapshot, which is how the old and the new ids are matched.
 7. Identity. Under `domain_v1` the id is the ASIN (the provider field, or `/dp/<ASIN>` from the link), and two results with the same ASIN are one candidate.
-8. Projection. M2 only reorders or removes the items it is given and joins them back to the untouched internal items. The only field it changes is `why`, which a fixed template fills from real fields. No public field is added, and the scores never reach the client.
+8. Projection. M2 only reorders or removes the items it is given and joins them back to the untouched internal items. The only field it changes is `why`, which a fixed template fills from real fields. No public field is added, and the scores never reach the client. No claim in the line comes from a model: a fixed template fills it from the price, the review count and the match to the query.
 9. Fallback. An error, a timeout, an empty output, or a duplicate, unknown or missing id returns the original B0 order, still behind the hard gate, with a `FALLBACK_*` warning. If the ranker itself raises, the gate still applies, so a failure cannot put a violator back in front of the user.
 10. Injection. `GenericGraphAdapters.ranker` takes the whole ranker, so the tests need no monkeypatching.
+11. Rollback. Setting the flag back to `legacy` and restarting the backend is the whole rollback. No data or schema changes are involved.
 
 ### One Search, Flag Off and On {#liveexample}
 
@@ -687,13 +692,13 @@ D4 puts M2 into the live product request, behind `METAREC_PRODUCT_RANKER`. With 
 
 ### Tests and Review {#livetests}
 
-The 90 tests cover the flag, the contracts, equality with B0 when the flag is off, the constraints, the currency rules, ASIN ids, every fallback path, the history read and the projection. To see whether they can fail, I broke the code on purpose in 14 ways. Examples are switching off currency detection, letting a ranker error return the list unfiltered, removing the timeout on the history read, allowing extra fields on a candidate and reading the flag leniently. One break was not caught at first, because my test for hidden items was too weak (the item was last under B0 anyway). I rewrote the test, and all 14 breaks are now caught.
+The 95 tests cover the flag, the contracts, equality with B0 when the flag is off, the constraints, the currency rules, ASIN ids, every fallback path, the history read and the projection. To see whether they can fail, I broke the code on purpose in 14 ways. Examples are switching off currency detection, letting a ranker error return the list unfiltered, removing the timeout on the history read, allowing extra fields on a candidate and reading the flag leniently. One break was not caught at first, because my test for hidden items was too weak (the item was last under B0 anyway). I rewrote the test, and all 14 breaks are now caught.
 
 I then reviewed D4 line by line against the proposal's text. That found four things, which I fixed: the currency of the budget was ignored, the request contract was looser than the proposal's, a ranker error could return an unfiltered list, and the history read had no bound.
 
 ### What D4 Does Not Show {#livelimits}
 
-The offline result (+0.81% NDCG@10 over B1) was measured on the Amazon Reviews data with a history query. It does not carry over to live requests, which have a real query, a different popularity scale and no relevance labels. For live requests the evidence is the 15 labelled searches ({sec:evalresults}), the contract checks and the equality with B0 when the flag is off. Five limits are known. The service does not pass a task id into the generic graph, and the request keeps the field optional. The proposal's third identity rule, a normalised brand and model when there is no ASIN, is not built, because the provider results carry no model field. The live weights are the offline ones. The repository returns at most 5,000 interactions, oldest first, so a user with more than that loses the latest ones. And no live check with a SerpApi key has been run.
+The offline result (+0.81% NDCG@10 over B1) was measured on the Amazon Reviews data with a history query. It does not carry over to live requests, which have a real query, a different popularity scale and no relevance labels. For live requests the evidence is the 15 labelled searches ({sec:evalresults}), the contract checks and the equality with B0 when the flag is off. Five limits are known. First, the hard category, model and required-word rules are matched against the candidate's text (title, description, tags and the provider's brand field), because live candidates carry no verified category or model field. The proposal asks that unverified text not be promoted to a hard-filter field, so this departs from it. A product whose title leaves out a word it really has is excluded, and a brand rule fires only when a different brand is readable. Only the budget rests on a parsed field, the price. The proposal's third identity rule, a normalised brand and model when there is no ASIN, is not built, because the provider results carry no model field. The live weights are the offline ones. The repository returns at most 5,000 interactions, oldest first, so a user with more than that loses the latest ones. And no live check with a SerpApi key has been run.
 
 To show it in the demo, set `METAREC_PRODUCT_RANKER=domain_v1` (or `legacy` for the other half), restart the backend, and run the same ProductRec query twice.
 
@@ -712,8 +717,8 @@ python -m eval.domain_ranker --domain product --fixture eval/product_dev_v1.json
 2. It gives the relative lift of M2 over each baseline with a user-level bootstrap (2,000 resamples, seed 42), and applies the frozen decision rule: the lower bound above zero, a point estimate of at least 3%, and the complex slice not worse than -2% at its lower bound. The comparison is with the stronger of B0 and B1. A 5% lift is shown as directional only.
 3. It reports exposure (head share of the top 10, popularity, catalogue coverage) and the price-parse and catalogue-mapping coverage of the pools.
 4. It runs the 15 labelled searches through the real graph with the flag off and on, and counts violators by kind of constraint and for products without a price.
-5. It measures ranker-only latency, states the hardware, and runs the pytest files that prove the feature-off and no-network bullets with the provider key removed.
-6. It refuses the sealed test split unless `--open-test-split` is given. The live smoke test runs only with `--live-smoke` and a `SERPAPI_KEY`; otherwise the report says "not run".
+5. It measures ranker-only latency, states the hardware, and runs the pytest files that prove the feature-off and no-network bullets with the provider key removed. It records the versions behind the numbers (commit, Python, hardware, fixture checksum and M2 weights). The offline evaluator uses no LLM and calls no provider, so it costs nothing beyond the laptop's time.
+6. It refuses the sealed test split unless `--open-test-split` is given. The live smoke test runs only with `--live-smoke` and a `SERPAPI_KEY`; otherwise the report says "not run". The smoke test is bounded: three searches, each with the flag off and on, so at most six provider calls.
 
 ### Results on the Development Set {#evalresults}
 
@@ -760,7 +765,7 @@ Every bullet passes except one. M2 beats the stronger of B0 and B1 with a positi
 
 ![fig:liftslice|Relative NDCG@10 lift of M2 over B1 by slice, with 95% user-level bootstrap intervals|full|figures/fig5_m2_lift_by_slice.png](figures/fig5_m2_lift_by_slice.png)
 
-The head and tail rows are new. M2 gives up 1.29% of NDCG@10 on head targets (-1.39% to -1.19%) and gains +73% on tail targets, but in absolute terms the tail gain is small: 0.0211 against 0.0122, compared with 0.4978 on head targets. I have not isolated which component produces it. The tail adjustment has a weight of only 0.05, and removing it costs just 0.06% overall ({tab:t27}). The gain is also larger where the target has no price (+4.15%, +3.68% to +4.63%). {tab:t38} shows what this does to exposure.
+On the complex slice, the proposal's headline measures both improve: Recall@10 +2.12% [+1.82%, +2.44%] and NDCG@10 +2.91% [+2.62%, +3.21%]. The head and tail rows are new. M2 gives up 1.29% of NDCG@10 on head targets (-1.39% to -1.19%) and gains +73% on tail targets, but in absolute terms the tail gain is small: 0.0211 against 0.0122, compared with 0.4978 on head targets. I have not isolated which component produces it. The tail adjustment has a weight of only 0.05, and removing it costs just 0.06% overall ({tab:t27}). The gain is also larger where the target has no price (+4.15%, +3.68% to +4.63%). {tab:t38} shows what this does to exposure.
 
 %table t38 | Exposure and Coverage on the Held-Out Users (Top 10) | f
 | System | Head share of the top 10 | Mean ln(1 + reviews) | Distinct items shown | Catalogue coverage |
@@ -822,6 +827,29 @@ That is also the honest summary of the contribution. On accuracy against a stron
 
 The head and tail result is a trade-off and not a clear win. M2 is 1.29% worse than B1 on head targets and much better on tail ones, with more of the catalogue shown. Whether that is wanted depends on the product. For a search with a budget it probably is, because the item the user wants is often not the most reviewed one, but I have no live data to say so.
 
+### Where M2 Still Falls Short {#failures}
+
+These are the cases I found where the ranker does not help, or does something a user might not want.
+
+1. Cold users. 39.5% of the held-out cases have no history, and M2 and B1 rank them the same way (-0.01% [-0.03%, +0.00%]).
+2. Short histories. On keyword-like histories M2 is -0.24% against B1, and the interval includes zero (-0.24% [-0.50%, +0.02%]).
+3. Head targets. M2 is -1.29% against B1 when the real item is a head item (-1.29% [-1.39%, -1.19%]).
+4. Products without a price. When a budget is stated, a compliant product with no price is excluded. That cost 3 of 94 compliant products in the 15 searches.
+5. Pools with nothing left. If every candidate breaks a rule, as in the SSD and gaming-laptop searches, the answer is empty with an explained error, and the budget is never relaxed on its own.
+6. Rules that read text. The hard category, model and required-word rules match the candidate's text, so a product whose title leaves out a word it really has is excluded, and a brand rule fires only when a different brand is readable ({sec:livelimits}).
+
+### How This Fits the Reading List {#related}
+
+The proposal's reading list has five papers, and each of them touches a choice in this project.
+
+Covington et al. {cite:8} separate candidate generation from ranking. MetaRec's product search is the first stage (SerpApi returns at most ten results) and M2 is the second, which also sets a ceiling: M2 can only reorder what the first stage returned. In two of the 15 frozen searches, the SSD and the gaming laptop, every returned product broke a constraint, so the gate rightly left nothing to show, and no ranking could have helped. The live re-run in {sec:fields} found that only 12 of 30 results (40%) appeared in both runs of the same query. In such cases a better first stage would help, and a better ranker would not.
+
+BPR {cite:9} and EASE {cite:10} are the pairwise and the linear baselines that the proposal suggests for implicit feedback. I used neither. The proposal allows an item-based method where the data supports it, and the frozen subset has thin histories (a median of 4 train interactions per user, {sec:leak}), so I used ItemKNN, which scored below plain popularity (NDCG@10 0.1676 against 0.2231). I did not test BPR or EASE, so I cannot say whether a stronger collaborative baseline would have changed the order of the systems. That is a limit of the comparison, and it is the first thing I would add.
+
+Ferrari Dacrema et al. {cite:11} analysed recent neural recommenders and found that most of the ones they could reproduce were beaten by simpler, well-tuned baselines, and they ask for careful and reproducible comparison. This project follows that advice in three ways. The baselines are tuned on the same development data as M2, the popularity baseline is kept as a serious reference (it carries most of the result), and the first set of numbers was thrown away when I found the popularity leak ({sec:leak}). The shared project rules say that a well-supported null result is acceptable, and that a leaked or post-hoc threshold is not. I have tried to stay on the right side of both.
+
+Hou et al. {cite:1} is the source of the dataset. The proposal lists the pretrained BLaIR encoders of that work as an optional comparison, and I did not run them.
+
 ### Threats to Validity {#validity}
 
 - Sampled metrics. Each case ranks 100 candidates and not the whole catalogue. Such metrics cannot be compared with papers that rank everything, and they can even reverse which of two systems looks better {cite:6}. The comparison between B1 and M2 is therefore about these sampled cases, and a full-catalogue evaluation could differ.
@@ -831,6 +859,8 @@ The head and tail result is a trade-off and not a clear win. M2 is 1.29% worse t
 - Tuning. M2's weights were tuned on 1 in 10 users and scored on the other 9 in 10. B1's weight was chosen on all development users, which if anything favours B1. The top ten weightings are within 0.0010 NDCG@10 of each other, so the weights are not pinned down.
 - Intervals. The bootstrap covers which users are in the sample. It does not cover the random negatives, the choice of weights, or the 15 labelled searches, which I labelled by hand and which are too few for a rate.
 - Prices and providers. Prices and result lists change between runs ({sec:prices}), so the live result will differ from any frozen one. The live path has been tested against frozen candidate pools and not against the real provider.
+- Rules on text. The hard rules match candidate text and not validated attributes ({sec:livelimits}). The zero-violator result on the 15 searches therefore says that the rules do what they state. It does not say that every product that passes truly has the required feature.
+- Collaborative baselines. Only ItemKNN was tried ({sec:related}).
 - Hardware. The latency was measured on one laptop, and the live-ranker p95 moved between 3.5 and 15.4 ms across repeats. It should be repeated on the demo machine if that is a different one.
 - The test split. It has not been scored, so nothing here has been checked on data that played no part in any choice, apart from the held-out users of the development split.
 
@@ -838,7 +868,7 @@ The head and tail result is a trade-off and not a clear win. M2 is 1.29% worse t
 
 WP4 set out to stop MetaRec from recommending products that break what the user asked for, and to rank the rest well. The audit showed the size of the problem: 36% of the products returned by 15 frozen searches broke a stated constraint, and the existing rating-first sort showed all of them. I built a frozen, leak-free evaluation on Amazon Reviews 2023, found and removed a popularity leak that had nearly doubled the first baseline numbers, and built a constraint-first hybrid ranker, M2. It is now connected to the live product path behind a feature flag. With the flag off, the output is unchanged. With the flag on, no violator reaches the user in any of the 15 searches, a failure falls back to the old order behind the same gate, and the ranker takes well under the 25 ms limit for 100 candidates.
 
-On ranking quality the result is modest. M2 beats B1 by +0.81% NDCG@10 on held-out users, with an interval of +0.69% to +0.94%, and by +2.91% on long histories, so the 3% target is not met. I did not change the threshold, and the test split is unopened. What the project delivers is a ranker that never ignores a stated budget, brand, category or model, a way to measure it with one command, and an honest account of how small the accuracy gain is against a strong popularity baseline. Real search queries, live relevance labels and a pinned exchange table are what would show whether the gain is larger in use than it is offline.
+On ranking quality the result is modest. M2 beats B1 by +0.81% NDCG@10 on held-out users, with an interval of +0.69% to +0.94%, and by +2.91% on long histories, so the 3% target is not met. I did not change the threshold, and the test split is unopened. What the project delivers is a ranker that never ignores a stated budget, brand, category or model, a way to measure it with one command, and an honest account of how small the accuracy gain is against a strong popularity baseline. To answer the research question directly: yes, a constraint-first hybrid can rerank MetaRec's product candidates without violating a stated budget, brand, category or model, and the 15 searches show it (0 of 52 violators). It ranks better than the old rating-first order by a wide margin (NDCG@10 0.2369 against 0.0347 for the closest leak-free version of that order), and better than a text-plus-popularity baseline only slightly, which is not enough to meet the 3% target. Real search queries, live relevance labels and a pinned exchange table are what would show whether the gain is larger in use than it is offline.
 
 ## Status, Decisions and Handover {#status}
 
@@ -870,7 +900,9 @@ I list these here so that nobody has to hunt for them. {sec:validity} covers how
 - The baselines and the re-tuned M2 have user-level bootstrap intervals on held-out users. I chose the M2 weights on 1 in 10 users and the B1 weight on all users.
 - The offline numbers do not transfer to live requests, which have a real query, a different popularity scale and no relevance labels. The live weights are the offline ones, because there are no live labels to tune on.
 - The complex-query slice is computed only with a proxy (history-text length, {sec:slices}). The Plan freezes a 2% non-inferiority margin for it, but nothing defines a complex query or says where such queries come from, and the evaluation cases have no real search queries.
-- Known limits of the live path ({sec:livelimits}): the task id is not passed into the generic graph, the brand-and-model identity rule is not built, no exchange table is pinned (so a price in another currency is excluded), the repository returns at most 5,000 interactions, oldest first, and nothing has been run against the real provider.
+- Known limits of the live path ({sec:livelimits}): the brand-and-model identity rule is not built, no exchange table is pinned (so a price in another currency is excluded), the repository returns at most 5,000 interactions, oldest first, and nothing has been run against the real provider.
+- The hard category, model and required-word rules match candidate text and not validated attributes, which the proposal would prefer ({sec:livelimits}).
+- Only ItemKNN was tried as a collaborative baseline. BPR and EASE from the reading list were not ({sec:related}).
 - The labelled constraint corpus has 15 searches and 52 violators that I labelled by hand. It is enough to show that the gate works, and too small to give a rate.
 - The full evaluation takes about 25 minutes, and the latency was measured on one laptop.
 - The working branch name does not follow the `fyp/wp4/<topic>` convention in the shared guidance.
@@ -893,7 +925,7 @@ python scripts/wp4_m2_components.py all m2full             # about 14 minutes
 python scripts/wp4_m2_tune.py m2full sweep_ranks.npz       # about 12 minutes
 python scripts/wp4_latency.py 500 0.25,0,0.05,0.65,0.05            # first 500 cases
 python scripts/wp4_latency.py 500 0.25,0,0.05,0.65,0.05 1000       # spread sample
-python -m pytest tests/wp4                                         # 197 tests
+python -m pytest tests/wp4                                         # 202 tests
 python scripts/wp4_slices.py dist                         # length distribution only
 python scripts/wp4_slices.py run m2full sweep_ranks.npz 51  # slices, a few minutes
 python -m eval.domain_ranker --domain product --fixture eval/product_dev_v1.jsonl --systems generic classical domain_v1 --out artifacts/wp4_d5_dev   # D5, about 25 minutes
@@ -908,7 +940,7 @@ The project is built, tested and evaluated on development data. This is what is 
 1. The sealed test split. It is to be opened once, at the very end, with the weights and thresholds as they are ({sec:testsplit}).
 2. A check against the real provider. Run the live smoke test (`--live-smoke`) and the demo with a SerpApi key and quota, which is the second open point in {sec:confirm}.
 3. The oral, 23 to 28 November: slides first, then a live demo in the UI with the ranker flag off and on ({sec:livelimits} says how), with a frozen replay as backup.
-4. Work that I would do next, in order of value: collect real search queries and live relevance labels, so that the weights can be tuned on the live task and the complex-query slice can use real queries; pin an exchange-rate table; build the brand-and-model identity rule; and pass the task id into the graph.
+4. Work that I would do next, in order of value: collect real search queries and live relevance labels, so that the weights can be tuned on the live task and the complex-query slice can use real queries; pin an exchange-rate table; build the brand-and-model identity rule; and try BPR or EASE as stronger collaborative baselines.
 
 ### Decisions Taken on My Own Judgement {#own}
 
@@ -922,6 +954,7 @@ The Plan or the proposal left these points open. I have decided each one here an
 | **The 3% target** | The frozen threshold is not changed. The overall result (+0.81%) is reported as it is, with the ablations and the slice result beside it. | Thresholds are frozen once the locked test is opened, and the evidence shows where the gain is and is not. | {secn:retune}, {secn:slices} |
 | **Graded NDCG** | Both versions are reported: binary, and graded (normalised by the ideal ranking). | With one rated item per case, the difference between a 5-star and a 4-star item cancels in the normalised version. | {secn:legacy} |
 | **Demo** | Slides first, then a live demo in the UI with the ranker flag off and on, with a frozen replay as backup. | Live search results change from run to run. | {secn:status}, remaining work |
+| **Hard rules match candidate text** | Category, model and required-word rules are matched against the title, description, tags and the provider's brand field, and a brand rule fires only when a different brand is readable. | Live candidates have no verified category or model field. This departs from the proposal's wish for validated fields only, and it is the conservative option that the data allows. | {secn:livelimits} |
 | **Branch name** | Keep `feat/wp4-constraint-aware-product` on the fork, with draft pull request #17. | The project lead allowed a fork with a work-in-progress pull request. | {secn:decisions}, point 4 |
 | **A bare `$` in a live budget** | Read as USD. | SerpApi's Amazon results are in USD, although the app treats `$` as SGD elsewhere. A price in another currency than the budget is excluded, because no exchange table is pinned. | {secn:livebehaviour}, item 5 |
 | **Live weights** | The re-tuned offline weights, unchanged. | There are no live relevance labels to tune on. | {secn:livebehaviour}, item 6 |
@@ -930,10 +963,11 @@ The Plan or the proposal left these points open. I have decided each one here an
 
 ### Still to Confirm With the Supervisor {#confirm}
 
-Two points are still open for the supervisor.
+Three points are still open for the supervisor.
 
 1. Licence. Neither the dataset's homepage nor its Hugging Face card states a licence or terms of use, only a request to cite (checked 20 and 21 Oct). Is academic use on that basis acceptable?
 2. Demo key. If a live demo is expected, who provides the SerpApi key and quota?
+3. Ethics. I collected no consent, and none could be collected: the data is a public research dataset of reviews, and I recruit and contact nobody and do not try to identify any reviewer. I have not asked for a formal ethics determination. Does the university need one for the secondary use of public, pseudonymous data?
 
 %references
 
@@ -950,6 +984,14 @@ Two points are still open for the supervisor.
 [6] S. Rendle, “Evaluation metrics for item recommendation under sampling,” Dec. 2019, arXiv:1912.02263.
 
 [7] B. Efron, “Bootstrap methods: Another look at the jackknife,” *Ann. Statist.*, vol. 7, no. 1, pp. 1–26, Jan. 1979.
+
+[8] P. Covington, J. Adams, and E. Sargin, “Deep neural networks for YouTube recommendations,” in *Proc. 10th ACM Conf. Recommender Syst. (RecSys)*, Boston, MA, USA, Sep. 2016, doi: 10.1145/2959100.2959190.
+
+[9] S. Rendle, C. Freudenthaler, Z. Gantner, and L. Schmidt-Thieme, “BPR: Bayesian personalized ranking from implicit feedback,” in *Proc. 25th Conf. Uncertainty Artif. Intell. (UAI)*, 2009, arXiv:1205.2618.
+
+[10] H. Steck, “Embarrassingly shallow autoencoders for sparse data,” in *Proc. Web Conf. (WWW)*, 2019, arXiv:1905.03375.
+
+[11] M. Ferrari Dacrema, P. Cremonesi, and D. Jannach, “Are we really making much progress? A worrying analysis of recent neural recommendation approaches,” in *Proc. 13th ACM Conf. Recommender Syst. (RecSys)*, 2019, arXiv:1907.06902.
 
 ## Appendix A: Full Ranking for Case dev_0000000 (B1, BM25 Weight 0.25, Train-Only Popularity) {#appA}
 
