@@ -9,8 +9,8 @@
 | Candidate pool | real item + 99 random negatives per case (seed 42) |
 | Bootstrap | user-level, 2,000 resamples, seed 42, 95% percentile interval |
 | Head threshold | 12 train reviews (80th percentile) |
-| Code | git 1fd8d16, python 3.10.11, Windows |
-| Run | 2026-11-01 07:34 UTC, scoring pass 22.3 min |
+| Code | git bba1eb0, python 3.10.11, Windows |
+| Run | 2026-11-01 08:04 UTC, scoring pass 24.9 min |
 | Declared hardware | processor Intel64 Family 6 Model 140 Stepping 1, GenuineIntel, logical cpus 8, ram gb 15.7, os Windows 10, python 3.10.11 |
 | Pools | every system ranks the same pool; metrics are conditional on the real item having been retrieved (479,889 of 479,889 held-out cases) |
 
@@ -28,7 +28,7 @@
 
 | Requirement | This run | Status |
 |---|---|---|
-| Feature-off output equals the B0 strict-API fixtures; every ranked or excluded id comes from the input; no network | pytest test_b0_golden.py, test_d4_live_ranker.py, test_wp4_baseline.py, test_product_ranker_m2.py: 153 passed in 5.03s | PASS |
+| Feature-off output equals the B0 strict-API fixtures; every ranked or excluded id comes from the input; no network | pytest test_b0_golden.py, test_d4_live_ranker.py, test_wp4_baseline.py, test_product_ranker_m2.py: 153 passed in 6.88s | PASS |
 | Zero hard budget / brand / category / model violations in the labelled corpus | 0 of 52 labelled violators surfaced (B0: 52) | PASS |
 | Unknown price follows the declared strict policy (excluded when a budget is stated) | 0 unpriced items shown of 3 in the pools; 3 compliant items excluded by the policy on purpose | PASS |
 | M2 NDCG@10 exceeds the stronger of B0 / B1, which is B1 (BM25 0.25 + popularity), with a positive lower bound | +0.81%, 95% [+0.69%, +0.94%] | PASS |
@@ -36,7 +36,7 @@
 | Directional reference: +5% relative lift (not the pass mark) | +0.81% | not reached |
 | Complex-query slice improves or is non-inferior (margin -2% on the lower bound) | +2.91%, 95% [+2.62%, +3.21%] | PASS |
 | Head / tail exposure reported, not only aggregate accuracy | M2 head share of top 10 91.5%, catalogue coverage 70.3% (section 4) | reported |
-| Ranker-only p95 at most 25 ms for 100 candidates on declared hardware | offline M2 sample: p95 9.4 ms; live ranker, 100 candidates: p95 4.1 ms | PASS |
+| Ranker-only p95 at most 25 ms for 100 candidates on declared hardware | offline M2 sample: p95 9.3 ms; live ranker, 100 candidates: p95 10.5 ms | PASS |
 | Cold and sparse histories always return a valid text / popularity fallback (ten distinct candidates) | B1 (BM25 0.25 + popularity): 100.0% of cases, cold 100.0%, sparse 100.0%; M2 (domain_v1): 100.0% of cases, cold 100.0%, sparse 100.0% | PASS |
 
 ## 2. Held-out users, all slices
@@ -146,7 +146,7 @@
 | keyword-like (1 to 51 words of history) | +5.46% [+4.98%, +5.94%] | +5.11% [+4.59%, +5.67%] | +4.87% [+4.15%, +5.58%] | +5.16% [+4.55%, +5.77%] |
 | complex (more than 51 words of history) | +12.34% [+11.76%, +12.93%] | +16.01% [+15.34%, +16.74%] | +18.18% [+17.32%, +19.09%] | +16.59% [+15.89%, +17.37%] |
 | head target (12+ train reviews) | -1.12% [-1.29%, -0.96%] | +1.00% [+0.81%, +1.21%] | +2.18% [+1.92%, +2.45%] | +1.04% [+0.83%, +1.26%] |
-| tail target (fewer than 12 train reviews) | +180850.00% [+97792.05%, +548793.75%] | +318775.00% [+172448.31%, +968948.03%] | +656838.29% [+355345.63%, +2000526.50%] | +275270.96% [+148900.73%, +836008.24%] |
+| tail target (fewer than 12 train reviews) | n/a (baseline 0.0000) | n/a (baseline 0.0000) | n/a (baseline 0.0000) | n/a (baseline 0.0000) |
 | target price missing | +13.12% [+12.30%, +13.99%] | +15.99% [+15.02%, +16.99%] | +18.03% [+16.79%, +19.33%] | +15.93% [+14.89%, +17.02%] |
 
 ### M2 over B1 (BM25 0.25 + popularity)
@@ -244,13 +244,13 @@ Ranker-only, one process, 500 dev cases (every 1068th case), 100 candidates each
 
 | System | p50 ms | p95 ms | max ms | p95 ms, users with history |
 |---|---|---|---|---|
-| B0 legacy (train-only ratings) | 0.08 | 0.08 | 0.12 | 0.08 |
-| B0 reviews only | 0.11 | 0.12 | 0.17 | 0.12 |
-| B1 (BM25 0.25 + popularity) | 2.83 | 6.39 | 10.96 | 7.94 |
-| ItemKNN | 0.44 | 0.86 | 1.43 | 1.11 |
-| M2 (domain_v1) | 4.53 | 9.44 | 16.64 | 12.27 |
+| B0 legacy (train-only ratings) | 0.08 | 0.09 | 0.16 | 0.09 |
+| B0 reviews only | 0.12 | 0.15 | 0.58 | 0.13 |
+| B1 (BM25 0.25 + popularity) | 2.60 | 6.62 | 20.87 | 9.16 |
+| ItemKNN | 0.42 | 0.84 | 1.93 | 1.00 |
+| M2 (domain_v1) | 3.78 | 9.33 | 27.17 | 10.92 |
 
-Live ranker (`rank_live`) on 100 provider-shaped candidates with a budget stated, 100 runs: p50 2.64 ms, p95 4.06 ms, max 5.29 ms. The target is 25 ms at p95.
+Live ranker (`rank_live`) on 100 provider-shaped candidates with a budget stated, 100 runs: p50 3.19 ms, p95 10.51 ms, max 18.12 ms. The target is 25 ms at p95.
 
 ## 8. Live smoke test
 
