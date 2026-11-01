@@ -1982,7 +1982,8 @@ class MetaRecService:
                 uid = ensure_uuid(user_id)
             except Exception:
                 return [], []
-            records = await item_interaction_repository.list_for_user(uid, domain="product")
+            # Oldest first and bounded, so ask for the most the repository allows; the loader keeps the latest.
+            records = await item_interaction_repository.list_for_user(uid, domain="product", limit=5000)
             return history_from_records(records)
 
         try:

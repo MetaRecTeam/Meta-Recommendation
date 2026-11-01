@@ -25,14 +25,14 @@ from __future__ import annotations
 import math
 import os
 import re
-import statistics
 import uuid
-from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Iterable, List, Optional, Sequence, Set, Tuple
+from dataclasses import asdict, dataclass, field
+from datetime import datetime
+from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, Sequence, Set, Tuple
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from langgraph_metarec.product_constraints import ProductConstraints
+from langgraph_metarec.product_constraints import ProductConstraints, currency_from_symbol
 from langgraph_metarec.product_ranker_m2 import (
     ATTRIBUTE_MATCH_THRESHOLD,
     HISTORY_AFFINITY_ZSCORE_THRESHOLD,
@@ -112,17 +112,67 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
+# Exactly the fields of the internal recommendation item (the proposal's RecommendationItemInternal).
+INTERNAL_ITEM_FIELDS = frozenset(
+    {"id", "domain", "title", "subtitle", "description", "image_url", "url", "rating", "reviews_count",
+     "source", "tags", "why", "gps_coordinates", "raw"}
+)
+MAX_CANDIDATES = 100       # a request never carries more than this many candidates
+MAX_HISTORY_EVENTS = 200   # the most recent interactions are what the ranker reads
+
+
+class FusedPreferencesV1(_Strict):
+    """The typed preferences the ranker reads, plus the hard constraints in force."""
+
+    use_case: Optional[str] = None
+    category: Optional[str] = None
+    brand: Optional[str] = None
+    model: Optional[str] = None
+    hard_constraints: Dict[str, Any] = Field(default_factory=dict)
+
+
+class ItemInteractionV1Model(_Strict):
+    schema_version: str = Field(default="item-interaction.v1", pattern=r"^item-interaction\.v1$")
+    event_id: str
+    domain: str = Field(default="product", pattern=r"^product$")
+    item_id: str
+    action: Literal["save", "hide", "positive", "negative", "consumed"]
+    result_id: Optional[str] = None
+    occurred_at: Optional[str] = None
+
+    @field_validator("occurred_at")
+    @classmethod
+    def _rfc3339(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+        if parsed.tzinfo is None:
+            raise ValueError("occurred_at must carry a UTC offset (RFC 3339)")
+        return value
+
+
 class RankerRequestV1(_Strict):
     schema_version: str = Field(default="ranker-request.v1", pattern=r"^ranker-request\.v1$")
     request_id: str
     task_id: Optional[str] = None
     domain: str = Field(default="product", pattern=r"^product$")
     query: str
-    fused_preferences: Dict[str, Any] = Field(default_factory=dict)
-    candidates: List[Dict[str, Any]]
-    interactions: List[Dict[str, Any]] = Field(default_factory=list)
+    fused_preferences: FusedPreferencesV1 = Field(default_factory=FusedPreferencesV1)
+    candidates: List[Dict[str, Any]] = Field(max_length=MAX_CANDIDATES)
+    interactions: List[ItemInteractionV1Model] = Field(default_factory=list, max_length=MAX_HISTORY_EVENTS)
     top_k: int = Field(default=10, ge=1, le=50)
     seed: int = 0
+
+    @field_validator("candidates")
+    @classmethod
+    def _exact_item_fields(cls, items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        for item in items:
+            if set(item) != INTERNAL_ITEM_FIELDS:
+                raise ValueError(
+                    "a candidate must have exactly the internal item fields; differs by "
+                    f"{sorted(set(item) ^ INTERNAL_ITEM_FIELDS)}"
+                )
+        return items
 
 
 class RankedEntryV1(_Strict):
@@ -198,7 +248,7 @@ def history_from_records(records: Iterable[Any]) -> Tuple[List[Dict[str, Any]], 
 
     wire: List[Dict[str, Any]] = []
     events: List[HistoryEvent] = []
-    for record in records or []:
+    for record in list(records or [])[-MAX_HISTORY_EVENTS:]:
         wire.append(to_interaction_v1(record))
         snapshot = (getattr(record, "payload", None) or {}).get("item") or {}
         events.append(
@@ -210,6 +260,33 @@ def history_from_records(records: Iterable[Any]) -> Tuple[List[Dict[str, Any]], 
             )
         )
     return wire, events
+
+
+# ---------------------------------------------------------------------------
+# Currency
+# ---------------------------------------------------------------------------
+
+# No exchange table is pinned. Until one is, a price in a different currency from the stated
+# budget cannot be compared and strict mode excludes it. A table, when given, is
+# {"version": "<id>", "rates": {"USD": {"SGD": 1.30}}}, read as 1 USD = 1.30 SGD.
+PINNED_FX_TABLE: Optional[Dict[str, Any]] = None
+
+
+def price_currency(item: Dict[str, Any]) -> Optional[str]:
+    """Currency a live item's price is in: the provider's own field when there is one, else the
+    price symbol. None when the price carries no symbol."""
+    raw = item.get("raw") if isinstance(item.get("raw"), dict) else {}
+    own = str(raw.get("currency") or "").strip().upper()
+    if own:
+        return own
+    return currency_from_symbol(raw.get("price")) or currency_from_symbol(item.get("subtitle"))
+
+
+def _fx_rate(table: Optional[Dict[str, Any]], source: str, target: str) -> Optional[float]:
+    try:
+        return float(((table or {}).get("rates") or {})[source][target])
+    except (KeyError, TypeError, ValueError):
+        return None
 
 
 # ---------------------------------------------------------------------------
@@ -436,6 +513,13 @@ def _contract_result(request_id: str, ranker_result: RankerResult, id_of: Callab
     )
 
 
+def _text_or_none(value: Any) -> Optional[str]:
+    if isinstance(value, (list, tuple)):
+        value = " ".join(str(v) for v in value)
+    text = str(value).strip() if value not in (None, "") else ""
+    return text or None
+
+
 def rank_live(
     *,
     items: List[Dict[str, Any]],
@@ -450,6 +534,7 @@ def rank_live(
     task_id: Optional[str] = None,
     top_k: int = 10,
     seed: int = 0,
+    fx_table: Optional[Dict[str, Any]] = None,
 ) -> LiveRankOutcome:
     """Rank the live candidates with M2, or fall back to their original order.
 
@@ -459,16 +544,28 @@ def rank_live(
     a ``FALLBACK_*`` warning, still passing the hard-constraint gate so that a failure can
     never put a violator back in front of the user."""
     request_id = request_id or uuid.uuid4().hex
+    prefs = dict(preferences or {})
     RankerRequestV1(  # validates the request against the contract; unknown fields are rejected
         request_id=request_id,
         task_id=task_id,
         query=query or "",
-        fused_preferences=dict(preferences or {}),
+        fused_preferences=FusedPreferencesV1(
+            use_case=_text_or_none(prefs.get("use_case")),
+            category=_text_or_none(prefs.get("category")),
+            brand=_text_or_none(prefs.get("brand")),
+            model=_text_or_none(prefs.get("model")),
+            hard_constraints=asdict(constraints),
+        ),
         candidates=[dict(i) for i in items],
         interactions=list(interactions or []),
         top_k=top_k,
         seed=seed,
     )
+    table = PINNED_FX_TABLE if fx_table is None else fx_table
+    budget_currency = None
+    if constraints.budget_max is not None:
+        budget_currency = (constraints.currency or "").strip().upper() or None
+    notes: List[str] = []
     by_cid: Dict[str, Dict[str, Any]] = {}
     candidates: List[Dict[str, Any]] = []
     for item in items:
@@ -476,8 +573,23 @@ def rank_live(
         if cid in by_cid:
             continue  # the same ASIN twice: keep the first, which is the one B0 ranked higher
         by_cid[cid] = item
-        candidates.append({**item, "parent_asin": cid})
-    ctx = LiveContext(query=query or "", preferences=dict(preferences or {}), events=list(events or []))
+        view: Dict[str, Any] = {**item, "parent_asin": cid}
+        cur = price_currency(item)
+        price = _candidate_price(item)
+        if budget_currency and price is not None:
+            if cur is None:
+                notes.append("CURRENCY_MISSING")
+            elif cur != budget_currency:
+                rate = _fx_rate(table, cur, budget_currency)
+                if rate:  # a pinned table makes the two comparable
+                    raw = item.get("raw") if isinstance(item.get("raw"), dict) else {}
+                    view["raw"] = {**raw, "price": round(price * rate, 2), "currency": budget_currency}
+                    cur = budget_currency
+                    notes.append(f"FX_CONVERTED:{(table or {}).get('version', 'unversioned')}")
+        if cur:
+            view["currency"] = cur
+        candidates.append(view)
+    ctx = LiveContext(query=query or "", preferences=prefs, events=list(events or []))
     result = rank_candidates(
         candidates=candidates,
         history_asins=[],
@@ -493,7 +605,9 @@ def rank_live(
     )
 
     has_history = any(e.action in POSITIVE_ACTIONS | NEGATIVE_ACTIONS for e in (events or []))
-    result.warnings = [w for w in result.warnings if w != "COLD_START"] + ([] if has_history else ["COLD_START"])
+    result.warnings = list(dict.fromkeys(
+        [w for w in result.warnings if w != "COLD_START"] + ([] if has_history else ["COLD_START"]) + notes
+    ))
     excluded_codes = {e.item_id: list(e.reason_codes) for e in result.excluded}
     fell_back = result.fell_back
     if fell_back:

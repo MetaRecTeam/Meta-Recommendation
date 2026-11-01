@@ -584,3 +584,194 @@ def test_scores_stay_server_side_and_legacy_metadata_is_unchanged(monkeypatch):
     assert "product_ranker" not in main.client_safe_metadata(on.metadata)
     off, _ = _service_run(monkeypatch, case, user_id=REGISTERED, flag=None)
     assert "product_ranker" not in off.metadata
+
+
+# ---------------------------------------------------------------------------
+# The proposal's contract, point by point
+# ---------------------------------------------------------------------------
+
+from langgraph_metarec.product_ranker_live import (  # noqa: E402
+    INTERNAL_ITEM_FIELDS,
+    MAX_CANDIDATES,
+    MAX_HISTORY_EVENTS,
+    FusedPreferencesV1,
+    ItemInteractionV1Model,
+    price_currency,
+)
+
+
+def test_a_candidate_has_exactly_the_internal_item_fields():
+    item = _items([_provider_item("Desk lamp", "$30", 200, asin="B0LLLLLLL1")])[0]
+    assert set(item) == INTERNAL_ITEM_FIELDS
+    RankerRequestV1(request_id="r", query="lamp", candidates=[item])
+    with pytest.raises(Exception):
+        RankerRequestV1(request_id="r", query="lamp", candidates=[{k: v for k, v in item.items() if k != "raw"}])
+    with pytest.raises(Exception):
+        RankerRequestV1(request_id="r", query="lamp", candidates=[{**item, "score": 1.0}])
+
+
+def test_the_candidate_list_and_the_history_are_bounded():
+    item = _items([_provider_item("Desk lamp", "$30", 200, asin="B0LLLLLLL1")])[0]
+    RankerRequestV1(request_id="r", query="q", candidates=[item] * MAX_CANDIDATES)
+    with pytest.raises(Exception):
+        RankerRequestV1(request_id="r", query="q", candidates=[item] * (MAX_CANDIDATES + 1))
+    event = {"event_id": "e", "item_id": "i", "action": "save"}
+    RankerRequestV1(request_id="r", query="q", candidates=[], interactions=[event] * MAX_HISTORY_EVENTS)
+    with pytest.raises(Exception):
+        RankerRequestV1(request_id="r", query="q", candidates=[], interactions=[event] * (MAX_HISTORY_EVENTS + 1))
+
+
+def test_an_interaction_must_match_item_interaction_v1():
+    ok = {"event_id": "e", "item_id": "i", "action": "consumed", "occurred_at": "2026-10-01T08:00:00+00:00"}
+    ItemInteractionV1Model(**ok)
+    ItemInteractionV1Model(**{**ok, "occurred_at": "2026-10-01T08:00:00Z"})
+    for bad in (
+        {**ok, "action": "share"},
+        {**ok, "occurred_at": "2026-10-01T08:00:00"},
+        {**ok, "user_id": "u"},
+        {**ok, "domain": "restaurant"},
+        {**ok, "schema_version": "item-interaction.v2"},
+    ):
+        with pytest.raises(Exception):
+            ItemInteractionV1Model(**bad)
+
+
+def test_the_typed_preferences_carry_the_hard_constraints():
+    prefs = FusedPreferencesV1(use_case="Mac", category="keyboard", hard_constraints={"budget_max": 120.0})
+    assert prefs.model_dump()["hard_constraints"] == {"budget_max": 120.0}
+    with pytest.raises(Exception):
+        FusedPreferencesV1(budget="120 USD")  # only the typed fields are accepted
+
+
+def test_the_flag_is_read_exactly_in_the_graph_too(monkeypatch):
+    for value, expected in (("domain_v1", "domain_v1"), ("legacy", "legacy"), ("DOMAIN_V1", "legacy"), (" domain_v1", "legacy")):
+        monkeypatch.setenv(PRODUCT_RANKER_ENV, value)
+        assert generic_graph._product_ranker() == expected
+
+
+# ---------------------------------------------------------------------------
+# Currency: the missing-price policy for a budget in another currency
+# ---------------------------------------------------------------------------
+
+SGD_BUDGET = ProductConstraints(budget_max=120.0, currency="SGD")
+
+
+def test_a_budget_in_singapore_dollars_excludes_us_dollar_prices_when_no_table_is_pinned():
+    items = _items([_provider_item("Quiet keyboard", "$80", 300, asin="B0MMMMMMM1")])
+    out = rank_live(items=items, query="keyboard", preferences={}, constraints=SGD_BUDGET)
+    assert out.items == []
+    assert [(e.item_id, e.reason_code) for e in out.result.excluded] == [("B0MMMMMMM1", "UNKNOWN_PRICE_STRICT_MODE")]
+
+
+def test_a_pinned_exchange_table_makes_the_currencies_comparable_and_says_so():
+    table = {"version": "fx-test-1", "rates": {"USD": {"SGD": 1.30}}}
+    items = _items(
+        [
+            _provider_item("Quiet keyboard", "$80", 300, asin="B0MMMMMMM1"),  # S$104: within S$120
+            _provider_item("Loud keyboard", "$95", 900, asin="B0MMMMMMM2"),  # S$123.50: over
+        ]
+    )
+    out = rank_live(items=items, query="keyboard", preferences={}, constraints=SGD_BUDGET, fx_table=table)
+    assert [i["title"] for i in out.items] == ["Quiet keyboard"]
+    assert any(w == "FX_CONVERTED:fx-test-1" for w in out.result.warnings)
+    assert [(e.item_id, e.reason_code) for e in out.result.excluded] == [("B0MMMMMMM2", "OVER_BUDGET")]
+    assert out.items[0]["raw"]["price"] == "$80", "the provider's own price must not be rewritten"
+
+
+def test_a_price_with_no_symbol_is_kept_and_flagged_when_the_budget_names_a_currency():
+    items = _items([_provider_item("Quiet keyboard", "80", 300, asin="B0MMMMMMM1")])
+    out = rank_live(items=items, query="keyboard", preferences={}, constraints=SGD_BUDGET)
+    assert len(out.items) == 1 and "CURRENCY_MISSING" in out.result.warnings
+
+
+def test_matching_currencies_need_no_conversion():
+    items = _items([_provider_item("Quiet keyboard", "$80", 300, asin="B0MMMMMMM1")])
+    constraints = ProductConstraints(budget_max=120.0, currency="USD")
+    out = rank_live(items=items, query="keyboard", preferences={}, constraints=constraints)
+    assert len(out.items) == 1 and not any(w.startswith(("FX_", "CURRENCY_")) for w in out.result.warnings)
+
+
+def test_price_symbols_and_prefixes_are_read_correctly():
+    from langgraph_metarec.product_constraints import _budget_from_text, currency_from_symbol
+
+    assert [currency_from_symbol(x) for x in ("$5", "US$5", "S$5", "AU$5", "CA$5", "HK$5", "45")] == [
+        "USD", "USD", "SGD", "AUD", "CAD", "HKD", None,
+    ]
+    assert _budget_from_text("below S$120")[1] == "SGD" and _budget_from_text("below US$50")[1] == "USD"
+    assert price_currency({"raw": {"price": "S$45"}}) == "SGD"
+    assert price_currency({"raw": {"price": "45", "currency": "eur"}}) == "EUR"
+
+
+# ---------------------------------------------------------------------------
+# Injection, failure paths and bounds
+# ---------------------------------------------------------------------------
+
+
+def test_a_ranker_can_be_injected_through_the_adapters_without_monkeypatching(monkeypatch):
+    monkeypatch.setenv(PRODUCT_RANKER_ENV, "domain_v1")
+    case = _fallback_case()
+    seen = {}
+
+    def fake_ranker(*, items, **kwargs):
+        seen["n"] = len(items)
+        return rank_live(items=list(reversed(items)), **kwargs)
+
+    adapters = GenericGraphAdapters(tool_registry=_registry_returning(case.pool), ranker=fake_ranker)
+    result = _graph(case, adapters)
+    assert seen["n"] == len(_items(case.pool))
+    assert result.metadata["product_ranker"]["ranked"]
+
+
+def test_a_ranker_that_raises_still_leaves_the_hard_gate_in_place(monkeypatch):
+    monkeypatch.setenv(PRODUCT_RANKER_ENV, "domain_v1")
+    case = _fallback_case()
+
+    def broken(**_):
+        raise RuntimeError("ranker bug")
+
+    adapters = GenericGraphAdapters(tool_registry=_registry_returning(case.pool), ranker=broken)
+    result = _graph(case, adapters)
+    meta = result.metadata["product_ranker"]
+    assert meta["fell_back"] is True and "FALLBACK_ERROR" in meta["warnings"]
+    labels = case.labels_by_title()
+    assert result.items and not [i for i in result.items if labels.get(i["title"])]
+
+
+def test_a_slow_history_read_is_a_cold_start_and_does_not_hold_the_request(monkeypatch):
+    monkeypatch.setenv(PRODUCT_RANKER_ENV, "domain_v1")
+    case = _fallback_case()
+
+    async def slow():
+        await asyncio.sleep(2.0)
+        return [], []
+
+    adapters = GenericGraphAdapters(tool_registry=_registry_returning(case.pool), ranker_history=slow, ranker_timeout_s=0.1)
+    t0 = time.perf_counter()
+    result = _graph(case, adapters)
+    assert time.perf_counter() - t0 < 1.0
+    assert "HISTORY_UNAVAILABLE" in result.metadata["product_ranker"]["warnings"]
+    assert result.items
+
+
+def test_only_the_most_recent_history_is_read():
+    records = [
+        _record("save", f"i{n}", f"Item {n}", f"https://www.amazon.com/dp/B0{n:08d}", event_id=f"e{n}")
+        for n in range(MAX_HISTORY_EVENTS + 50)
+    ]
+    wire, events = history_from_records(records)
+    assert len(wire) == len(events) == MAX_HISTORY_EVENTS
+    assert events[-1].item_id == f"i{MAX_HISTORY_EVENTS + 49}" and events[0].item_id == "i50"
+
+
+def test_one_hundred_candidates_rank_within_the_latency_target():
+    pool = [_provider_item(f"Mechanical keyboard model {n}", f"${20 + n}", 10 + n * 7, asin=f"B0{n:08d}") for n in range(100)]
+    items = _items(pool)
+    assert len(items) == 100
+    constraints = ProductConstraints(budget_max=100.0, currency="USD")
+    times = []
+    for _ in range(40):
+        out = rank_live(items=items, query="quiet mechanical keyboard for mac", preferences={"use_case": "Mac"}, constraints=constraints)
+        times.append(out.result.latency_ms)
+    times.sort()
+    p95 = times[int(0.95 * len(times)) - 1]
+    assert p95 < 50, f"p95 {p95:.1f} ms for 100 candidates is far above the 25 ms target"

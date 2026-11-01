@@ -12,7 +12,8 @@ from langgraph.graph import END, START, StateGraph
 
 from langgraph_metarec.genres import detect_genres_in_text
 from langgraph_metarec.product_constraints import resolve_constraints
-from langgraph_metarec.product_ranker_live import asin_of, candidate_id, rank_live
+from langgraph_metarec.product_ranker_live import asin_of, candidate_id, rank_live, ranker_timeout_seconds
+from langgraph_metarec.product_ranker_m2 import exclusion_reason_codes
 from langgraph_metarec.tool_registry import DEFAULT_TOOL_REGISTRY, ToolRegistry
 
 
@@ -39,7 +40,9 @@ _PRODUCT_RANKERS = {"legacy", "domain_v1"}
 
 
 def _product_ranker() -> str:
-    value = os.getenv("METAREC_PRODUCT_RANKER", "legacy").strip().lower()
+    # Exactly legacy|domain_v1, as the proposal says. Startup (main._lifespan) rejects anything
+    # else; this returns legacy for it so that a request never runs the new path by accident.
+    value = os.getenv("METAREC_PRODUCT_RANKER", "legacy")
     return value if value in _PRODUCT_RANKERS else "legacy"
 
 
@@ -80,7 +83,10 @@ class GenericGraphAdapters:
     # (ItemInteractionV1 dicts, content events). It is only called when
     # METAREC_PRODUCT_RANKER=domain_v1, so the legacy path never touches the database.
     ranker_history: Optional[Callable[[], Awaitable[Tuple[List[Dict[str, Any]], List[Any]]]]] = None
-    # Tests inject a scorer or a timeout here; production leaves both at their defaults.
+    # The ranker itself, with rank_live's signature; None means the production one. A test injects a
+    # fake here instead of monkeypatching, as the proposal suggests for GenericGraphAdapters.
+    ranker: Optional[Callable[..., Any]] = None
+    # Tests can also inject just the scorer, or shorten the timeout; production leaves both unset.
     ranker_scorer: Optional[Callable[..., Any]] = None
     ranker_timeout_s: Optional[float] = None
 
@@ -806,12 +812,13 @@ async def _rank_product_with_m2(
     events: List[Any] = []
     warnings: List[str] = []
     if adapters.ranker_history is not None:
+        history_timeout = adapters.ranker_timeout_s or ranker_timeout_seconds()
         try:
-            interactions, events = await adapters.ranker_history()
-        except Exception:  # an unreadable history is a cold start, never an error
+            interactions, events = await asyncio.wait_for(adapters.ranker_history(), timeout=history_timeout)
+        except Exception:  # an unreadable or slow history is a cold start, never an error
             warnings.append("HISTORY_UNAVAILABLE")
     try:
-        outcome = rank_live(
+        outcome = (adapters.ranker or rank_live)(
             items=ranked,
             query=query,
             preferences=preferences,
@@ -821,14 +828,19 @@ async def _rank_product_with_m2(
             timeout_s=adapters.ranker_timeout_s,
             scorer=adapters.ranker_scorer,
         )
-    except Exception:  # the contract or the gate itself failed: original order, unfiltered, flagged
+    except Exception:  # the ranker or its contract failed: original order, still behind the hard gate
+        try:
+            kept = [i for i in ranked if constraints.is_empty() or not exclusion_reason_codes(i, constraints)]
+            gate_note = []
+        except Exception:  # last resort: the gate itself failed, so the original order, flagged
+            kept, gate_note = ranked, ["FALLBACK_GATE_ERROR"]
         state["product_ranker"] = {
             "mode": "domain_v1",
             "fell_back": True,
-            "warnings": ["FALLBACK_ERROR", *warnings],
+            "warnings": ["FALLBACK_ERROR", *gate_note, *warnings],
         }
         state["constraint_filter"] = None
-        return ranked
+        return kept
 
     result = outcome.result
     titles = {candidate_id(i): i.get("title") for i in ranked}

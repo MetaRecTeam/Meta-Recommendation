@@ -16,6 +16,7 @@ dataset and the end-to-end evaluation.
 | `capture.py` | `python -m tests.wp4.capture "<query>" --pref k=v --out cases/X.json` — pull a live candidate pool. |
 | `eval_constraints.py` | runs every case through the real graph (fake search adapter), prints B1; `--baseline` prints B0. |
 | `test_wp4_baseline.py` | acceptance tests: no leak, no false drops, all-violating → empty, label/checker consistency. |
+| `test_d4_live_ranker.py` | D4: the flag, the contracts, feature-off equality, constraints, currency, ASIN ids, fallback, history, projection. No network, database or key. |
 
 ## Run
 

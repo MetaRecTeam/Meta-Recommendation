@@ -20,7 +20,7 @@ from dataclasses import dataclass, field, replace
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
 _PRICE_NUM = re.compile(r"\d[\d,]*(?:\.\d+)?")
-_CURRENCIES = ("SGD", "USD", "CNY", "RMB", "EUR", "GBP", "MYR", "JPY", "AUD")
+_CURRENCIES = ("SGD", "USD", "CNY", "RMB", "EUR", "GBP", "MYR", "JPY", "AUD", "CAD", "NZD", "HKD")
 _UPPER_BOUND = re.compile(r"(<=|<|under|below|no more than|至多|以内|以下|不超过|少于|低于)", re.IGNORECASE)
 
 # Small hard-attribute vocabulary for the derive path. The extraction step is
@@ -157,6 +157,31 @@ def violations(item: Dict[str, Any], c: ProductConstraints) -> List[str]:
 # ---------------------------------------------------------------------------
 
 
+# Prefixed symbols first: "S$120" is Singapore dollars, not the US dollars a bare "$" means here.
+_SYMBOL_CURRENCIES = (
+    (re.compile(r"US\$"), "USD"),
+    (re.compile(r"(?<![A-Za-z])S\$"), "SGD"),
+    (re.compile(r"AU\$|(?<![A-Za-z])A\$"), "AUD"),
+    (re.compile(r"CA\$|(?<![A-Za-z])C\$"), "CAD"),
+    (re.compile(r"NZ\$"), "NZD"),
+    (re.compile(r"HK\$"), "HKD"),
+    (re.compile("€"), "EUR"),
+    (re.compile("£"), "GBP"),
+    (re.compile(r"\$"), "USD"),
+)
+
+
+def currency_from_symbol(text: Any) -> Optional[str]:
+    """Currency a price or budget string names by its symbol, or None. A bare ``$`` is read as
+    US dollars (the Amazon provider returns USD); a string with no symbol is left unknown rather
+    than guessed."""
+    value = str(text or "")
+    for pattern, code in _SYMBOL_CURRENCIES:
+        if pattern.search(value):
+            return code
+    return None
+
+
 def _budget_from_text(text: str) -> Tuple[Optional[float], Optional[str]]:
     if not text or not _UPPER_BOUND.search(text):
         return None, None
@@ -165,8 +190,8 @@ def _budget_from_text(text: str) -> Tuple[Optional[float], Optional[str]]:
         return None, None
     amount = float(nums[-1].replace(",", ""))
     currency = next((cur for cur in _CURRENCIES if cur.lower() in text.lower()), None)
-    if currency is None and "$" in text:
-        currency = "USD"
+    if currency is None:
+        currency = currency_from_symbol(text)
     return amount, currency
 
 
