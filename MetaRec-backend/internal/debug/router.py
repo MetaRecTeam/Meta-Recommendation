@@ -12,8 +12,14 @@ from pathlib import Path
 from threading import Lock
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
+
+from langgraph_metarec.wp8_trace.models import (
+    DEFAULT_PAGE_EVENTS,
+    MAX_PAGE_EVENTS,
+    GraphTraceV1,
+)
 
 from .unit_registry import UnitSpec, register_default_debug_units
 
@@ -454,6 +460,9 @@ def create_debug_router(
 
     debug_enabled = _env_flag("DEBUG_UI_ENABLED", False)
     explain_enabled = _env_flag("DEBUG_LLM_EXPLAIN_ENABLED", True)
+    # WP8 graph tracing. Off by default: with it off no trace is persisted and
+    # no existing response gains a field (WP8 brief, invariant 5).
+    graph_trace_enabled = _env_flag("DEBUG_GRAPH_TRACE_ENABLED", False)
     # Auth is delegated to the app's real-user session via require_admin; the
     # arena no longer owns a token/session. cookie_name is reported by /config
     # so the frontend knows which app session cookie carries auth.
@@ -780,6 +789,28 @@ def create_debug_router(
             jobs.pop(run_id, None)
         rec["job_running"] = bool(job and not job.done())
         return rec
+
+    @router.get("/behavior-tests/{run_id}/graph-trace", response_model=GraphTraceV1)
+    async def get_graph_trace(
+        run_id: str,
+        after_sequence: int = Query(0, ge=0),
+        limit: int = Query(DEFAULT_PAGE_EVENTS, ge=1, le=MAX_PAGE_EVENTS),
+        _: AuthSessionPayload = Depends(require_auth),
+    ):
+        """Paged graph trace for one debug run.
+
+        Stub (WP8 B0): the contract is frozen and reaches OpenAPI through
+        ``response_model``, but no store exists yet. Member B's B4/B5 replace
+        the body; the shape returned to callers does not change.
+        """
+        require_enabled()
+        if not graph_trace_enabled:
+            raise HTTPException(status_code=400, detail="graph_trace_disabled")
+        if not trace_storage.load(run_id):
+            raise HTTPException(status_code=404, detail="Debug run not found")
+        # A run that was not traced when it started cannot be reconstructed
+        # from coarse task events; say so rather than invent a path.
+        raise HTTPException(status_code=404, detail="trace_unavailable")
 
     @router.post("/behavior-tests/{run_id}/explain")
     async def explain_endpoint(run_id: str, payload: ExplainRequest, session: AuthSessionPayload = Depends(require_auth)):
