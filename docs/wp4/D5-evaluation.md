@@ -70,8 +70,9 @@ the past is train plus dev, and every user is scored (nothing was tuned on it).
   ItemKNN covers the whole catalogue but is far less accurate.
 * **Labelled constraint searches:** 0 of 52 violators surfaced (B0: 52 of 52; 9 of 15 searches had one in the
   top 3). 3 unpriced items excluded by the missing-price policy, none shown, no compliant item dropped by mistake.
-* **Latency (idle machine, Intel64 Family 6 Model 140, 8 logical CPUs, 15.7 GB):** M2 p95 9.4 ms on 500 dev cases; the live
-  ranker on 100 provider-shaped candidates p95 4.1 ms. Target 25 ms.
+* **Latency (Intel64 Family 6 Model 140, 8 logical CPUs, 15.7 GB, other programs not closed):** M2 p95 9.3 ms on
+  500 dev cases (9.4 ms in an earlier run); the live ranker on 100 provider-shaped candidates p95 10.5 ms. The
+  live-ranker figure is noisy: five other measurements gave 3.5 to 15.4 ms. All are under the 25 ms target.
 * **Acceptance tests:** the four pytest files pass (153 tests).
 * **Not run against the real provider:** the live smoke test (no key given). Its code path is exercised in
   the tests against a stub provider, so it will not fail on a typo at the demo. The sealed test split is untouched.

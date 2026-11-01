@@ -24,9 +24,16 @@ FULL_W = PAGE_W - 2 * MARGIN_LR          # 17.8 cm
 COL_W = (FULL_W - GAP) / 2               # 8.6 cm
 FONT = "Times New Roman"
 MONO = "Courier New"
-ROMAN = ["", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV",
-         "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII",
-         "XXIX", "XXX", "XXXI", "XXXII", "XXXIII", "XXXIV", "XXXV"]
+def _roman(n):
+    out = ""
+    for value, symbol in ((50, "L"), (40, "XL"), (10, "X"), (9, "IX"), (5, "V"), (4, "IV"), (1, "I")):
+        while n >= value:
+            out += symbol
+            n -= value
+    return out
+
+
+ROMAN = [""] + [_roman(i) for i in range(1, 100)]  # tables, sections and appendices are numbered in Roman
 
 
 # ---------------------------------------------------------------------------------------------- parsing
