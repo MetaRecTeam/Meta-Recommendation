@@ -852,6 +852,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/internal/debug/behavior-tests/{run_id}/graph-trace": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get Graph Trace
+         * @description Paged graph trace for one debug run.
+         *
+         *     Stub (WP8 B0): the contract is frozen and reaches OpenAPI through
+         *     ``response_model``, but no store exists yet. Member B's B4/B5 replace
+         *     the body; the shape returned to callers does not change.
+         */
+        get: operations["get_graph_trace_internal_debug_behavior_tests__run_id__graph_trace_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/internal/debug/config": {
         parameters: {
             query?: never;
@@ -1156,6 +1180,41 @@ export interface components {
              */
             per: string;
         };
+        /**
+         * CaptureOptions
+         * @description All five keys are required; the brief allows no partial capture.
+         */
+        CaptureOptions: {
+            /**
+             * Child Events
+             * @enum {string}
+             */
+            child_events: "none" | "tool_llm_metadata";
+            /** Graph Lifecycle */
+            graph_lifecycle: boolean;
+            /** Nested Graphs */
+            nested_graphs: boolean;
+            /** Node Lifecycle */
+            node_lifecycle: boolean;
+            /**
+             * State Diff
+             * @enum {string}
+             */
+            state_diff: "none" | "allowlisted_node_update";
+        };
+        /** ChangedValue */
+        ChangedValue: {
+            /**
+             * After
+             * @description null, boolean, finite number, string of at most 512 characters, or list/object of at most 50 safe values, nested at most 6 levels
+             */
+            after: unknown;
+            /**
+             * Before
+             * @description null, boolean, finite number, string of at most 512 characters, or list/object of at most 50 safe values, nested at most 6 levels
+             */
+            before: unknown;
+        };
         /** ConfirmationQuickActionAPI */
         ConfirmationQuickActionAPI: {
             /** Clear Preference Keys */
@@ -1281,6 +1340,43 @@ export interface components {
             /** Missing Required */
             missing_required?: string[];
         };
+        /** EventMetadata */
+        EventMetadata: {
+            /** Attempt */
+            attempt?: number | null;
+            /** Domain */
+            domain?: string | null;
+            llm_attempt?: components["schemas"]["LlmAttempt"] | null;
+            /** Model */
+            model?: string | null;
+            /** Task Id */
+            task_id?: string | null;
+            /** Tool */
+            tool?: string | null;
+            tool_health?: components["schemas"]["ToolHealth"] | null;
+            tool_scope?: components["schemas"]["ToolScope"] | null;
+        };
+        /**
+         * EventWindow
+         * @description Where this page sits in the trace, and how to ask for the next one.
+         */
+        EventWindow: {
+            /** After Sequence */
+            after_sequence: number;
+            /** Has More */
+            has_more: boolean;
+            /** Next After Sequence */
+            next_after_sequence: number;
+            /** Returned */
+            returned: number;
+        };
+        /** ExcludedTool */
+        ExcludedTool: {
+            /** Name */
+            name: string;
+            /** Reason Code */
+            reason_code: string;
+        };
         /** ExplainRequest */
         ExplainRequest: {
             /**
@@ -1332,6 +1428,142 @@ export interface components {
             message: string;
             /** Success */
             success: boolean;
+        };
+        /**
+         * GraphDefinition
+         * @description Possible nodes and edges of one compiled graph. Not what ran.
+         */
+        GraphDefinition: {
+            /** Edges */
+            edges: components["schemas"]["TopologyEdge"][];
+            /** Graph Definition Id */
+            graph_definition_id: string;
+            /** Name */
+            name: string;
+            /** Nodes */
+            nodes: components["schemas"]["TopologyNode"][];
+        };
+        /**
+         * GraphInstance
+         * @description One execution of one graph definition inside a trace.
+         */
+        GraphInstance: {
+            /** Ended Sequence */
+            ended_sequence: number | null;
+            /** Graph Definition Id */
+            graph_definition_id: string;
+            /** Graph Instance Id */
+            graph_instance_id: string;
+            /** Namespace */
+            namespace: string[];
+            /** Parent Graph Instance Id */
+            parent_graph_instance_id: string | null;
+            /** Parent Node Run Id */
+            parent_node_run_id: string | null;
+            /** Started Sequence */
+            started_sequence: number;
+        };
+        /**
+         * GraphRunEventV1
+         * @description One accepted trace event. Every key is present; unavailable values are null.
+         */
+        GraphRunEventV1: {
+            /** Debug Run Id */
+            debug_run_id: string;
+            /** Duration Ms */
+            duration_ms: number | null;
+            error: components["schemas"]["SafeError"] | null;
+            /** Event Id */
+            event_id: string;
+            /**
+             * Event Type
+             * @enum {string}
+             */
+            event_type: "graph_start" | "graph_end" | "node_start" | "node_end" | "tool_start" | "tool_end" | "llm_start" | "llm_end" | "policy_start" | "policy_end" | "error" | "trace_truncated";
+            /** Graph Definition Id */
+            graph_definition_id: string | null;
+            /** Graph Instance Id */
+            graph_instance_id: string | null;
+            input_summary: components["schemas"]["PayloadSummary"] | null;
+            metadata: components["schemas"]["EventMetadata"] | null;
+            /** Monotonic Offset Ms */
+            monotonic_offset_ms: number;
+            /** Node Id */
+            node_id: string | null;
+            output_summary: components["schemas"]["PayloadSummary"] | null;
+            /** Parent Graph Instance Id */
+            parent_graph_instance_id: string | null;
+            /** Parent Run Id */
+            parent_run_id: string | null;
+            redaction: components["schemas"]["RedactionInfo"];
+            /** Run Id */
+            run_id: string | null;
+            /**
+             * Runnable Type
+             * @enum {string}
+             */
+            runnable_type: "graph" | "graph_node" | "tool" | "llm" | "policy" | "llm_attempt_adapter" | "tool_scope_adapter" | "trace_system";
+            /**
+             * Schema Version
+             * @constant
+             */
+            schema_version: "graph-run-event/1.0";
+            /** Sequence */
+            sequence: number;
+            state_diff: components["schemas"]["StateDiff"] | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "error" | "cancelled" | "incomplete";
+            /**
+             * Timestamp Utc
+             * Format: date-time
+             */
+            timestamp_utc: string;
+            /** Trace Id */
+            trace_id: string;
+        } & (unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown);
+        /**
+         * GraphTraceV1
+         * @description One page of a trace. The same shape serves an in-progress and a final read.
+         */
+        GraphTraceV1: {
+            config_snapshot: components["schemas"]["TraceConfigSnapshot"];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Debug Run Id */
+            debug_run_id: string;
+            /** Dropped Event Count */
+            dropped_event_count: number;
+            event_window: components["schemas"]["EventWindow"];
+            /** Events */
+            events: components["schemas"]["GraphRunEventV1"][];
+            /**
+             * Expires At
+             * Format: date-time
+             */
+            expires_at: string;
+            redaction_summary: components["schemas"]["RedactionSummary"];
+            /**
+             * Schema Version
+             * @constant
+             */
+            schema_version: "graph-trace/1.0";
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "running" | "completed" | "failed" | "cancelled" | "incomplete";
+            summary: components["schemas"]["TraceSummary"];
+            topology: components["schemas"]["TraceTopology"];
+            /** Trace Id */
+            trace_id: string;
+            /** Truncated */
+            truncated: boolean;
         };
         /** GuestLoginRequestAPI */
         GuestLoginRequestAPI: {
@@ -1466,6 +1698,34 @@ export interface components {
             /** User Id */
             user_id?: string | null;
         };
+        /**
+         * LlmAttempt
+         * @description WP5 physical attempt. Start-only events leave the outcome fields null.
+         */
+        LlmAttempt: {
+            /** Attempt Id */
+            attempt_id: string | null;
+            /** Cost Usd */
+            cost_usd: number | null;
+            /** Model Id */
+            model_id: string | null;
+            /** Outcome */
+            outcome: string | null;
+            /** Policy Leg */
+            policy_leg: string | null;
+            /** Pricing Snapshot Id */
+            pricing_snapshot_id: string | null;
+            /** Provider Id */
+            provider_id: string | null;
+            /** Provider Price Table Version */
+            provider_price_table_version: string | null;
+            /** Request Id */
+            request_id: string | null;
+            /** Total Tokens */
+            total_tokens: number | null;
+            /** Validation Status */
+            validation_status: string | null;
+        };
         /** LoginRequestAPI */
         LoginRequestAPI: {
             /** Email */
@@ -1500,6 +1760,28 @@ export interface components {
             role: string;
             /** Timestamp */
             timestamp?: string | null;
+        };
+        /** Omission */
+        Omission: {
+            /** Path */
+            path: string;
+            /** Reason */
+            reason: string;
+        };
+        /** PayloadSummary */
+        PayloadSummary: {
+            /** Bytes */
+            bytes: number;
+            /** Item Count */
+            item_count?: number | null;
+            /** Keys */
+            keys: string[];
+            /** Omitted Count */
+            omitted_count?: number | null;
+            /** Value Types */
+            value_types?: {
+                [key: string]: string;
+            } | null;
         };
         /** PreferenceFieldAPI */
         PreferenceFieldAPI: {
@@ -1660,6 +1942,27 @@ export interface components {
                 [key: string]: unknown;
             } | null;
         };
+        /** RedactionInfo */
+        RedactionInfo: {
+            /** Policy Id */
+            policy_id: string;
+            /** Redacted Paths */
+            redacted_paths: string[];
+            /** Stored Bytes */
+            stored_bytes: number;
+            /** Truncated Paths */
+            truncated_paths: string[];
+        };
+        /**
+         * RedactionSummary
+         * @description Whole-trace redaction counts, so a reader knows what is withheld.
+         */
+        RedactionSummary: {
+            /** Redacted Value Count */
+            redacted_value_count: number;
+            /** Truncated Value Count */
+            truncated_value_count: number;
+        };
         /** RegisterRequestAPI */
         RegisterRequestAPI: {
             /** Display Name */
@@ -1720,12 +2023,43 @@ export interface components {
             /** Why */
             why?: string | null;
         };
+        /** SafeError */
+        SafeError: {
+            /** Code */
+            code: string;
+            /** Error Class */
+            error_class: string;
+            /** Retryable */
+            retryable: boolean;
+            /** Safe Message */
+            safe_message: string;
+        };
         /** SetActiveBranchRequest */
         SetActiveBranchRequest: {
             /** Branch Id */
             branch_id: string;
             /** Source Message Id */
             source_message_id?: string | null;
+        };
+        /** StateDiff */
+        StateDiff: {
+            /** Added */
+            added: {
+                [key: string]: unknown;
+            };
+            /**
+             * Basis
+             * @constant
+             */
+            basis: "node_input_to_update";
+            /** Changed */
+            changed: {
+                [key: string]: components["schemas"]["ChangedValue"];
+            };
+            /** Omitted */
+            omitted: components["schemas"]["Omission"][];
+            /** Removed */
+            removed: string[];
         };
         /** TaskStatusAPI */
         TaskStatusAPI: {
@@ -1757,6 +2091,123 @@ export interface components {
             status: string;
             /** Step */
             step: string;
+        };
+        /**
+         * ToolHealth
+         * @description Provider health only; never probe bodies, credentials or quota.
+         */
+        ToolHealth: {
+            /** Checked At */
+            checked_at: string | null;
+            /** Expires At */
+            expires_at: string | null;
+            /** Provider Id */
+            provider_id: string;
+            /** Reason Code */
+            reason_code: string | null;
+            /** State */
+            state: string;
+        };
+        /**
+         * ToolScope
+         * @description WP7 pre-LLM tool-scope decision.
+         */
+        ToolScope: {
+            /** Catalog Id */
+            catalog_id: string | null;
+            /** Eligible Tool Names */
+            eligible_tool_names: string[];
+            /** Excluded */
+            excluded: components["schemas"]["ExcludedTool"][];
+            /** Health Snapshot Id */
+            health_snapshot_id: string | null;
+            /** Policy Version */
+            policy_version: string | null;
+        };
+        /** TopologyEdge */
+        TopologyEdge: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "normal" | "conditional";
+            /** Label */
+            label?: string | null;
+            /** Source */
+            source: string;
+            /** Target */
+            target: string;
+        };
+        /** TopologyNode */
+        TopologyNode: {
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "start" | "end" | "node" | "tool" | "llm";
+            /** Label */
+            label: string;
+            /** Node Id */
+            node_id: string;
+        };
+        /**
+         * TraceConfigSnapshot
+         * @description What was actually applied, echoed back on every page.
+         */
+        TraceConfigSnapshot: {
+            capture: components["schemas"]["CaptureOptions"];
+            limits: components["schemas"]["TraceLimits"];
+            /** Redaction Policy Id */
+            redaction_policy_id: string;
+            /** Retention Days */
+            retention_days: number;
+        };
+        /**
+         * TraceLimits
+         * @description Requested limits. Each is positive and at most the hard cap.
+         */
+        TraceLimits: {
+            /** Max Collection Items */
+            max_collection_items: number;
+            /** Max Event Bytes */
+            max_event_bytes: number;
+            /** Max Events */
+            max_events: number;
+            /** Max Nesting Depth */
+            max_nesting_depth: number;
+            /** Max String Chars */
+            max_string_chars: number;
+            /** Max Trace Bytes */
+            max_trace_bytes: number;
+        };
+        /**
+         * TraceSummary
+         * @description Counts for the whole trace, not just the returned page.
+         */
+        TraceSummary: {
+            /** Completed At */
+            completed_at: string | null;
+            /** Duration Ms */
+            duration_ms: number | null;
+            /** Error Count */
+            error_count: number;
+            /**
+             * Started At
+             * Format: date-time
+             */
+            started_at: string;
+            /** Visited Nodes */
+            visited_nodes: number;
+        };
+        /**
+         * TraceTopology
+         * @description Static definitions (what could run) and dynamic instances (what did).
+         */
+        TraceTopology: {
+            /** Definitions */
+            definitions: components["schemas"]["GraphDefinition"][];
+            /** Instances */
+            instances: components["schemas"]["GraphInstance"][];
         };
         /** UnitInputGenerateRequest */
         UnitInputGenerateRequest: {
@@ -3326,6 +3777,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_graph_trace_internal_debug_behavior_tests__run_id__graph_trace_get: {
+        parameters: {
+            query?: {
+                after_sequence?: number;
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraphTraceV1"];
                 };
             };
             /** @description Validation Error */

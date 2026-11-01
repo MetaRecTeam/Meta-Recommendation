@@ -637,6 +637,70 @@
         "title": "BudgetRangeInputAPI",
         "type": "object"
       },
+      "CaptureOptions": {
+        "additionalProperties": false,
+        "description": "All five keys are required; the brief allows no partial capture.",
+        "properties": {
+          "child_events": {
+            "enum": [
+              "none",
+              "tool_llm_metadata"
+            ],
+            "title": "Child Events",
+            "type": "string"
+          },
+          "graph_lifecycle": {
+            "title": "Graph Lifecycle",
+            "type": "boolean"
+          },
+          "nested_graphs": {
+            "title": "Nested Graphs",
+            "type": "boolean"
+          },
+          "node_lifecycle": {
+            "title": "Node Lifecycle",
+            "type": "boolean"
+          },
+          "state_diff": {
+            "enum": [
+              "none",
+              "allowlisted_node_update"
+            ],
+            "title": "State Diff",
+            "type": "string"
+          }
+        },
+        "required": [
+          "graph_lifecycle",
+          "node_lifecycle",
+          "nested_graphs",
+          "child_events",
+          "state_diff"
+        ],
+        "title": "CaptureOptions",
+        "type": "object"
+      },
+      "ChangedValue": {
+        "additionalProperties": false,
+        "properties": {
+          "after": {
+            "description": "null, boolean, finite number, string of at most 512 characters, or list/object of at most 50 safe values, nested at most 6 levels",
+            "title": "After",
+            "x-wp8-safe-value": true
+          },
+          "before": {
+            "description": "null, boolean, finite number, string of at most 512 characters, or list/object of at most 50 safe values, nested at most 6 levels",
+            "title": "Before",
+            "x-wp8-safe-value": true
+          }
+        },
+        "required": [
+          "before",
+          "after"
+        ],
+        "title": "ChangedValue",
+        "type": "object"
+      },
       "ConfirmationQuickActionAPI": {
         "additionalProperties": false,
         "properties": {
@@ -928,6 +992,157 @@
         "title": "DomainPreferenceFormAPI",
         "type": "object"
       },
+      "EventMetadata": {
+        "additionalProperties": false,
+        "properties": {
+          "attempt": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attempt"
+          },
+          "domain": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Domain"
+          },
+          "llm_attempt": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LlmAttempt"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "model": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model"
+          },
+          "task_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Task Id"
+          },
+          "tool": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tool"
+          },
+          "tool_health": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolHealth"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tool_scope": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolScope"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "title": "EventMetadata",
+        "type": "object"
+      },
+      "EventWindow": {
+        "additionalProperties": false,
+        "description": "Where this page sits in the trace, and how to ask for the next one.",
+        "properties": {
+          "after_sequence": {
+            "minimum": 0.0,
+            "title": "After Sequence",
+            "type": "integer"
+          },
+          "has_more": {
+            "title": "Has More",
+            "type": "boolean"
+          },
+          "next_after_sequence": {
+            "minimum": 0.0,
+            "title": "Next After Sequence",
+            "type": "integer"
+          },
+          "returned": {
+            "minimum": 0.0,
+            "title": "Returned",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "after_sequence",
+          "returned",
+          "next_after_sequence",
+          "has_more"
+        ],
+        "title": "EventWindow",
+        "type": "object"
+      },
+      "ExcludedTool": {
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Name",
+            "type": "string"
+          },
+          "reason_code": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Reason Code",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "reason_code"
+        ],
+        "title": "ExcludedTool",
+        "type": "object"
+      },
       "ExplainRequest": {
         "properties": {
           "mode": {
@@ -1098,6 +1313,1189 @@
           "message"
         ],
         "title": "GenericSuccessResponseAPI",
+        "type": "object"
+      },
+      "GraphDefinition": {
+        "additionalProperties": false,
+        "description": "Possible nodes and edges of one compiled graph. Not what ran.",
+        "properties": {
+          "edges": {
+            "items": {
+              "$ref": "#/components/schemas/TopologyEdge"
+            },
+            "title": "Edges",
+            "type": "array"
+          },
+          "graph_definition_id": {
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*@v[1-9][0-9]*$",
+            "title": "Graph Definition Id",
+            "type": "string"
+          },
+          "name": {
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          },
+          "nodes": {
+            "items": {
+              "$ref": "#/components/schemas/TopologyNode"
+            },
+            "title": "Nodes",
+            "type": "array"
+          }
+        },
+        "required": [
+          "graph_definition_id",
+          "name",
+          "nodes",
+          "edges"
+        ],
+        "title": "GraphDefinition",
+        "type": "object"
+      },
+      "GraphInstance": {
+        "additionalProperties": false,
+        "description": "One execution of one graph definition inside a trace.",
+        "properties": {
+          "ended_sequence": {
+            "anyOf": [
+              {
+                "minimum": 1.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ended Sequence"
+          },
+          "graph_definition_id": {
+            "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*@v[1-9][0-9]*$",
+            "title": "Graph Definition Id",
+            "type": "string"
+          },
+          "graph_instance_id": {
+            "minLength": 1,
+            "title": "Graph Instance Id",
+            "type": "string"
+          },
+          "namespace": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Namespace",
+            "type": "array"
+          },
+          "parent_graph_instance_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Graph Instance Id"
+          },
+          "parent_node_run_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Node Run Id"
+          },
+          "started_sequence": {
+            "minimum": 1.0,
+            "title": "Started Sequence",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "graph_instance_id",
+          "graph_definition_id",
+          "parent_graph_instance_id",
+          "parent_node_run_id",
+          "namespace",
+          "started_sequence",
+          "ended_sequence"
+        ],
+        "title": "GraphInstance",
+        "type": "object"
+      },
+      "GraphRunEventV1": {
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "graph_start"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "duration_ms": {
+                  "type": "null"
+                },
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "type": "null"
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "graph"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "const": "running"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "graph_end"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "type": "null"
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "graph"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "not": {
+                    "const": "running"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "node_start"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "duration_ms": {
+                  "type": "null"
+                },
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "graph_node"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "const": "running"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "node_end"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "graph_node"
+                  ]
+                },
+                "status": {
+                  "not": {
+                    "const": "running"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "tool_start"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "duration_ms": {
+                  "type": "null"
+                },
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "tool"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "const": "running"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "tool_end"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "tool"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "not": {
+                    "const": "running"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "llm_start"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "duration_ms": {
+                  "type": "null"
+                },
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "llm",
+                    "llm_attempt_adapter"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "const": "running"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "llm_end"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "llm",
+                    "llm_attempt_adapter"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "not": {
+                    "const": "running"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "policy_start"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "duration_ms": {
+                  "type": "null"
+                },
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "policy",
+                    "tool_scope_adapter"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "const": "running"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "policy_end"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "node_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "policy",
+                    "tool_scope_adapter"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "not": {
+                    "const": "running"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "error"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "error": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "graph_instance_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "runnable_type": {
+                  "enum": [
+                    "graph",
+                    "graph_node",
+                    "llm",
+                    "llm_attempt_adapter",
+                    "policy",
+                    "tool",
+                    "tool_scope_adapter"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                },
+                "status": {
+                  "enum": [
+                    "cancelled",
+                    "error"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "trace_truncated"
+                }
+              },
+              "required": [
+                "event_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "node_id": {
+                  "type": "null"
+                },
+                "parent_run_id": {
+                  "type": "null"
+                },
+                "run_id": {
+                  "type": "null"
+                },
+                "runnable_type": {
+                  "enum": [
+                    "trace_system"
+                  ]
+                },
+                "state_diff": {
+                  "type": "null"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "error"
+                },
+                "runnable_type": {
+                  "not": {
+                    "const": "graph"
+                  }
+                }
+              },
+              "required": [
+                "event_type",
+                "runnable_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "node_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                },
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "graph_instance_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "graph_instance_id"
+              ]
+            },
+            "then": {
+              "properties": {
+                "graph_definition_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "parent_graph_instance_id": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "parent_graph_instance_id"
+              ]
+            },
+            "then": {
+              "properties": {
+                "parent_run_id": {
+                  "not": {
+                    "type": "null"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "metadata": {
+                  "properties": {
+                    "llm_attempt": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "llm_attempt"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "metadata"
+              ]
+            },
+            "then": {
+              "properties": {
+                "runnable_type": {
+                  "enum": [
+                    "llm_attempt_adapter"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "metadata": {
+                  "properties": {
+                    "tool_scope": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "tool_scope"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "metadata"
+              ]
+            },
+            "then": {
+              "properties": {
+                "runnable_type": {
+                  "enum": [
+                    "tool_scope_adapter"
+                  ]
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "metadata": {
+                  "properties": {
+                    "tool_health": {
+                      "type": "object"
+                    }
+                  },
+                  "required": [
+                    "tool_health"
+                  ],
+                  "type": "object"
+                }
+              },
+              "required": [
+                "metadata"
+              ]
+            },
+            "then": {
+              "properties": {
+                "runnable_type": {
+                  "enum": [
+                    "tool",
+                    "tool_scope_adapter"
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "description": "One accepted trace event. Every key is present; unavailable values are null.",
+        "properties": {
+          "debug_run_id": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Debug Run Id",
+            "type": "string"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "error": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SafeError"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event_id": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Event Id",
+            "type": "string"
+          },
+          "event_type": {
+            "enum": [
+              "graph_start",
+              "graph_end",
+              "node_start",
+              "node_end",
+              "tool_start",
+              "tool_end",
+              "llm_start",
+              "llm_end",
+              "policy_start",
+              "policy_end",
+              "error",
+              "trace_truncated"
+            ],
+            "title": "Event Type",
+            "type": "string"
+          },
+          "graph_definition_id": {
+            "anyOf": [
+              {
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*@v[1-9][0-9]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graph Definition Id"
+          },
+          "graph_instance_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graph Instance Id"
+          },
+          "input_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PayloadSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "metadata": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EventMetadata"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "monotonic_offset_ms": {
+            "minimum": 0.0,
+            "title": "Monotonic Offset Ms",
+            "type": "number"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id"
+          },
+          "output_summary": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PayloadSummary"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "parent_graph_instance_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Graph Instance Id"
+          },
+          "parent_run_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Parent Run Id"
+          },
+          "redaction": {
+            "$ref": "#/components/schemas/RedactionInfo"
+          },
+          "run_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Run Id"
+          },
+          "runnable_type": {
+            "enum": [
+              "graph",
+              "graph_node",
+              "tool",
+              "llm",
+              "policy",
+              "llm_attempt_adapter",
+              "tool_scope_adapter",
+              "trace_system"
+            ],
+            "title": "Runnable Type",
+            "type": "string"
+          },
+          "schema_version": {
+            "const": "graph-run-event/1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "sequence": {
+            "minimum": 1.0,
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "state_diff": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StateDiff"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "status": {
+            "enum": [
+              "running",
+              "completed",
+              "error",
+              "cancelled",
+              "incomplete"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "timestamp_utc": {
+            "format": "date-time",
+            "pattern": "(Z|[+-]00:00)$",
+            "title": "Timestamp Utc",
+            "type": "string"
+          },
+          "trace_id": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Trace Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "schema_version",
+          "event_id",
+          "trace_id",
+          "debug_run_id",
+          "sequence",
+          "timestamp_utc",
+          "monotonic_offset_ms",
+          "event_type",
+          "status",
+          "graph_definition_id",
+          "graph_instance_id",
+          "parent_graph_instance_id",
+          "node_id",
+          "run_id",
+          "parent_run_id",
+          "runnable_type",
+          "duration_ms",
+          "input_summary",
+          "output_summary",
+          "state_diff",
+          "metadata",
+          "error",
+          "redaction"
+        ],
+        "title": "GraphRunEventV1",
+        "type": "object"
+      },
+      "GraphTraceV1": {
+        "additionalProperties": false,
+        "description": "One page of a trace. The same shape serves an in-progress and a final read.",
+        "properties": {
+          "config_snapshot": {
+            "$ref": "#/components/schemas/TraceConfigSnapshot"
+          },
+          "created_at": {
+            "format": "date-time",
+            "pattern": "(Z|[+-]00:00)$",
+            "title": "Created At",
+            "type": "string"
+          },
+          "debug_run_id": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Debug Run Id",
+            "type": "string"
+          },
+          "dropped_event_count": {
+            "minimum": 0.0,
+            "title": "Dropped Event Count",
+            "type": "integer"
+          },
+          "event_window": {
+            "$ref": "#/components/schemas/EventWindow"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/GraphRunEventV1"
+            },
+            "title": "Events",
+            "type": "array"
+          },
+          "expires_at": {
+            "format": "date-time",
+            "pattern": "(Z|[+-]00:00)$",
+            "title": "Expires At",
+            "type": "string"
+          },
+          "redaction_summary": {
+            "$ref": "#/components/schemas/RedactionSummary"
+          },
+          "schema_version": {
+            "const": "graph-trace/1.0",
+            "title": "Schema Version",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "running",
+              "completed",
+              "failed",
+              "cancelled",
+              "incomplete"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/TraceSummary"
+          },
+          "topology": {
+            "$ref": "#/components/schemas/TraceTopology"
+          },
+          "trace_id": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Trace Id",
+            "type": "string"
+          },
+          "truncated": {
+            "title": "Truncated",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "schema_version",
+          "trace_id",
+          "debug_run_id",
+          "status",
+          "config_snapshot",
+          "topology",
+          "events",
+          "event_window",
+          "summary",
+          "redaction_summary",
+          "truncated",
+          "dropped_event_count",
+          "created_at",
+          "expires_at"
+        ],
+        "title": "GraphTraceV1",
         "type": "object"
       },
       "GuestLoginRequestAPI": {
@@ -1561,6 +2959,159 @@
         "title": "ItineraryRefineRequestAPI",
         "type": "object"
       },
+      "LlmAttempt": {
+        "additionalProperties": false,
+        "description": "WP5 physical attempt. Start-only events leave the outcome fields null.",
+        "properties": {
+          "attempt_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attempt Id"
+          },
+          "cost_usd": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cost Usd"
+          },
+          "model_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model Id"
+          },
+          "outcome": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Outcome"
+          },
+          "policy_leg": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Leg"
+          },
+          "pricing_snapshot_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Pricing Snapshot Id"
+          },
+          "provider_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Id"
+          },
+          "provider_price_table_version": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Price Table Version"
+          },
+          "request_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Request Id"
+          },
+          "total_tokens": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Tokens"
+          },
+          "validation_status": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Validation Status"
+          }
+        },
+        "required": [
+          "request_id",
+          "attempt_id",
+          "provider_id",
+          "model_id",
+          "policy_leg",
+          "outcome",
+          "validation_status",
+          "total_tokens",
+          "cost_usd",
+          "pricing_snapshot_id",
+          "provider_price_table_version"
+        ],
+        "title": "LlmAttempt",
+        "type": "object"
+      },
       "LoginRequestAPI": {
         "additionalProperties": false,
         "properties": {
@@ -1677,6 +3228,95 @@
           "content"
         ],
         "title": "MessageData",
+        "type": "object"
+      },
+      "Omission": {
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "maxLength": 512,
+            "title": "Path",
+            "type": "string"
+          },
+          "reason": {
+            "pattern": "^[a-z][a-z0-9_]{0,63}$",
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "reason"
+        ],
+        "title": "Omission",
+        "type": "object"
+      },
+      "PayloadSummary": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {
+            "minimum": 0.0,
+            "title": "Bytes",
+            "type": "integer"
+          },
+          "item_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Count"
+          },
+          "keys": {
+            "items": {
+              "maxLength": 512,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Keys",
+            "type": "array"
+          },
+          "omitted_count": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Omitted Count"
+          },
+          "value_types": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "maxLength": 512,
+                  "type": "string"
+                },
+                "maxProperties": 50,
+                "propertyNames": {
+                  "maxLength": 512
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value Types"
+          }
+        },
+        "required": [
+          "keys",
+          "bytes"
+        ],
+        "title": "PayloadSummary",
         "type": "object"
       },
       "PreferenceFieldAPI": {
@@ -2221,6 +3861,69 @@
         "title": "RecommendationResponseAPI",
         "type": "object"
       },
+      "RedactionInfo": {
+        "additionalProperties": false,
+        "properties": {
+          "policy_id": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Policy Id",
+            "type": "string"
+          },
+          "redacted_paths": {
+            "items": {
+              "maxLength": 512,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Redacted Paths",
+            "type": "array"
+          },
+          "stored_bytes": {
+            "minimum": 0.0,
+            "title": "Stored Bytes",
+            "type": "integer"
+          },
+          "truncated_paths": {
+            "items": {
+              "maxLength": 512,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Truncated Paths",
+            "type": "array"
+          }
+        },
+        "required": [
+          "policy_id",
+          "redacted_paths",
+          "truncated_paths",
+          "stored_bytes"
+        ],
+        "title": "RedactionInfo",
+        "type": "object"
+      },
+      "RedactionSummary": {
+        "additionalProperties": false,
+        "description": "Whole-trace redaction counts, so a reader knows what is withheld.",
+        "properties": {
+          "redacted_value_count": {
+            "minimum": 0.0,
+            "title": "Redacted Value Count",
+            "type": "integer"
+          },
+          "truncated_value_count": {
+            "minimum": 0.0,
+            "title": "Truncated Value Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "redacted_value_count",
+          "truncated_value_count"
+        ],
+        "title": "RedactionSummary",
+        "type": "object"
+      },
       "RegisterRequestAPI": {
         "additionalProperties": false,
         "properties": {
@@ -2505,6 +4208,38 @@
         "title": "RestaurantAPI",
         "type": "object"
       },
+      "SafeError": {
+        "additionalProperties": false,
+        "properties": {
+          "code": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Code",
+            "type": "string"
+          },
+          "error_class": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Error Class",
+            "type": "string"
+          },
+          "retryable": {
+            "title": "Retryable",
+            "type": "boolean"
+          },
+          "safe_message": {
+            "maxLength": 512,
+            "title": "Safe Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "error_class",
+          "safe_message",
+          "retryable"
+        ],
+        "title": "SafeError",
+        "type": "object"
+      },
       "SetActiveBranchRequest": {
         "additionalProperties": false,
         "properties": {
@@ -2528,6 +4263,65 @@
           "branch_id"
         ],
         "title": "SetActiveBranchRequest",
+        "type": "object"
+      },
+      "StateDiff": {
+        "additionalProperties": false,
+        "properties": {
+          "added": {
+            "additionalProperties": {
+              "description": "null, boolean, finite number, string of at most 512 characters, or list/object of at most 50 safe values, nested at most 6 levels",
+              "x-wp8-safe-value": true
+            },
+            "maxProperties": 50,
+            "propertyNames": {
+              "maxLength": 512
+            },
+            "title": "Added",
+            "type": "object"
+          },
+          "basis": {
+            "const": "node_input_to_update",
+            "title": "Basis",
+            "type": "string"
+          },
+          "changed": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ChangedValue"
+            },
+            "maxProperties": 50,
+            "propertyNames": {
+              "maxLength": 512
+            },
+            "title": "Changed",
+            "type": "object"
+          },
+          "omitted": {
+            "items": {
+              "$ref": "#/components/schemas/Omission"
+            },
+            "maxItems": 50,
+            "title": "Omitted",
+            "type": "array"
+          },
+          "removed": {
+            "items": {
+              "maxLength": 512,
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Removed",
+            "type": "array"
+          }
+        },
+        "required": [
+          "basis",
+          "added",
+          "changed",
+          "removed",
+          "omitted"
+        ],
+        "title": "StateDiff",
         "type": "object"
       },
       "TaskStatusAPI": {
@@ -2626,6 +4420,376 @@
           "status"
         ],
         "title": "ThinkingStepAPI",
+        "type": "object"
+      },
+      "ToolHealth": {
+        "additionalProperties": false,
+        "description": "Provider health only; never probe bodies, credentials or quota.",
+        "properties": {
+          "checked_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "(Z|[+-]00:00)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Checked At"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "(Z|[+-]00:00)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At"
+          },
+          "provider_id": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Provider Id",
+            "type": "string"
+          },
+          "reason_code": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason Code"
+          },
+          "state": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "provider_id",
+          "state",
+          "reason_code",
+          "checked_at",
+          "expires_at"
+        ],
+        "title": "ToolHealth",
+        "type": "object"
+      },
+      "ToolScope": {
+        "additionalProperties": false,
+        "description": "WP7 pre-LLM tool-scope decision.",
+        "properties": {
+          "catalog_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Catalog Id"
+          },
+          "eligible_tool_names": {
+            "items": {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+              "type": "string"
+            },
+            "maxItems": 50,
+            "title": "Eligible Tool Names",
+            "type": "array"
+          },
+          "excluded": {
+            "items": {
+              "$ref": "#/components/schemas/ExcludedTool"
+            },
+            "maxItems": 50,
+            "title": "Excluded",
+            "type": "array"
+          },
+          "health_snapshot_id": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Health Snapshot Id"
+          },
+          "policy_version": {
+            "anyOf": [
+              {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Policy Version"
+          }
+        },
+        "required": [
+          "catalog_id",
+          "health_snapshot_id",
+          "policy_version",
+          "eligible_tool_names",
+          "excluded"
+        ],
+        "title": "ToolScope",
+        "type": "object"
+      },
+      "TopologyEdge": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "normal",
+              "conditional"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          },
+          "source": {
+            "minLength": 1,
+            "title": "Source",
+            "type": "string"
+          },
+          "target": {
+            "minLength": 1,
+            "title": "Target",
+            "type": "string"
+          }
+        },
+        "required": [
+          "source",
+          "target",
+          "kind"
+        ],
+        "title": "TopologyEdge",
+        "type": "object"
+      },
+      "TopologyNode": {
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "start",
+              "end",
+              "node",
+              "tool",
+              "llm"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "node_id": {
+            "minLength": 1,
+            "title": "Node Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "node_id",
+          "label",
+          "kind"
+        ],
+        "title": "TopologyNode",
+        "type": "object"
+      },
+      "TraceConfigSnapshot": {
+        "additionalProperties": false,
+        "description": "What was actually applied, echoed back on every page.",
+        "properties": {
+          "capture": {
+            "$ref": "#/components/schemas/CaptureOptions"
+          },
+          "limits": {
+            "$ref": "#/components/schemas/TraceLimits"
+          },
+          "redaction_policy_id": {
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
+            "title": "Redaction Policy Id",
+            "type": "string"
+          },
+          "retention_days": {
+            "maximum": 30.0,
+            "minimum": 1.0,
+            "title": "Retention Days",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "redaction_policy_id",
+          "capture",
+          "limits",
+          "retention_days"
+        ],
+        "title": "TraceConfigSnapshot",
+        "type": "object"
+      },
+      "TraceLimits": {
+        "additionalProperties": false,
+        "description": "Requested limits. Each is positive and at most the hard cap.",
+        "properties": {
+          "max_collection_items": {
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Max Collection Items",
+            "type": "integer"
+          },
+          "max_event_bytes": {
+            "maximum": 16384.0,
+            "minimum": 1.0,
+            "title": "Max Event Bytes",
+            "type": "integer"
+          },
+          "max_events": {
+            "maximum": 5000.0,
+            "minimum": 1.0,
+            "title": "Max Events",
+            "type": "integer"
+          },
+          "max_nesting_depth": {
+            "maximum": 6.0,
+            "minimum": 1.0,
+            "title": "Max Nesting Depth",
+            "type": "integer"
+          },
+          "max_string_chars": {
+            "maximum": 512.0,
+            "minimum": 1.0,
+            "title": "Max String Chars",
+            "type": "integer"
+          },
+          "max_trace_bytes": {
+            "maximum": 2097152.0,
+            "minimum": 1.0,
+            "title": "Max Trace Bytes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "max_events",
+          "max_event_bytes",
+          "max_trace_bytes",
+          "max_string_chars",
+          "max_collection_items",
+          "max_nesting_depth"
+        ],
+        "title": "TraceLimits",
+        "type": "object"
+      },
+      "TraceSummary": {
+        "additionalProperties": false,
+        "description": "Counts for the whole trace, not just the returned page.",
+        "properties": {
+          "completed_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "pattern": "(Z|[+-]00:00)$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At"
+          },
+          "duration_ms": {
+            "anyOf": [
+              {
+                "minimum": 0.0,
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Duration Ms"
+          },
+          "error_count": {
+            "minimum": 0.0,
+            "title": "Error Count",
+            "type": "integer"
+          },
+          "started_at": {
+            "format": "date-time",
+            "pattern": "(Z|[+-]00:00)$",
+            "title": "Started At",
+            "type": "string"
+          },
+          "visited_nodes": {
+            "minimum": 0.0,
+            "title": "Visited Nodes",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "started_at",
+          "completed_at",
+          "duration_ms",
+          "visited_nodes",
+          "error_count"
+        ],
+        "title": "TraceSummary",
+        "type": "object"
+      },
+      "TraceTopology": {
+        "additionalProperties": false,
+        "description": "Static definitions (what could run) and dynamic instances (what did).",
+        "properties": {
+          "definitions": {
+            "items": {
+              "$ref": "#/components/schemas/GraphDefinition"
+            },
+            "title": "Definitions",
+            "type": "array"
+          },
+          "instances": {
+            "items": {
+              "$ref": "#/components/schemas/GraphInstance"
+            },
+            "title": "Instances",
+            "type": "array"
+          }
+        },
+        "required": [
+          "definitions",
+          "instances"
+        ],
+        "title": "TraceTopology",
         "type": "object"
       },
       "UnitInputGenerateRequest": {
@@ -4947,6 +7111,72 @@
           }
         },
         "summary": "Explain Endpoint",
+        "tags": [
+          "internal-debug"
+        ]
+      }
+    },
+    "/internal/debug/behavior-tests/{run_id}/graph-trace": {
+      "get": {
+        "description": "Paged graph trace for one debug run.\n\nStub (WP8 B0): the contract is frozen and reaches OpenAPI through\n``response_model``, but no store exists yet. Member B's B4/B5 replace\nthe body; the shape returned to callers does not change.",
+        "operationId": "get_graph_trace_internal_debug_behavior_tests__run_id__graph_trace_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "after_sequence",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "After Sequence",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 200,
+              "maximum": 500,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GraphTraceV1"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Graph Trace",
         "tags": [
           "internal-debug"
         ]
