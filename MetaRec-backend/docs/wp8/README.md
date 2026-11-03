@@ -13,6 +13,7 @@ collector can and cannot see. No WP8 collector exists yet.
 
 | Path | What it is |
 |---|---|
+| [CONTRACT.md](CONTRACT.md) | Every shape in the v1 trace contract: fields, rules, fixed value lists and hard caps, with the owner of each shape (checked against `models.py` by `tests/test_wp8_contract_doc.py`) |
 | [GRAPH_EXECUTION_FLOW.md](GRAPH_EXECUTION_FLOW.md) | How the five graphs call each other: entry points, node topology, and the parent link at every nested call site (runtime-verified) |
 | [diagrams/](diagrams/) | One diagram per graph, plus an end-to-end callback sequence (`.mmd` source + `.png`) |
 | [parentage-baseline/REPORT.md](parentage-baseline/REPORT.md) | Runtime experiments on the real graphs: what was tested, results, analysis, and what it means for the collector design |
