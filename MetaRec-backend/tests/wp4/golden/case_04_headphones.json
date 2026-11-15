@@ -1,0 +1,176 @@
+{
+  "case_id": "case_04_headphones",
+  "query": "over-ear noise cancelling headphones under 100 USD",
+  "items": [
+    {
+      "id": "product_1dfc954755628772",
+      "domain": "product",
+      "title": "Active Noise Cancelling Headphones, Bluetooth Over Ear, Hi-Fi Stereo,100H Playback Time, High-Resolution Audio, Water Resistant, Deep Bass, Memory Foam Ear Cups, Home, Office, Studio,Travel, Work, Gym",
+      "subtitle": "$49.97",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/81dY2KCp1AL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Cancelling-Headphones-Bluetooth-High-Resolution-Resistant/dp/B0FNFCNSTP/",
+      "rating": 4.8,
+      "reviews_count": 85,
+      "source": "Amazon",
+      "tags": [
+        "$49.97"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_20da64c0c245e432",
+      "domain": "product",
+      "title": "JLab, JBuds Lux ANC, Over Ear Headphones, Active Noise Cancelling, Bluetooth, Spatial Audio, Sage",
+      "subtitle": "$49.95",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71ow8D+hkbL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/JLab-Headphones-Cancelling-Customizable-Compatible/dp/B0CRMB9Z84/",
+      "rating": 4.5,
+      "reviews_count": 8700,
+      "source": "Amazon",
+      "tags": [
+        "$49.95"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_cb596efe13cd801d",
+      "domain": "product",
+      "title": "TOZO Hybrid Active Noise Cancelling Headphones, Hi Res Audio | Wireless Over Ear Bluetooth Headset, 60H Playtime, Custom EQ via App Deep Bass Comfort Fit Ear Cups, for Home Office Travel",
+      "subtitle": "$30.36",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71VxRF78LRL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/TOZO-HT2-Cancelling-Headphones-Bluetooth/dp/B07KY8G9NM/",
+      "rating": 4.5,
+      "reviews_count": 4600,
+      "source": "Amazon",
+      "tags": [
+        "$30.36"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_4e38f12565b83569",
+      "domain": "product",
+      "title": "TOZO HT3 Hybrid Noise Cancelling Wireless Headphones, 90H Over Ear Headset | Hi Res Audio, AI Voice Assistant, Dual Device Connection, 32 Custom EQs, Built In 5 Mics, ANC, Foldable, Bluetooth 6.0 Black",
+      "subtitle": "$29.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61LOj4pKq9L._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/TOZO-Cancelling-Headphones-Bluetooth-Assistant/dp/B0FPCGMXJB/",
+      "rating": 4.5,
+      "reviews_count": 3200,
+      "source": "Amazon",
+      "tags": [
+        "$29.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_9eb0c967688530d5",
+      "domain": "product",
+      "title": "1Mii Y8+ Noise Cancelling Headphones for Gaming, Airplane & Travel, Black | Bluetooth 6.0 Over-Ear Wireless, Hybrid ANC, 100 hrs Playtime, Comfortable, LDAC Hi-Res Audio, Deep Bass, Custom EQ via APP",
+      "subtitle": "$39.97",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71tlPl6QnSL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/1Mii-Y8-Cancelling-Headphones-Bluetooth/dp/B0DZHNWPKD/",
+      "rating": 4.5,
+      "reviews_count": 1300,
+      "source": "Amazon",
+      "tags": [
+        "$39.97"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_6acd484518e94ce5",
+      "domain": "product",
+      "title": "KVIDIO Hybrid Active Noise Cancelling Headphones Over Ear | Bluetooth Wireless ANC 70H Playtime, Transparency Mode, Microphone, Deep Bass, HiFi Stereo Sound for Home, Travel, Office",
+      "subtitle": "$22.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61BcRmV5jdL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/KVIDIO-Cancelling-Headphones-Microphone-Transparency/dp/B0CFGVDDH6/",
+      "rating": 4.4,
+      "reviews_count": 15300,
+      "source": "Amazon",
+      "tags": [
+        "$22.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_548adef3e2bc15ce",
+      "domain": "product",
+      "title": "RUNOLIM Active Noise Cancelling Headphones, Wireless Bluetooth Over Ear | 100H Playtime, Transparency Mode, Deep Bass Hi-Fi Stereo, Built-in Mic, Lightweight Comfort for Travel, Office and Home",
+      "subtitle": "$21.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/6162JJuKpbL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Cancelling-Headphones-Wireless-Bluetooth-Microphone/dp/B0BKPRTRXK/",
+      "rating": 4.4,
+      "reviews_count": 7500,
+      "source": "Amazon",
+      "tags": [
+        "$21.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_8591c60513caf02f",
+      "domain": "product",
+      "title": "Soundcore Anker Life Q20 Hybrid Active Noise Cancelling Headphones, Wireless Over Ear Bluetooth Headphones, 60H Playtime, Hi-Res Audio, Deep Bass, Foam Ear Cups, Travel, Office, USB-C Charging",
+      "subtitle": "$39.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/717y1XSK9EL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Soundcore-Cancelling-Headphones-Wireless-Bluetooth/dp/B0D1QR8NL8/",
+      "rating": 4.4,
+      "reviews_count": 7400,
+      "source": "Amazon",
+      "tags": [
+        "$39.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_95b415ebafc4f979",
+      "domain": "product",
+      "title": "Upgrade Pro‑Level Hybrid Active Noise Cancelling Headphones | HD Sound, Wireless Bluetooth Headphones Over The Ear Unequaled Comfort, Vivid Deep Bass, for Home Office Travel Gift, Black",
+      "subtitle": "$29.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71-Nso9qP6L._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/vibeadio-Cancelling-Headphones-Bluetooth-Transparency/dp/B0D14R85TZ/",
+      "rating": 4.4,
+      "reviews_count": 2000,
+      "source": "Amazon",
+      "tags": [
+        "$29.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_d83e8deb8aca1b41",
+      "domain": "product",
+      "title": "Hybrid Active Noise Cancelling Headphones Over Ear 120H Playtime | Smart Knob, Bluetooth 6.0 Wireless, Customize EQ, Transparency Mode, Hi-Res Audio, NC95, Silky Matte Finish, Travel/Workout",
+      "subtitle": "$69.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/51WPr7N0L2L._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/FOFUN-NC95-Cancelling-Headphones-Bluetooth/dp/B0FY562CBX/",
+      "rating": 4.3,
+      "reviews_count": 1500,
+      "source": "Amazon",
+      "tags": [
+        "$69.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    }
+  ]
+}

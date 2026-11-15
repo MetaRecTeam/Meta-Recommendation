@@ -1,0 +1,125 @@
+{
+  "id": "case_15_studio_headphones",
+  "query": "over-ear wired studio headphones under 50 USD",
+  "preferences": {
+    "product": "over-ear headphones",
+    "budget": "< 50 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 50,
+    "currency": "USD",
+    "category_terms": [
+      "headphone"
+    ]
+  },
+  "soft_constraints": [
+    "over-ear",
+    "wired",
+    "50mm drivers"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. Mostly clean (SerpApi relevance is good here - all over-ear wired studio headphones). Only leak is #6 Audio-Technica ATH-M20x at $58, over the $50 ceiling. Kept category loose ('headphone') because the M20x title omits 'over-ear'/'wired' though it is both.",
+  "candidates": [
+    {
+      "title": "Wired Headphones, Over Ear Headphones for Studio Monitor & Mixing DJ | 50mm Drivers, Stereo Sound, 1/4 to 3.5mm Jack, for Guitar AMP, Podcast, Keyboard & Computer Recording, Black",
+      "price": "$21.99",
+      "rating": 4.6,
+      "reviews": 340,
+      "link": "https://www.amazon.com/Wired-Headphones-Studio-Monitor-Mixing/dp/B0GXZNCGNK/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71hoPV5nXcL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Philips Over Ear Wired Stereo Headphones for Podcasts, Studio Monitoring and Recording Headset for Computer, Keyboard and Guitar with 6.3 mm (1/4\") Add On Adapter",
+      "price": "$17.99",
+      "rating": 4.1,
+      "reviews": 4500,
+      "link": "https://www.amazon.com/Headphones-Podcasts-Monitoring-Recording-Computer/dp/B085899TQ9/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81GmTkexzDL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "EKSA Wired Headphones, Over Ear Headphones for Studio Monitor/Mixing DJ | Hi-Res Stereo Sound, 1/4 to 3.5mm Jack, 50mm Drivers, for PC Keyboard Piano Podcast Guitar AMP Computer Recording Mixing",
+      "price": "$26.99",
+      "rating": 4.4,
+      "reviews": 84,
+      "link": "https://www.amazon.com/EKSA-Headphones-Studio-Monitor-Headphone/dp/B0G5Y7C816/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71+24n-dz+L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "OneOdio A71 Hi-Res Wired Over-Ear Studio Headphones for DJ, Mixing - Black | headphone for studio recording, monitoring and mixing, with foldable design, 3.5mm/6.35mm jacks connect to PC, computer, DJ",
+      "price": "$32.99",
+      "rating": 4.5,
+      "reviews": 17200,
+      "link": "https://www.amazon.com/OneOdio-Hi-Res-Studio-Recording-Headphones/dp/B09D3MFSGJ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61x6E4kVXmL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "OneOdio A70 Bluetooth Over-Ear Headphones, Hi-Res Wired DJ Studio - Black | Wireless over-ear headphones with 72H playtime, 3.5mm/6.35mm wired jacks for studio monitoring, mixing, guitar, amp and PC",
+      "price": "$37.34",
+      "rating": 4.4,
+      "reviews": 18400,
+      "link": "https://www.amazon.com/OneOdio-Bluetooth-Headphones-Share-Port-Professional/dp/B07MQQS88Q/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71lPvenXPLL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Audio-Technica ATH-M20x Professional Studio Monitor Headphones, Black",
+      "price": "$58.00",
+      "rating": 4.6,
+      "reviews": 27100,
+      "link": "https://www.amazon.com/Audio-Technica-ATH-M20x-Professional-Monitor-Headphones/dp/B00HVLUR18/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81zcnWFPwVS._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "FIFINE HD8 Wired Studio Monitor Headphone, Detachable 3.5mm/6.35mm Cables | Podcast Headphones with 50mm Drivers, Closed-back, 50mm Drivers, Passive Noise Canceling, Lightweight, for PC/Mixer/Amplifier",
+      "price": "$34.99",
+      "rating": 4.5,
+      "reviews": 1500,
+      "link": "https://www.amazon.com/FIFINE-Studio-Monitor-Headphone-Detachable/dp/B0B6BPVS3Z/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81OXsZ21Z4L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Wired Over Ear Headphones, DJ & Studio Monitor Headphones | 50mm Driver, Stereo Headsets with 1/4 and 3.5mm Jack for Recording Mixing Podcast Keyboard Guitar Laptop - Black",
+      "price": "$19.99",
+      "rating": 4.2,
+      "reviews": 54,
+      "link": "https://www.amazon.com/Aechorhy-Headphones-Headsets-Recording-Keyboard/dp/B0G4PBC1BM/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61U5RZKOL0L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "New Bee Studio Headphones, Wired Headphones with 50mm Drivers, Professional DJ Headphones for Recording Mixing Podcast Guitar Piano, 210g Ultra-Lightweight Design, 3.5/6.35mm Jack",
+      "price": "$15.98",
+      "rating": 4.2,
+      "reviews": 70,
+      "link": "https://www.amazon.com/New-Bee-Headphones-Professional-Ultra-Lightweight/dp/B0GLYKPC5B/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81nUCO-LKkL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "OneOdio A71D Wired Over-Ear Headphones, Hi-Res DJ Studio Headphone | Foldable monitor design with 3.5/6.35mm plugs for DJing, recording, podcasting, mixing, PC listening and guitar amps.",
+      "price": "$27.99",
+      "rating": 4.6,
+      "reviews": 472,
+      "link": "https://www.amazon.com/OneOdio-A71D-Headphones-Headphone-Recording/dp/B0FB3QKRXJ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71+wsE5tGKL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}

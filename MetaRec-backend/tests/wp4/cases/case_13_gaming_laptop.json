@@ -1,0 +1,147 @@
+{
+  "id": "case_13_gaming_laptop",
+  "query": "gaming laptop RTX under 500 USD",
+  "preferences": {
+    "product": "gaming laptop",
+    "budget": "< 500 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 500,
+    "currency": "USD",
+    "category_terms": [
+      "laptop"
+    ],
+    "require_terms": [
+      "rtx"
+    ]
+  },
+  "soft_constraints": [
+    "RTX 4050+",
+    "16GB RAM",
+    "144Hz"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. LEAKY (worst case): there is essentially no RTX gaming laptop under $500 - all 10 results are $549-$1400. #7 KAIGERR is the only sub-$550 but has no RTX GPU (integrated AMD). Every item violates; tests the relaxation / 'no match' path.",
+  "candidates": [
+    {
+      "title": "HP Victus 15 Gaming Laptop, NVIDIA GeForce RTX 3050, 12th Gen Intel Core i5-12500H, 8 GB RAM, 512 GB SSD, Full HD Display, Windows 11 Home, Backlit Keyboard, Enhanced Thermals (15-fa0025nr, 2022)",
+      "price": "$769.00",
+      "rating": 4.3,
+      "reviews": 376,
+      "link": "https://www.amazon.com/HP-i5-12500H-Keyboard-Enhanced-15-fa0025nr/dp/B09X8KFRB4/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71a1qK59lTL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "HP Victus 15.6\" Full HD 144Hz Gaming Laptop, Intel Core i5-12450H, NVIDIA GeForce RTX 3050,16GB RAM, 512GB PCIe SSD, Wi-Fi 6, Backlit Keyboard,Windows 11 Pro, Performance Blue",
+      "price": "$842.99",
+      "rating": 4.5,
+      "reviews": 73,
+      "link": "https://www.amazon.com/HP-i5-12450H-GeForce-Keyboard-Performance/dp/B0DJ3L37TY/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71cZs6fmSfL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "msi Thin A15 Gaming Laptop - 15.6\" FHD 144Hz Display - Ryzen 5-7535HS Processor - GeForce RTX 3050 GPU - 16GB DDR5 RAM - 512GB SSD - Cooler Boost Cooling - Thin & Light - Windows 11 - B7UC-473US",
+      "price": "$924.22",
+      "rating": 4.1,
+      "reviews": 57,
+      "link": "https://www.amazon.com/msi-Thin-A15-Gaming-Laptop/dp/B0FT53751J/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71Fr-EEsp6L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "msi Thin A15 15.6” 144Hz FHD Gaming Laptop: Ryzen 5-7535HS, NVIDIA Geforce RTX 2050, 8GB DDR5, 512GB NVMe SSD, Cooler Boost 5, Win 11: Black B7UCX-218US",
+      "price": "$819.99",
+      "rating": 4.2,
+      "reviews": 54,
+      "link": "https://www.amazon.com/MSI-Thin-144Hz-Gaming-Laptop/dp/B0CZSH2SP5/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71C+dSmk+KL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "HP NVIDIA GeForce RTX 4050 Laptop Gamer Victus 13420H 16GB RAM 512GB SSD 15.6\" Windows 11 Home English Keyboard",
+      "price": "$950.00",
+      "rating": 4.4,
+      "reviews": 25,
+      "link": "https://www.amazon.com/HP-GeForce-Windows-English-Keyboard/dp/B0FVTDK7VP/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71DT6QxmBAL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "ASUS TUF Gaming A16 Laptop: AMD Ryzen 7 7445HS, 16\" Full HD+ 145Hz Display, NVIDIA GeForce RTX 4050, 16GB DDR5 RAM, 512GB SSD, Backlit Keyboard, Windows 11",
+      "price": "$1,068.00",
+      "rating": 4.5,
+      "reviews": 165,
+      "link": "https://www.amazon.com/ASUS-TUF-Gaming-A16-Laptop/dp/B0FV4B883Y/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61WVG2Fd76L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "KAIGERR Gaming Laptop, Laptops with AMD Ryzen 7430U(Up to 4.3GHz), 16GB DDR4 512GB SSD Laptop Computer, 15.6inch Windοws 11 Laptop, 1920P FHD Display, WiFi 6, USB3.2, Type_C",
+      "price": "$549.99",
+      "rating": 5.0,
+      "reviews": 4,
+      "link": "https://www.amazon.com/KAIGERR-Laptops-Computer-15-6inch-Wind%CE%BFws/dp/B0H5J8PGC5/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81VdbDaxtGL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget",
+        "compat"
+      ]
+    },
+    {
+      "title": "acer Nitro V 15.6” FHD IPS 165Hz Gaming Laptop, Intel Core i5-13420H, NVIDIA GeForce RTX 5050 with 8GB GDDR7 VRAM, Win11H, w/Mouse pad (16GB RAM, 512GB PCIe SSD)",
+      "price": "$1,010.00",
+      "rating": 4.4,
+      "reviews": 110,
+      "link": "https://www.amazon.com/Nitro-Gaming-Laptop-i5-13420H-GeForce/dp/B0G43CQSNW/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81as6TD+vdL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "ASUS V16 Gaming Laptop, 16” WUXGA 144Hz Display, Intel Core 7 Processor 240H, NVIDIA GeForce RTX 5060, 16GB Memory, 512GB Storage, Windows 11, Matte Black, V3607VM-ES74",
+      "price": "$1,399.99",
+      "rating": 4.3,
+      "reviews": 29,
+      "link": "https://www.amazon.com/ASUS-Display-Processor-GeForce-V3607VM-ES74/dp/B0F11447PL/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71jUWgXKPvL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "HP Victus 15.6 inch FHD 144Hz Gaming Laptop Intel Core i5-13420H NVIDIA GeForce RTX 4050 6GB - 16GB DDR4 512GB SSD Mica Silver (2024)",
+      "price": "$919.93",
+      "rating": 4.4,
+      "reviews": 317,
+      "link": "https://www.amazon.com/HP-Victus-Gaming-i5-13420H-GeForce/dp/B0DN5RWNNC/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81obPsMhewL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    }
+  ]
+}

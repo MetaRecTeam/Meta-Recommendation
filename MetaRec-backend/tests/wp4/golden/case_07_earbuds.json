@@ -1,0 +1,176 @@
+{
+  "case_id": "case_07_earbuds",
+  "query": "wireless earbuds under 60 USD not Apple",
+  "items": [
+    {
+      "id": "product_58bed1f2ef1ad8ee",
+      "domain": "product",
+      "title": "Apple AirPods 4 Wireless Earbuds | Bluetooth Headphones, Personalized Spatial Audio, Sweat & Water Resistant, USB-C Charging Case, H2 Chip",
+      "subtitle": "$99.00",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61iBtxCUabL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Apple-Bluetooth-Headphones-Personalized-Effortless/dp/B0DGHMNQ5Z/",
+      "rating": 4.5,
+      "reviews_count": 34100,
+      "source": "Amazon",
+      "tags": [
+        "$99.00"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_18a67f1ca5dc7eae",
+      "domain": "product",
+      "title": "Apple EarPods Headphones with USB-C Plug, Wired Ear Buds with Built-in Remote to Control Music, Phone Calls, and Volume",
+      "subtitle": "$19.00",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/513OSdW4elL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Apple-EarPods-Headphones-Built-Control/dp/B0DCH8VDXF/",
+      "rating": 4.5,
+      "reviews_count": 17300,
+      "source": "Amazon",
+      "tags": [
+        "$19.00"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_4c25cf538f666235",
+      "domain": "product",
+      "title": "Soundcore by Anker P20i True Wireless Earbuds, with Big Bass, 30H Playtime | Bluetooth 5.3, Water-Resistant, 2 Mics for AI Clear Calls, 22 Preset EQs, Customization via App",
+      "subtitle": "$24.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/516-5Sh5pvL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Soundcore-Wireless-Bluetooth-Water-Resistant-Customization/dp/B0D5HSP346/",
+      "rating": 4.4,
+      "reviews_count": 113900,
+      "source": "Amazon",
+      "tags": [
+        "$24.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_62cd67072a551683",
+      "domain": "product",
+      "title": "JLab Go Air Pop+, True Wireless Earbuds, Bluetooth Earbuds with Microphone, Dual Connect, USB-C Charging Case, Teal",
+      "subtitle": "$24.88",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/61DLI0QB1pL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/JLab-Bluetooth-Resistance-Connection-Signature/dp/B0CYNH8BS4/",
+      "rating": 4.4,
+      "reviews_count": 25100,
+      "source": "Amazon",
+      "tags": [
+        "$24.88"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_d5c908850cfa8302",
+      "domain": "product",
+      "title": "TOZO T10 Wireless Earbuds Powerful Bass Stereo Wireless Charging, APP, IPX8 | Waterproof, 55H Playtime, Ergonomic Design In Ear buds, App Customize EQ, Bluetooth 5.3 Headphones for Work, Travel, Black",
+      "subtitle": "$18.94",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/81mk-PdqggL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/TOZO-Bluetooth-Wireless-Headphones-Waterproof/dp/B07J2Z5DBM/",
+      "rating": 4.3,
+      "reviews_count": 259600,
+      "source": "Amazon",
+      "tags": [
+        "$18.94"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_e70888753251d773",
+      "domain": "product",
+      "title": "kurdene Wireless Earbuds Bluetooth 5.3 Light Weight in Ear Headphones | Premium Sound Bass Ear buds with Charging Case,Smart Touch Control,Built in Mics Headset,Clear Calls for Sports Workout",
+      "subtitle": "$9.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/715fNrGN+ML._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/kurdene-Bluetooth-Light-Weight-Headphones-Earphones/dp/B0D635YLCT/",
+      "rating": 4.3,
+      "reviews_count": 60700,
+      "source": "Amazon",
+      "tags": [
+        "$9.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_1d04017c24f2aab7",
+      "domain": "product",
+      "title": "TOZO NC9 Hybrid Active Noise Cancelling Wireless Earbuds, 60H, LED Display | 6 Mic ENC Clear Calls, Deep Bass Sound, IPX8, in Ear Bluetooth 5.3 Headphones,32 EQs via APP, Comfort Fit Ear Buds, Black",
+      "subtitle": "$26.55",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/818Tszb+hNL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/TOZO-Cancelling-Waterproof-Bluetooth-Headphones/dp/B0DD41G2NZ/",
+      "rating": 4.3,
+      "reviews_count": 49400,
+      "source": "Amazon",
+      "tags": [
+        "$26.55"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_298780bb05cf1726",
+      "domain": "product",
+      "title": "JBL Vibe Beam - True Wireless Earbuds - Black | JBL Deep Bass Sound, Comfortable fit, Up to 32 8h 24h total hours of battery life with speed charging",
+      "subtitle": "$29.95",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/41+1Csr1pSL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/JBL-Vibe-Beam-Wireless-Headphones/dp/B0BQPNMXQV/",
+      "rating": 4.2,
+      "reviews_count": 40200,
+      "source": "Amazon",
+      "tags": [
+        "$29.95"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_e3c9923be9de3999",
+      "domain": "product",
+      "title": "Wireless Earbuds, Bluetooth 5.4 Headphones Sport Over Ear Buds with ENC Mic | Noise Cancelling Mic,48H, Wireless Earphone with Earhooks, Stereo Deep Bass, IP7 Waterproof Ear Bud for Workout Running, Blue",
+      "subtitle": "$24.69",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/71p2GKcro0L._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/Wireless-Bluetooth-Headphones-Cancelling-Waterproof/dp/B0FLPQ9TL8/",
+      "rating": 4.2,
+      "reviews_count": 26100,
+      "source": "Amazon",
+      "tags": [
+        "$24.69"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    },
+    {
+      "id": "product_d33ac9478e5db360",
+      "domain": "product",
+      "title": "xinwld Adaptive Hybrid Active Noise Canceling 2026 Wireless Earbuds, 6 Mics ENC Clear Call Ear Buds, Hi-Res Audio Deep Bass Bluetooth 5.4 Headphones, 40H, LED, for Sports Running Gym Workout, Black",
+      "subtitle": "$22.99",
+      "description": null,
+      "image_url": "https://m.media-amazon.com/images/I/717KVZ+HZOL._AC_UY218_.jpg",
+      "url": "https://www.amazon.com/xinwld-Adaptive-Canceling-Bluetooth-Headphones/dp/B0GX67QJMX/",
+      "rating": 4.1,
+      "reviews_count": 20900,
+      "source": "Amazon",
+      "tags": [
+        "$22.99"
+      ],
+      "why": "Matched the product search query.",
+      "gps_coordinates": null
+    }
+  ]
+}

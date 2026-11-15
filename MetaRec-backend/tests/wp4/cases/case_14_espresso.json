@@ -1,0 +1,126 @@
+{
+  "id": "case_14_espresso",
+  "query": "espresso machine under 100 USD",
+  "preferences": {
+    "product": "espresso machine",
+    "budget": "< 100 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 100,
+    "currency": "USD",
+    "category_terms": [
+      "espresso"
+    ]
+  },
+  "soft_constraints": [
+    "15-bar+ pump",
+    "steam wand"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. LEAKY - budget: 2/10 over $100 ($118.99, $109.99).",
+  "candidates": [
+    {
+      "title": "Chefman CraftBrew Espresso Machine, 15-Bar Pump Digital Espresso Maker w/Steam Wand for Latte & Cappuccino, Compact Espresso Coffee Machine w/ 1.5L Removable Water Reservoir - Stainless Black",
+      "price": "$79.99",
+      "rating": 4.2,
+      "reviews": 281,
+      "link": "https://www.amazon.com/Chefman-CraftBrew-Cappuccino-Removable-Reservoir/dp/B0FXBY6BVL/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71-ffsGoauL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "XIXUBX Cold Brew Espresso Machine with Milk Frother, Grey | 20 Bar Italian Pump, Professional Temperature Control System, Food-Grade Materials, Stainless Steel, 42 oz Water Tank",
+      "price": "$69.99",
+      "rating": 4.2,
+      "reviews": 554,
+      "link": "https://www.amazon.com/XIXUBX-Cold-Espresso-Machine-Frother/dp/B0H1C2F2JR/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61UkWBh3jLL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "HBN Espresso Machine, 3.5Bar Cappuccino & Latte Maker, 2-4 Cup Stainless Steel Coffee Machine with Milk Frother, 800W Espresso Machine Maker with Steamer, Compact Coffee Maker for Home and Office",
+      "price": "$58.49",
+      "rating": 4.3,
+      "reviews": 168,
+      "link": "https://www.amazon.com/HBN-Espresso-Machine-Cappuccino-Stainless/dp/B0FR9G93CY/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71nhvJF+Y0L._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "AMZCHEF Compact Espresso Machine 20 Bar, Americano, Latte & Cappuccino | Easy One-Touch Brewing, 30s Heat-Up, Stable PID Control, Easy Milk Frothing, Compact Design, 50oz Tank, White",
+      "price": "$79.98",
+      "rating": 4.6,
+      "reviews": 339,
+      "link": "https://www.amazon.com/AMZCHEF-Espresso-Removable-Cappuccino-Americano/dp/B0FCF8331R/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71uiX+-ty7L._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "CASABREWS CM5418 Compact Espresso Machine with Milk Frothing Steam Wand | Stainless Steel, 20-Bar Pump, Built-in Pressure Gauge, Powerful Steam Wand for Cappuccino Latte for Home, 34oz Water Tank",
+      "price": "$118.99",
+      "rating": 4.3,
+      "reviews": 8100,
+      "link": "https://www.amazon.com/Espresso-Professional-Removable-Cappuccino-Macchiato/dp/B09X3WGJ3R/",
+      "thumbnail": "https://m.media-amazon.com/images/I/617U+hSCJEL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "CASABREWS 3700 Essential Stainless Steel Espresso Machine with Steam Wand | 20-Bar Italian Pump, Powerful Steam Wand, 43.9oz Removable Water Tank, Compact Espresso Maker for Home, Cappuccino & Latte",
+      "price": "$99.99",
+      "rating": 4.3,
+      "reviews": 3600,
+      "link": "https://www.amazon.com/CASABREWS-Professional-Cappuccino-Removable-Stainless/dp/B0BRSP8YT6/",
+      "thumbnail": "https://m.media-amazon.com/images/I/6151bIBTKtL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Espresso Machine 20 Bar, Compact Espresso Coffee Machine with Milk Frother, Stainless Steel Coffee Maker with 34oz Removable Water Tank, Cappuccino Machine for Home, Office, Latte (Silver)",
+      "price": "$99.98",
+      "rating": 4.4,
+      "reviews": 159,
+      "link": "https://www.amazon.com/AERCANA-Espresso-Stainless-Removable-Cappuccino/dp/B0GY74JMX3/",
+      "thumbnail": "https://m.media-amazon.com/images/I/712in44KnCL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Espresso Machine 20 Bar - Espresso & Coffee Maker with Automatic Milk Frother, Cappuccino Machine, Latte Maker for Home, office, 1250W",
+      "price": "$66.58",
+      "rating": 4.6,
+      "reviews": 20,
+      "link": "https://www.amazon.com/JZ-CAFE-Espresso-Machine-Bar-Cappuccino/dp/B0DNSWPBT6/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61RhagudL9L._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Spacekey Espresso Machine with Milk Frother, 20 Bar Compact Expresso Coffee Machines for Home, Stainless Steel Espresso Maker with 39oz Removable Water Tank for Cappuccino Latte, Fast Heating, Silver",
+      "price": "$89.99",
+      "rating": 4.0,
+      "reviews": 84,
+      "link": "https://www.amazon.com/Spacekey-Espresso-Stainless-Removable-Cappuccino/dp/B0GTPT95BK/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71hpkDgOiFL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Stainless Steel Espresso Machine with Powerful Steam Wand | 20-Bar Pump, Hot & Cold Brew, Touch Screen, 57.5oz Removable Water Tank, Compact Espresso Maker for Home Cappuccino & Latte",
+      "price": "$109.99",
+      "rating": 5.0,
+      "reviews": 31,
+      "link": "https://www.amazon.com/RIOSKY-Stainless-Espresso-Machine-Powerful/dp/B0H217GWLL/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71Vots-yvjL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    }
+  ]
+}

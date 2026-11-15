@@ -1,0 +1,138 @@
+{
+  "id": "case_10_standing_desk",
+  "query": "electric standing desk 48 inch under 100 USD",
+  "preferences": {
+    "product": "standing desk",
+    "budget": "< 100 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 100,
+    "currency": "USD",
+    "category_terms": [
+      "desk"
+    ],
+    "require_terms": [
+      "standing",
+      "electric"
+    ]
+  },
+  "soft_constraints": [
+    "48 inch",
+    "memory presets"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. LEAKY - tight budget: motorised 48in standing desks split around $100, 6/10 over.",
+  "candidates": [
+    {
+      "title": "DUMOS 48 Inch Electric Standing Desk, Memory Adjustable Home Office Desk | Sit Stand Up Desk for Work Home Office,Adjustable Desk, Rising Computer Table with Splice Board,Cable Management,Hook,Black",
+      "price": "$78.92",
+      "rating": 4.2,
+      "reviews": 1400,
+      "link": "https://www.amazon.com/DUMOS-Electric-Standing-Adjustable-Workstations/dp/B0G3WZ7H6T/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71GVWo-3wdL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Standing Computer Gaming Office Desk - 48 x 24 Inches Adjustable Stand Up Electric Height Rising Table with Memory Presets for Home Study Writing PC Work, Modern Simple Walking Sit Desk, Easy Assembly",
+      "price": "$59.99",
+      "rating": 4.7,
+      "reviews": 145,
+      "link": "https://www.amazon.com/Standing-Computer-Gaming-Office-Desk/dp/B0GR6CLLM8/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81GN5l40QlL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Acrolix 48x24 Electric Standing Desk with Cable Net, Rustic Brown | 176 lbs Capacity, 28.3\"-46.4\" Height Range, 3-Piece Desktop, Quiet Motor Under 45dB, 2 Memory Presets, Hook & Cable Clips",
+      "price": "$79.99",
+      "rating": 4.6,
+      "reviews": 235,
+      "link": "https://www.amazon.com/Acrolix-Electric-Standing-Management-Desktop/dp/B0FJSRHNWM/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81bf3UYeiJL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Claiks Electric Standing Desk 48x24 Inch Adjustable Desk, Black | 156lbs weight capacity, 3 memory presets, industrial steel frame, cable management hub, adjustable height , easy assembly",
+      "price": "$79.99",
+      "rating": 4.3,
+      "reviews": 34,
+      "link": "https://www.amazon.com/Claiks-Electric-Standing-48x24-Adjustable/dp/B0H5JM5RXJ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61Z74zTW5gL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "SHW 48-Inch Electric Height Adjustable Standing Desk w/Drawer, Black | w/ Memory Presets and Cable Management | Drawer with adjustable compartments | Hanging Hooks",
+      "price": "$159.87",
+      "rating": 4.5,
+      "reviews": 21800,
+      "link": "https://www.amazon.com/SHW-Electric-Height-Adjustable-Computer/dp/B07MBR8N89/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71-kHcI68wL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "HUANUO 48″ x 24″ Electric Standing Desk with 2 Drawers, C-Clamp Mount Compatible, Height Adjustable Computer Desk, Home Office Stand Up Desk with 4 Preset Heights & 2 Hooks, Black",
+      "price": "$139.98",
+      "rating": 4.6,
+      "reviews": 1200,
+      "link": "https://www.amazon.com/HUANUO-Electric-Standing-Compatible-Adjustable/dp/B0CQC3RVMV/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71CfxsqVXmL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "Monomi 48\" x24“ Electric Height Adjustable Standing Desk,Black | Ergonomic Home Office Computer Gaming Desks with Memory Presets,Stable Steel Frame,176 lbs Capacity,Easy Assembly",
+      "price": "$139.95",
+      "rating": 4.6,
+      "reviews": 2500,
+      "link": "https://www.amazon.com/MONOMI-Adjustable-Electric-Standing-Ergonomic/dp/B09H2N3ZK1/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71Dnepy9puL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "FEZIBO 48 x 24 Inch Height Adjustable Electric Standing Desk with Double Drawer, Stand up Home Office Computer Desk with 4 Height-Adjustable Feets & 2 Hooks,Black",
+      "price": "$119.99",
+      "rating": 1.5,
+      "reviews": 2,
+      "link": "https://www.amazon.com/FEZIBO-Adjustable-Electric-Standing-Height-Adjustable/dp/B0FCSGF2N1/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71QdNQr3PVL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "OffiGo 48 Inch Electric Standing Desk with 3 Wood Drawers | Power Outlet, LED Light, 3 Memory Presets, Cable Management, Monitor Stand",
+      "price": "$199.99",
+      "rating": 4.4,
+      "reviews": 66,
+      "link": "https://www.amazon.com/OffiGo-Electric-Standing-Adjustable-Workstation/dp/B0F9441VRQ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71S0A6685fL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    },
+    {
+      "title": "HUANUO Electric Standing Desk, Whole Piece Desktop, Adjustable Height Computer Desk, 4 Height Memory Settings, Sit Stand Up Desk for Home Office, 48\" x 24\", Black",
+      "price": "$104.98",
+      "rating": 4.6,
+      "reviews": 432,
+      "link": "https://www.amazon.com/HUANUO-Electric-Standing-Adjustable-Computer/dp/B0DCVMBW77/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61x0R66lzmL._AC_UL320_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "budget"
+      ]
+    }
+  ]
+}

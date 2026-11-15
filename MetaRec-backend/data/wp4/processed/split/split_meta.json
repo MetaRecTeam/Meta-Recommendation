@@ -1,0 +1,16 @@
+{
+  "min_timestamp_ms": 933608662000,
+  "max_timestamp_ms": 1694272513298,
+  "min_date": "1999-08-02",
+  "max_date": "2023-09-09",
+  "dev_cutoff_ms": 1542139743038,
+  "dev_cutoff_date": "2018-11-13",
+  "test_cutoff_ms": 1618206128168,
+  "test_cutoff_date": "2021-04-12",
+  "counts": {
+    "train": 910722,
+    "dev": 534128,
+    "test": 443817
+  },
+  "total_interactions": 1888667
+}

@@ -1948,6 +1948,7 @@ class MetaRecService:
         use_online_agent: bool,
         tool_tags: Optional[List[str]],
         progress_callback,
+        task_id: Optional[str] = None,
     ) -> RecommendationResult:
         from langgraph_metarec.graphs.generic_graph import (
             GenericGraphAdapters,
@@ -1970,6 +1971,22 @@ class MetaRecService:
                 model=self.llm_model,
             )
 
+        async def _ranker_history():
+            # WP4 D4: the signed-in user's product interactions, for the constraint-aware ranker.
+            # The graph calls this only when METAREC_PRODUCT_RANKER=domain_v1. A guest, or any
+            # user without rows, is simply a cold start.
+            from business_models import ensure_uuid
+            from business_repositories import item_interaction_repository
+            from langgraph_metarec.product_ranker_live import history_from_records
+
+            try:
+                uid = ensure_uuid(user_id)
+            except Exception:
+                return [], []
+            # Oldest first and bounded, so ask for the most the repository allows; the loader keeps the latest.
+            records = await item_interaction_repository.list_for_user(uid, domain="product", limit=5000)
+            return history_from_records(records)
+
         try:
             graph_result = await run_generic_domain_graph(
                 query=query,
@@ -1978,7 +1995,11 @@ class MetaRecService:
                 use_online_agent=use_online_agent,
                 tool_tags=tool_tags,
                 progress_callback=progress_callback,
-                adapters=GenericGraphAdapters(reasoner=_gather_reasoner),
+                task_id=task_id,
+                adapters=GenericGraphAdapters(
+                    reasoner=_gather_reasoner,
+                    ranker_history=_ranker_history if domain == "product" else None,
+                ),
             )
         except Exception as exc:
             import logging
@@ -2025,25 +2046,30 @@ class MetaRecService:
             ),
         ]
 
+        result_metadata = {
+            "query": query,
+            "user_id": user_id,
+            "timestamp": datetime.now().isoformat(),
+            "preferences": preferences,
+            "graph": graph_result.metadata.get("graph", "generic_domain_graph"),
+            "domain": graph_result.metadata.get("domain", domain),
+            "selected_tools": graph_result.metadata.get("selected_tools", []),
+            "skipped_tools": graph_result.metadata.get("skipped_tools", []),
+            "progress_events": graph_result.progress_events,
+            "executions": graph_result.executions,
+            "items_count": len(graph_result.items),
+            "errors": graph_result.errors,
+        }
+        if graph_result.metadata.get("product_ranker"):
+            # WP4 D4: scores, components and reason codes. Server-side experiment data: the API
+            # strips this key before a client sees the result (main._INTERNAL_METADATA_KEYS).
+            result_metadata["product_ranker"] = graph_result.metadata["product_ranker"]
         return RecommendationResult(
             restaurants=[],
             items=[RecommendationItem(**item) for item in graph_result.items],
             thinking_steps=thinking_steps,
             confidence_score=0.85 if graph_result.items else 0.45,
-            metadata={
-                "query": query,
-                "user_id": user_id,
-                "timestamp": datetime.now().isoformat(),
-                "preferences": preferences,
-                "graph": graph_result.metadata.get("graph", "generic_domain_graph"),
-                "domain": graph_result.metadata.get("domain", domain),
-                "selected_tools": graph_result.metadata.get("selected_tools", []),
-                "skipped_tools": graph_result.metadata.get("skipped_tools", []),
-                "progress_events": graph_result.progress_events,
-                "executions": graph_result.executions,
-                "items_count": len(graph_result.items),
-                "errors": graph_result.errors,
-            },
+            metadata=result_metadata,
         )
 
     async def run_recommendation_task_graph(
@@ -2218,6 +2244,7 @@ class MetaRecService:
                     use_online_agent=use_online_agent,
                     tool_tags=task_tool_tags,
                     progress_callback=scoped_progress_callback,
+                    task_id=task_id,
                 )
 
             if active_route.get("mode") == "multi_domain":

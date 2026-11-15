@@ -1,0 +1,125 @@
+{
+  "id": "case_03_mouse",
+  "query": "gaming mouse under 50 USD wireless",
+  "preferences": {
+    "product": "gaming mouse",
+    "budget": "< 50 USD"
+  },
+  "hard_constraints": {
+    "budget_max": 50,
+    "currency": "USD",
+    "category_terms": [
+      "mouse"
+    ],
+    "require_terms": [
+      "wireless"
+    ]
+  },
+  "soft_constraints": [
+    "gaming",
+    "low-latency"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon. CLEAN CONTROL case: every candidate already satisfies the stated constraints (all wireless mice under $50). Purpose - Phase 1 filter must surface all 10 and drop none (no false positives).",
+  "candidates": [
+    {
+      "title": "Wireless Gaming Mouse,Rechargeable Computer Mouse with Type-C Fast Charging, Ergonomic Mouse with 3 Adjustable DPI, 6 Silent Buttons, LED Light, Long Battery Life for Laptop, PC, Mac",
+      "price": "$9.99",
+      "rating": 4.4,
+      "reviews": 329,
+      "link": "https://www.amazon.com/Wireless-Rechargeable-Computer-Ergonomic-Adjustable/dp/B0D7364XBV/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71ncnCl8x3L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "RK ROYAL KLUDGE RK M30 Wireless Gaming Mouse, 24000 DPI, 43g Ultra-Lightweight, PAW3311 Sensor, 2.4G/Bluetooth/USB-C Rechargeable Wireless Mouse with 5 Programmable Buttons for PC/Mac, White",
+      "price": "$29.99",
+      "rating": 4.2,
+      "reviews": 350,
+      "link": "https://www.amazon.com/ROYAL-KLUDGE-Ultra-Lightweight-Rechargeable-Programmable/dp/B0DQY58FCD/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51aFA7AdXkL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Redragon M656 Wireless Optical Gaming Mouse 4000 DPI Remapping Keys | Cable-Free 0 Delay, Smooth Precise Tracking, Custom Macro Keybinds, Ergonomic Grip Body Comfort",
+      "price": "$16.99",
+      "rating": 4.5,
+      "reviews": 2500,
+      "link": "https://www.amazon.com/Redragon-M656-Wireless-Software-Supported/dp/B09VPBF8NY/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51gVnLijAYL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Logitech G305 Lightspeed Wireless Gaming Mouse - Blue | 12,000 DPI, Lightweight, 6 Programmable Buttons, 250h Battery, On-Board Memory, Compatible with PC and Mac",
+      "price": "$29.99",
+      "rating": 4.6,
+      "reviews": 39700,
+      "link": "https://www.amazon.com/Logitech-Lightspeed-Wireless-Gaming-Mouse/dp/B086PDW7BB/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51lWnqodMlL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "VEGCOO Wireless Gaming Mouse, C23 Silent Click Wireless Rechargeable Mouse with Colorful LED Lights and 3 Level DPI 400mah Lithium Battery for Laptop and Computer (Black)",
+      "price": "$8.99",
+      "rating": 4.1,
+      "reviews": 662,
+      "link": "https://www.amazon.com/Wireless-VEGCOO-Rechargeable-Colorful-Computer/dp/B09CD1G6G6/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71TmHxBNc6L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "TECKNET Wireless Gaming Mouse,Tri-Mode 24000 DPI Ergonomic Gaming Mouse | 1000Hz Polling Rate,RGB Backlit,6 Programmable Buttons,ergonomic plastic body,fits PC/Laptop/Mac,for gaming and office",
+      "price": "$18.99",
+      "rating": 4.3,
+      "reviews": 9800,
+      "link": "https://www.amazon.com/TECKNET-Bluetooth-Rechargeable-Ergonomic-Programmable/dp/B0FB91DWTP/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71hM82HvLdL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "MELOGAGA Wireless Gaming Mouse, 3-Mode Bluetooth/2.4G/USB-C, 8 DPI -White | 800-6400 DPI, 1000hz Polling, Ultra-Light 71g Design with 120-Hour Rechargeable Battery for PC, Mac, PS5 & Tablets",
+      "price": "$14.97",
+      "rating": 4.1,
+      "reviews": 240,
+      "link": "https://www.amazon.com/MELOGAGA-Bluetooth-Adjustable-Ergonomic-Rechargeable/dp/B0FSJHP6Z8/",
+      "thumbnail": "https://m.media-amazon.com/images/I/51zfLQljFeL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "CHONCHOW Wireless Gaming Mouse Rechargeable LED Backlit 2.4G USB Receiver 3600 DPI Cordless Portable High Performance Compatible with PC Laptop MacBook iMac PS4 PS5 Switch Xbox one x(Black)",
+      "price": "$9.99",
+      "rating": 4.3,
+      "reviews": 184,
+      "link": "https://www.amazon.com/Wireless-Rechargeable-Receiver-Performance-Compatible/dp/B09MN89RL9/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71PnhbT7JuL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Wireless Gaming Mouse, Rechargeable Wireless Computer Mouse, 7-Color LED Light, Ergonomic Mouse with 6 Silent Click Buttons, 3 Adjustable 2400 DPI Wireless Mouse for Laptop,PC,Mac, Black",
+      "price": "$11.99",
+      "rating": 4.3,
+      "reviews": 673,
+      "link": "https://www.amazon.com/LuLabboard-Wireless-Rechargeable-Ergonomic-Adjustable/dp/B0C6F5T7FZ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71fEUcsDDEL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "G57 Wireless Gaming Mouse, 8000 DPI, Black | 80g Rechargeable Wireless Mouse, 2.4G/Bluetooth/USB-C Connectivity, 5 Programmable Buttons, PC/Mac Compatible",
+      "price": "$21.99",
+      "rating": 4.4,
+      "reviews": 90,
+      "link": "https://www.amazon.com/Typehaven-Wireless-Bluetooth-Rechargeable-Programmable/dp/B0FQNYG9CW/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61aadU6CFML._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}

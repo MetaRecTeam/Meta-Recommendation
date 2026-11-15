@@ -1,0 +1,136 @@
+{
+  "id": "case_07_earbuds",
+  "query": "wireless earbuds under 60 USD not Apple",
+  "preferences": {
+    "product": "wireless earbuds",
+    "budget": "< 60 USD",
+    "brand_not": "Apple"
+  },
+  "hard_constraints": {
+    "budget_max": 60,
+    "currency": "USD",
+    "category_terms": [
+      "earbud",
+      "ear bud"
+    ],
+    "brand_not_in": [
+      "Apple"
+    ],
+    "require_terms": [
+      "wireless"
+    ]
+  },
+  "soft_constraints": [
+    "active noise cancelling",
+    "IPX water resistance"
+  ],
+  "notes": "LIVE capture 30 Aug 2026, commit 9c09346, SerpApi amazon, query 'wireless earbuds under 60 USD not Apple'. LEAKY - brand-exclude + wireless: SerpApi surfaces Apple EarPods (wired, $19) at #1 and AirPods 4 ($99) despite 'not Apple'. brand field is null on both; 'Apple' read from title.",
+  "candidates": [
+    {
+      "title": "Apple EarPods Headphones with USB-C Plug, Wired Ear Buds with Built-in Remote to Control Music, Phone Calls, and Volume",
+      "price": "$19.00",
+      "rating": 4.5,
+      "reviews": 17300,
+      "link": "https://www.amazon.com/Apple-EarPods-Headphones-Built-Control/dp/B0DCH8VDXF/",
+      "thumbnail": "https://m.media-amazon.com/images/I/513OSdW4elL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "brand",
+        "compat"
+      ]
+    },
+    {
+      "title": "kurdene Wireless Earbuds Bluetooth 5.3 Light Weight in Ear Headphones | Premium Sound Bass Ear buds with Charging Case,Smart Touch Control,Built in Mics Headset,Clear Calls for Sports Workout",
+      "price": "$9.99",
+      "rating": 4.3,
+      "reviews": 60700,
+      "link": "https://www.amazon.com/kurdene-Bluetooth-Light-Weight-Headphones-Earphones/dp/B0D635YLCT/",
+      "thumbnail": "https://m.media-amazon.com/images/I/715fNrGN+ML._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "JBL Vibe Beam - True Wireless Earbuds - Black | JBL Deep Bass Sound, Comfortable fit, Up to 32 8h 24h total hours of battery life with speed charging",
+      "price": "$29.95",
+      "rating": 4.2,
+      "reviews": 40200,
+      "link": "https://www.amazon.com/JBL-Vibe-Beam-Wireless-Headphones/dp/B0BQPNMXQV/",
+      "thumbnail": "https://m.media-amazon.com/images/I/41+1Csr1pSL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "TOZO NC9 Hybrid Active Noise Cancelling Wireless Earbuds, 60H, LED Display | 6 Mic ENC Clear Calls, Deep Bass Sound, IPX8, in Ear Bluetooth 5.3 Headphones,32 EQs via APP, Comfort Fit Ear Buds, Black",
+      "price": "$26.55",
+      "rating": 4.3,
+      "reviews": 49400,
+      "link": "https://www.amazon.com/TOZO-Cancelling-Waterproof-Bluetooth-Headphones/dp/B0DD41G2NZ/",
+      "thumbnail": "https://m.media-amazon.com/images/I/818Tszb+hNL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Apple AirPods 4 Wireless Earbuds | Bluetooth Headphones, Personalized Spatial Audio, Sweat & Water Resistant, USB-C Charging Case, H2 Chip",
+      "price": "$99.00",
+      "rating": 4.5,
+      "reviews": 34100,
+      "link": "https://www.amazon.com/Apple-Bluetooth-Headphones-Personalized-Effortless/dp/B0DGHMNQ5Z/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61iBtxCUabL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": [
+        "brand",
+        "budget"
+      ]
+    },
+    {
+      "title": "TOZO T10 Wireless Earbuds Powerful Bass Stereo Wireless Charging, APP, IPX8 | Waterproof, 55H Playtime, Ergonomic Design In Ear buds, App Customize EQ, Bluetooth 5.3 Headphones for Work, Travel, Black",
+      "price": "$18.94",
+      "rating": 4.3,
+      "reviews": 259600,
+      "link": "https://www.amazon.com/TOZO-Bluetooth-Wireless-Headphones-Waterproof/dp/B07J2Z5DBM/",
+      "thumbnail": "https://m.media-amazon.com/images/I/81mk-PdqggL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Wireless Earbuds, Bluetooth 5.4 Headphones Sport Over Ear Buds with ENC Mic | Noise Cancelling Mic,48H, Wireless Earphone with Earhooks, Stereo Deep Bass, IP7 Waterproof Ear Bud for Workout Running, Blue",
+      "price": "$24.69",
+      "rating": 4.2,
+      "reviews": 26100,
+      "link": "https://www.amazon.com/Wireless-Bluetooth-Headphones-Cancelling-Waterproof/dp/B0FLPQ9TL8/",
+      "thumbnail": "https://m.media-amazon.com/images/I/71p2GKcro0L._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "xinwld Adaptive Hybrid Active Noise Canceling 2026 Wireless Earbuds, 6 Mics ENC Clear Call Ear Buds, Hi-Res Audio Deep Bass Bluetooth 5.4 Headphones, 40H, LED, for Sports Running Gym Workout, Black",
+      "price": "$22.99",
+      "rating": 4.1,
+      "reviews": 20900,
+      "link": "https://www.amazon.com/xinwld-Adaptive-Canceling-Bluetooth-Headphones/dp/B0GX67QJMX/",
+      "thumbnail": "https://m.media-amazon.com/images/I/717KVZ+HZOL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "JLab Go Air Pop+, True Wireless Earbuds, Bluetooth Earbuds with Microphone, Dual Connect, USB-C Charging Case, Teal",
+      "price": "$24.88",
+      "rating": 4.4,
+      "reviews": 25100,
+      "link": "https://www.amazon.com/JLab-Bluetooth-Resistance-Connection-Signature/dp/B0CYNH8BS4/",
+      "thumbnail": "https://m.media-amazon.com/images/I/61DLI0QB1pL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    },
+    {
+      "title": "Soundcore by Anker P20i True Wireless Earbuds, with Big Bass, 30H Playtime | Bluetooth 5.3, Water-Resistant, 2 Mics for AI Clear Calls, 22 Preset EQs, Customization via App",
+      "price": "$24.99",
+      "rating": 4.4,
+      "reviews": 113900,
+      "link": "https://www.amazon.com/Soundcore-Wireless-Bluetooth-Water-Resistant-Customization/dp/B0D5HSP346/",
+      "thumbnail": "https://m.media-amazon.com/images/I/516-5Sh5pvL._AC_UY218_.jpg",
+      "source": "amazon",
+      "expect_violations": []
+    }
+  ]
+}

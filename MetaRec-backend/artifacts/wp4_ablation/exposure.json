@@ -1,0 +1,68 @@
+[
+ {
+  "variant": "M2 (live weights)",
+  "head_share_top10": 0.9152593620608099,
+  "distinct_items": 56396,
+  "catalogue_coverage": 0.7033586510519949
+ },
+ {
+  "variant": "re-tuned without text_relevance",
+  "head_share_top10": 0.9780034549656275,
+  "distinct_items": 40359,
+  "catalogue_coverage": 0.5033486736259214
+ },
+ {
+  "variant": "re-tuned without attribute_match",
+  "head_share_top10": 0.9152593620608099,
+  "distinct_items": 56396,
+  "catalogue_coverage": 0.7033586510519949
+ },
+ {
+  "variant": "re-tuned without collaborative",
+  "head_share_top10": 0.9261737610155681,
+  "distinct_items": 53534,
+  "catalogue_coverage": 0.6676644092740175
+ },
+ {
+  "variant": "re-tuned without popularity",
+  "head_share_top10": 0.2930442248103207,
+  "distinct_items": 80181,
+  "catalogue_coverage": 1.0
+ },
+ {
+  "variant": "re-tuned without tail_adjustment",
+  "head_share_top10": 0.9488902642069312,
+  "distinct_items": 50046,
+  "catalogue_coverage": 0.6241628315935197
+ },
+ {
+  "variant": "zeroed text_relevance, others fixed",
+  "head_share_top10": 0.9890299631789852,
+  "distinct_items": 27926,
+  "catalogue_coverage": 0.3482870006610045
+ },
+ {
+  "variant": "zeroed attribute_match, others fixed",
+  "head_share_top10": 0.9152593620608099,
+  "distinct_items": 56396,
+  "catalogue_coverage": 0.7033586510519949
+ },
+ {
+  "variant": "zeroed collaborative, others fixed",
+  "head_share_top10": 0.9160039092373444,
+  "distinct_items": 56650,
+  "catalogue_coverage": 0.7065264838303339
+ },
+ {
+  "variant": "zeroed popularity, others fixed",
+  "head_share_top10": 0.1048742521708145,
+  "distinct_items": 80166,
+  "catalogue_coverage": 0.9998129232611217
+ },
+ {
+  "variant": "zeroed tail_adjustment, others fixed",
+  "head_share_top10": 0.9418359245575539,
+  "distinct_items": 52965,
+  "catalogue_coverage": 0.6605679649792345
+ }
+]
