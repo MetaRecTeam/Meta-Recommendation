@@ -598,7 +598,7 @@ for b in blocks:
         render_table(b)
     elif k == "fig":
         want_cols(1 if b["w"] == "f" else 2)
-        width = {"pipeline": 17.0, "confirm": 17.0, "results": 12.0, "evalflow": 17.0}.get(b["key"], COL_W - 0.2)
+        width = {"pipeline": 17.0, "confirm": 17.0, "results": 12.0, "evalflow": 17.0, "gainsummary": 17.0}.get(b["key"], COL_W - 0.2)
         p = new_par(WD_ALIGN_PARAGRAPH.CENTER, before=6, after=2, keep_next=True)
         p.add_run().add_picture(str((ROOT / b["path"]).resolve()), width=Cm(width))
         cp = new_par(WD_ALIGN_PARAGRAPH.CENTER, before=0, after=6)

@@ -62,7 +62,7 @@ Sections {secn:pipeline} to {secn:freeze} give the full D0 audit. After that com
 | 2 | Intent + Preferences | `service.py` (LLM) | The free-text query becomes structured `preferences`, and the user confirms them before any search runs (`hitl_state`). |
 | 3 | Routing | `langgraph_metarec/graphs/routing_graph.py` `run_routing_graph` | The product route is chosen by keyword classification **or** by a preference frame that carries `brand` or `category` (`_DOMAIN_ENTITY_KEYS["product"]`). It emits `DomainRoute(domain="product", execution_domain="product", status="ready", tool_tags=["#thing","#shopping","#product"])`. |
 | 4 | Task Dispatch | `langgraph_metarec/graphs/task_graph.py` → `service.py` `_execute_generic_domain_task` | The preferences are merged as `{**profile_domain_slice, **request_preferences}`. |
-| 5 | Product preference normalisation | `request_orchestrator.py` `_normalize_product_preferences` | A regex fills `product`, `brand`, `category`, `use_case`, `model` and `budget`. **`budget` is a text string** (`"<= 120 USD"`, `"120 USD"`, `"affordable"`). There is no structured budget, no required attributes and no brand exclusions. |
+| 5 | Product preference normalisation | `request_orchestrator.py` `_normalize_product_preferences` | A regex fills `product`, `brand`, `category`, `use_case`, `model` and `budget`. **`budget` is a text string** (`"<= 120 USD"`, `"120 USD"`, `"affordable"`). A structured `budget_range` (`min`, `max`, `currency`) can arrive from the preference extraction, and it is turned into that same text. B0 reads neither. There are no required attributes and no brand exclusions. |
 | 6 | Candidate gather | `generic_graph.py` `candidate_gather` | `ToolRegistry.resolve(domain="product", tags=[...])` selects `amazon.product.search`, which is active only if `SERPAPI_KEY` is set. In the seed pass, `_parameters_for_tool` calls `_product_search_query(query, prefs)`, which joins the query with the budget text, category, brand, use_case and model tokens into **one search string** and builds `{"query": <string>, "max_results": 10}`. In the ReAct refine loop, `amazon.product.search` is not in `_RELAX_ORDER`, so nothing is relaxed and the loop simply stops. |
 | 7 | Provider | `tool_registry.py` `_amazon_product_search_adapter` | SerpApi is called with `engine=amazon` and `k=<query string>`. From each of `organic_results[:10]` it keeps **only** `{title, brand, link, rating, reviews, price, thumbnail, source}`, and then `compact_tool_output` caps the free text. |
 | 8 | Enrichment | — | **None for products.** Only places are merged with gmap/osm data. |
@@ -190,7 +190,7 @@ All 80,181 items matched a metadata record by `parent_asin`. The price is missin
 
 My first pass dropped the star rating. A second pass re-read the raw reviews and kept the rating in a new file, which I checked row for row against the 5-core file without changing any existing file. From it I get per-item counts and mean ratings computed from train rows only, which is all that was known at the train cutoff. I also get a graded relevance label for each dev row (76.1% are 2, 10.4% are 1 and 13.5% are 0). 40.3% of the items have no train rows yet, because they were first reviewed later. I recounted all of this independently and found no mismatch.
 
-The 100-candidate pools used in {sec:baselines} are frozen by checksum, and rebuilding all 534,128 cases from scratch gave a byte-identical file. The data sheet now states the licence position: neither the dataset's homepage nor its Hugging Face card gives a licence or terms, only a request to cite. I have flagged this for the supervisor to confirm. It also covers consent and ethics, the personal data that is held, minimisation, access, retention, deletion and custody of the sealed test set. The raw and processed files are not in git, but their SHA-256 checksums, the data sheet and the scripts that produce them are.
+The 100-candidate pools used in {sec:baselines} are frozen by checksum, and rebuilding all 534,128 cases from scratch gave a byte-identical file. The data sheet now states the licence position: neither the dataset's homepage nor its Hugging Face card gives a licence or terms, only a request to cite. It also covers consent and ethics, the personal data that is held, minimisation, access, retention, deletion and custody of the sealed test set. The raw and processed files are not in git, but their SHA-256 checksums, the data sheet and the scripts that produce them are.
 
 ## Baselines on Development Data (D2) {#baselines}
 
@@ -274,7 +274,7 @@ The leak changes five things.
 
 1. The headline gap was mostly the leak. B1 does not more than double B0. Against a plain most-reviewed sort, BM25 adds about 4.5% in Recall@10 (0.3711 against 0.3550). B1 is still the stronger baseline, but only a little stronger than popularity alone. I first chose the BM25 weight of 0.25 on 30,000 cases under the leaking popularity. I then re-checked it on the full development set with train-only popularity ({sec:sweep}), and 0.25 is still the best for NDCG@10 and MRR@10.
 2. Popularity is most of the signal. Cold users, who get popularity alone, score about as well as warm users who also get text matching. The glossary of the proposal calls a popularity baseline "surprisingly strong", and this data agrees.
-3. ItemKNN is feasible but weak. The project lead's condition for adding it was that the data must support it, and it does. Of the 47,892 items with at least one train user, a random sample of 2,000 (seed 42) shares users with a median of about 54 other items, and only 8 of the 2,000 share users with none. The histories are thin, though. Among the 173,609 users with at least one train interaction, the median is 4 interactions, 68% have 5 or fewer, and only 1.15% have more than 20. For warm users ItemKNN scores 0.2172 against 0.3785 for B1.
+3. ItemKNN is feasible but weak. The project lead's condition for adding it was that the data must support it, and it does. Of the 47,892 items with at least one train user, a random sample of 2,000 (seed 42) shares users with a median of about 54 other items, and only 8 of the 2,000 share users with none. The histories are thin, though. Among the 173,609 users with at least one train interaction, the median is 4 distinct items, 68% have 5 or fewer, and only 1.15% have more than 20. For warm users ItemKNN scores 0.2172 against 0.3785 for B1.
 4. Latency is not a problem for the baselines. I measured ranker-only p95 for 100 candidates on the development laptop, over repeated runs on two samples of 500 cases. It was 0.10 to 0.21 ms for B0, 7.2 to 13.0 ms for B1 and 1.1 to 2.3 ms for ItemKNN, against the 25 ms limit ({tab:t28} adds M2).
 5. The absolute values need care. A random ranking of 100 candidates scores Recall@10 = 0.10. These are sampled metrics: each case ranks 100 candidates and not all 80,181 items, which means they cannot be compared with papers that rank the whole catalogue. Rendle {cite:6} also shows that sampled metrics can change which of two algorithms looks better, so every comparison in this report is a statement about these sampled cases.
 
@@ -447,7 +447,7 @@ The score of a candidate c is the mean of sim(c, h) over the items h in the user
 | #79 Blue Summit self-seal security envelopes (the real next item) | 50 | 1, 1, 0 | 1/√(50×342) = 0.0076, 1/√(50×163) = 0.0111, 0 | 0.0062 |
 | #41 Universal binder clips | 119 | 1, 0, 1 | 1/√(119×342) = 0.0050, 0, 1/√(119×107) = 0.0089 | 0.0046 |
 
-The real item ranks 2, so this case scores Recall@10 = 1, NDCG@10 = 0.631 and MRR@10 = 0.500. Four more candidates have small non-zero scores, and the other 93 candidates score exactly 0. This pattern lies behind the weak overall ItemKNN result. Histories are thin (a median of 4 train interactions per user), which leaves most candidates with a score that is either 0 or rests on a single shared buyer.
+The real item ranks 2, so this case scores Recall@10 = 1, NDCG@10 = 0.631 and MRR@10 = 0.500. Four more candidates have small non-zero scores, and the other 93 candidates score exactly 0. This pattern lies behind the weak overall ItemKNN result. Histories are thin (a median of 4 distinct train items per user), which leaves most candidates with a score that is either 0 or rests on a single shared buyer.
 
 ### BM25 Weight Sweep and Confidence Intervals {#sweep}
 
@@ -771,7 +771,7 @@ python -m eval.domain_ranker --domain product --fixture eval/product_dev_v1.json
 
 ### Results on the Development Set {#evalresults}
 
-The run used the code at commit `bba1eb0` on the laptop of {sec:retune} (Python reports its processor as Intel64 Family 6 Model 140 Stepping 1, with 8 logical CPUs, 15.7 GB RAM and Python 3.10.11; it reports Windows 11 as release 10), and I did not close other programs, so the latency figures are for the laptop's ordinary conditions. It scored 534,128 cases, of which 479,889 cases from 134,481 users are held out, in 24.9 minutes. {tab:t36} marks each acceptance bullet of the proposal from that run.
+The run used the code at commit `bba1eb0` on the laptop of {sec:retune} (Python reports its processor as Intel64 Family 6 Model 140 Stepping 1, with 8 logical CPUs, 15.7 GB RAM and Python 3.10.11; it reports Windows 11 as release 10), and I did not close other programs, so the latency figures are for the laptop's ordinary conditions. It scored 534,128 cases, of which 479,889 cases from 134,481 users are held out, in 24.9 minutes. {tab:t36} marks each acceptance bullet of the proposal from that run. That commit had 153 tests in the four files named in its first row. A later commit (`c362fc7`) added five tests to the D4 file and passed the task id to the ranker, which does not touch any score, so those four files now hold 158 tests, and `tests/wp4` holds 202 with the evaluator's 44.
 
 %table t36 | The Proposal's Acceptance Evidence, Checked by the D5 Run | f
 | Requirement | This run | Status |
@@ -845,6 +845,8 @@ M2 shows slightly fewer head items than B1 (91.5% of its top 10 against 95.3%) a
 
 With the flag on, none of the 52 violators is shown, and no compliant product is dropped by mistake. The 3 compliant products that are excluded have no price while a budget is stated, which is the strict policy doing what it was designed to do, at a cost of 3 products out of the 94 compliant ones. The counts by kind overlap, because a search can state a budget and a brand together. All 15 searches state a budget, and 2 state a brand.
 
+{tab:t40} gives the ranker-only latency of the same run.
+
 %table t40 | Ranker-Only Latency in the D5 Run (100 Candidates) | f
 | System | p50 ms | p95 ms | max ms | p95 ms, users with a history |
 |---|---|---|---|---|
@@ -897,13 +899,17 @@ This is one run on one test split, with the same offline limits as before: sampl
 
 The most useful result is a negative one. The ranker I built beats the baselines, and the gain is real, because its interval is well above zero, but it is 0.81% and not 3%. There are three reasons, and the data supports all of them.
 
-First, popularity does almost all of the work. A reviews-only sort already reaches NDCG@10 0.2231, B1 adds text matching for +5.3% ({tab:t21}), and M2 adds a further 0.81%. Removing popularity from M2 halves its NDCG ({tab:t27}). Second, the histories are thin. The median user has 4 train interactions, and 39.5% of the held-out cases have no history at all, where M2 and B1 are the same by construction. M2's extra signals, text, history affinity and a small tail boost, need a history to work with, which is why its edge grows with the length of the history (-0.24% on short histories, +1.33% on all warm users and +2.91% on long ones). Third, the evaluation cannot show what M2 was designed for. No offline case states a budget, a brand or a model, so the hard gate removes nothing there. Its value shows up only in the 15 labelled searches, where it takes the violators shown from 52 to 0.
+First, popularity does almost all of the work. A reviews-only sort already reaches NDCG@10 0.2231, B1 adds text matching for +5.3% ({tab:t21}), and M2 adds a further 0.81%. Removing popularity from M2 halves its NDCG ({tab:t27}). Second, the histories are thin. The median user has 4 distinct train items, and 39.5% of the held-out cases have no history at all, where M2 and B1 are the same by construction. M2's extra signals, text, history affinity and a small tail boost, need a history to work with, which is why its edge grows with the length of the history (-0.24% on short histories, +1.33% on all warm users and +2.91% on long ones). Third, the evaluation cannot show what M2 was designed for. No offline case states a budget, a brand or a model, so the hard gate removes nothing there. Its value shows up only in the 15 labelled searches, where it takes the violators shown from 52 to 0.
 
 That is also the honest summary of the contribution. On accuracy against a strong popularity baseline the gain is small. On the property that motivated the project, products that break the user's own constraints, the change is large and easy to see: with the old sort every one of the 52 violators was shown, and in 9 of 15 searches one was in the top 3. The price of strictness is small and visible. Three compliant products with no price were excluded because a budget was stated, and a user who wants unpriced products would have to drop the budget.
 
 The head and tail result is a trade-off and not a clear win. M2 is 1.29% worse than B1 on head targets and much better on tail ones, with more of the catalogue shown. Whether that is wanted depends on the product. For a search with a budget it probably is, because the item the user wants is often not the most reviewed one, but I have no live data to say so.
 
 The sealed test split supports this reading. M2's lead over B1 is +1.87% there (+1.70% to +2.04%), larger than on the development set and with the same pattern across slices, so the gain is not an artefact of tuning on the development set ({sec:testsplit}). Re-tuning the weights on five folds of users gives the same picture, a gain of +0.79% on average that is positive in all five folds ({sec:crossval}). The 3% target is still not met. Taking each component out in turn ({sec:ablation}) shows that none hurts accuracy, that the history-affinity part is what puts M2 above B1, and that the tail adjustment earns its place through exposure and not through accuracy.
+
+{fig:gainsummary} puts the three results side by side. M2 beats B1 on the development set, on the sealed test split and in every cross-validation fold, and none of them reaches the 3% target.
+
+![fig:gainsummary|NDCG@10 gain of M2 over B1 on the development set, the sealed test split and the five cross-validation folds, against the 3% target|full|figures/fig6_m2_gain_summary.png](figures/fig6_m2_gain_summary.png)
 
 ### Where M2 Still Falls Short {#failures}
 
@@ -922,7 +928,7 @@ The proposal's reading list has five papers, and each of them touches a choice i
 
 Covington et al. {cite:8} separate candidate generation from ranking. MetaRec's product search is the first stage (SerpApi returns at most ten results) and M2 is the second, which also sets a ceiling: M2 can only reorder what the first stage returned. In two of the 15 frozen searches, the SSD and the gaming laptop, every returned product broke a constraint, so the gate rightly left nothing to show, and no ranking could have helped. The live re-run in {sec:fields} found that only 12 of 30 results (40%) appeared in both runs of the same query. In such cases a better first stage would help, and a better ranker would not.
 
-BPR {cite:9} and EASE {cite:10} are the pairwise and the linear baselines that the proposal suggests for implicit feedback. I used neither. The proposal allows an item-based method where the data supports it, and the frozen subset has thin histories (a median of 4 train interactions per user, {sec:leak}), so I used ItemKNN, which scored below plain popularity (NDCG@10 0.1676 against 0.2231). I did not test BPR or EASE, so I cannot say whether a stronger collaborative baseline would have changed the order of the systems. That is a limit of the comparison, and it is the first thing I would add.
+BPR {cite:9} and EASE {cite:10} are the pairwise and the linear baselines that the proposal suggests for implicit feedback. I used neither. The proposal allows an item-based method where the data supports it, and the frozen subset has thin histories (a median of 4 distinct train items per user, {sec:leak}), so I used ItemKNN, which scored below plain popularity (NDCG@10 0.1676 against 0.2231). I did not test BPR or EASE, so I cannot say whether a stronger collaborative baseline would have changed the order of the systems. That is a limit of the comparison, and it is the first thing I would add.
 
 Ferrari Dacrema et al. {cite:11} analysed recent neural recommenders and found that most of the ones they could reproduce were beaten by simpler, well-tuned baselines, and they ask for careful and reproducible comparison. This project follows that advice in three ways. The baselines are tuned on the same development data as M2, the popularity baseline is kept as a serious reference (it carries most of the result), and the first set of numbers was thrown away when I found the popularity leak ({sec:leak}). The shared project rules say that a well-supported null result is acceptable, and that a leaked or post-hoc threshold is not. I have tried to stay on the right side of both.
 
@@ -981,7 +987,7 @@ The Project Plan (§6) records the decisions below, which come from the project 
 9. B1: BM25 plus calibrated popularity is enough, and ItemKNN is added only if D1 shows that the interaction data supports it. Checked, and it does ({sec:leak}, item 3).
 10. NDCG relevance: graded labels from the review rating (5 stars = 2, 4 stars = 1, below 4 = 0), written into D0. I apply them in {sec:legacy} as NDCG normalised by the ideal ranking, which with one rated item per case reduces to binary NDCG with grade-0 cases scored 0. Both versions are reported (see {sec:own}).
 11. Head and tail: the top 20% of items by review count within the frozen category are head and the rest are tail, and any documented threshold is acceptable if it is fixed before evaluation. I fixed it at 12 train reviews (see {sec:own}). The earlier 868, from the metadata counts, includes future reviews and is not used.
-12. Dataset access: read the terms in week 1, record them in the data sheet, and raise it at once if an agreement is needed. Done: I found no licence or terms (data sheet; still to confirm, {sec:confirm}).
+12. Dataset access: read the terms in week 1, record them in the data sheet, and raise it at once if an agreement is needed. Done: I found no licence or terms, only a request to cite (data sheet).
 13. Correction: do not count on live MetaRec interaction data. The `item_interactions` table starts empty, so the evaluation stands on the frozen public dataset, any live history would be a separate, clearly labelled slice, and MetaRec users are never fabricated. Followed: I use no live interaction data.
 
 ### Limitations and Known Gaps {#gaps}
@@ -997,6 +1003,7 @@ I list these here so that nobody has to hunt for them. {sec:validity} covers how
 - Known limits of the live path ({sec:livelimits}): the brand-and-model identity rule is not built, no exchange table is pinned (so a price in another currency is excluded), the repository returns at most 5,000 interactions, oldest first, and nothing has been run against the real provider.
 - The hard category, model and required-word rules match candidate text and not validated attributes, which the proposal would prefer ({sec:livelimits}).
 - Only ItemKNN was tried as a collaborative baseline. BPR and EASE from the reading list were not ({sec:related}).
+- Licence and ethics. The dataset states no licence, only a request to cite (checked 20 and 21 October). I collected no consent, and none could be collected: it is a public research dataset of reviews, I contact nobody and I do not try to identify any reviewer. I have not asked for a formal ethics determination.
 - The labelled constraint corpus has 15 searches and 52 violators that I labelled by hand. It is enough to show that the gate works, and too small to give a rate.
 - The full evaluation takes about 25 minutes, and the latency was measured on one laptop.
 - The working branch name does not follow the `fyp/wp4/<topic>` convention in the shared guidance.
@@ -1060,14 +1067,6 @@ The Plan or the proposal left these points open. I have decided each one here an
 | **Live weights** | The re-tuned offline weights, unchanged. | There are no live relevance labels to tune on. | {secn:livebehaviour}, item 6 |
 | **Reading the history** | At most the latest 200 interactions, cut off by the ranker's timeout. A guest, a slow read or an error is a cold start. | It bounds the cost and fails safe. | {secn:livebehaviour}, item 6 |
 | **The decision rule against B0 and B1** | M2 is compared with the stronger of the two. The 3% minimum effect is the pass mark, and 5% is shown as directional only. | This is the proposal's wording. The 3% is the value frozen in the Plan. | {secn:evalresults} |
-
-### Still to Confirm With the Supervisor {#confirm}
-
-Three points are still open for the supervisor.
-
-1. Licence. Neither the dataset's homepage nor its Hugging Face card states a licence or terms of use, only a request to cite (checked 20 and 21 Oct). Is academic use on that basis acceptable?
-2. Ethics. I collected no consent, and none could be collected: the data is a public research dataset of reviews, and I recruit and contact nobody and do not try to identify any reviewer. I have not asked for a formal ethics determination. Does the university need one for the secondary use of public, pseudonymous data?
-3. The 2% margin. The Plan freezes a 2% non-inferiority margin for the complex-query slice, but nothing defines a complex query or says where such queries come from, and my cases have no real queries. Is the history-length proxy of {sec:slices} acceptable?
 
 %references
 
