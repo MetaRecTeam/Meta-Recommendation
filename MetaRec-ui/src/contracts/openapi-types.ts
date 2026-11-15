@@ -861,16 +861,21 @@ export interface paths {
         };
         /**
          * Get Graph Trace
-         * @description Paged graph trace for one debug run.
+         * @description One page of the graph trace for a debug run.
          *
-         *     Stub (WP8 B0): the contract is frozen and reaches OpenAPI through
-         *     ``response_model``, but no store exists yet. Member B's B4/B5 replace
-         *     the body; the shape returned to callers does not change.
+         *     ``after_sequence`` is a cursor, not an offset: pass back the
+         *     ``next_after_sequence`` from the previous page. The same shape serves
+         *     an in-progress run and a finished one, so a poller calls this
+         *     unchanged from start to end.
          */
         get: operations["get_graph_trace_internal_debug_behavior_tests__run_id__graph_trace_get"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete Graph Trace
+         * @description Delete one trace ahead of its retention. Its events go with it.
+         */
+        delete: operations["delete_graph_trace_internal_debug_behavior_tests__run_id__graph_trace_delete"];
         options?: never;
         head?: never;
         patch?: never;
@@ -887,6 +892,29 @@ export interface paths {
         get: operations["get_config_internal_debug_config_get"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/internal/debug/graph-traces/purge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Purge Graph Traces
+         * @description Drop every trace past its retention.
+         *
+         *     Retention is a promise, so something has to keep it. This is the
+         *     manual trigger; a scheduled caller hits the same route.
+         */
+        post: operations["purge_graph_traces_internal_debug_graph_traces_purge_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1098,6 +1126,10 @@ export interface components {
             confirm_message: string;
             /** Conversation Id */
             conversation_id?: string | null;
+            /** Graph Trace Config */
+            graph_trace_config?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Max Wait Seconds
              * @default 90
@@ -1523,7 +1555,7 @@ export interface components {
             timestamp_utc: string;
             /** Trace Id */
             trace_id: string;
-        } & (unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown);
+        } & (unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown & unknown);
         /**
          * GraphTraceV1
          * @description One page of a trace. The same shape serves an in-progress and a final read.
@@ -3824,7 +3856,58 @@ export interface operations {
             };
         };
     };
+    delete_graph_trace_internal_debug_behavior_tests__run_id__graph_trace_delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_config_internal_debug_config_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": unknown;
+                };
+            };
+        };
+    };
+    purge_graph_traces_internal_debug_graph_traces_purge_post: {
         parameters: {
             query?: never;
             header?: never;

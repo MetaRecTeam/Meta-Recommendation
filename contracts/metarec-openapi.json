@@ -443,6 +443,18 @@
             ],
             "title": "Conversation Id"
           },
+          "graph_trace_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Graph Trace Config"
+          },
           "max_wait_seconds": {
             "default": 90,
             "title": "Max Wait Seconds",
@@ -1375,12 +1387,13 @@
             "type": "string"
           },
           "graph_instance_id": {
-            "minLength": 1,
+            "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
             "title": "Graph Instance Id",
             "type": "string"
           },
           "namespace": {
             "items": {
+              "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
               "type": "string"
             },
             "title": "Namespace",
@@ -1389,6 +1402,7 @@
           "parent_graph_instance_id": {
             "anyOf": [
               {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
                 "type": "string"
               },
               {
@@ -1400,6 +1414,7 @@
           "parent_node_run_id": {
             "anyOf": [
               {
+                "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
                 "type": "string"
               },
               {
@@ -2023,6 +2038,29 @@
                   "not": {
                     "type": "null"
                   }
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "event_type": {
+                  "const": "error"
+                },
+                "runnable_type": {
+                  "const": "graph"
+                }
+              },
+              "required": [
+                "event_type",
+                "runnable_type"
+              ]
+            },
+            "then": {
+              "properties": {
+                "node_id": {
+                  "type": "null"
                 }
               }
             }
@@ -7117,8 +7155,47 @@
       }
     },
     "/internal/debug/behavior-tests/{run_id}/graph-trace": {
+      "delete": {
+        "description": "Delete one trace ahead of its retention. Its events go with it.",
+        "operationId": "delete_graph_trace_internal_debug_behavior_tests__run_id__graph_trace_delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "run_id",
+            "required": true,
+            "schema": {
+              "title": "Run Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Graph Trace",
+        "tags": [
+          "internal-debug"
+        ]
+      },
       "get": {
-        "description": "Paged graph trace for one debug run.\n\nStub (WP8 B0): the contract is frozen and reaches OpenAPI through\n``response_model``, but no store exists yet. Member B's B4/B5 replace\nthe body; the shape returned to callers does not change.",
+        "description": "One page of the graph trace for a debug run.\n\n``after_sequence`` is a cursor, not an offset: pass back the\n``next_after_sequence`` from the previous page. The same shape serves\nan in-progress run and a finished one, so a poller calls this\nunchanged from start to end.",
         "operationId": "get_graph_trace_internal_debug_behavior_tests__run_id__graph_trace_get",
         "parameters": [
           {
@@ -7196,6 +7273,26 @@
           }
         },
         "summary": "Get Config",
+        "tags": [
+          "internal-debug"
+        ]
+      }
+    },
+    "/internal/debug/graph-traces/purge": {
+      "post": {
+        "description": "Drop every trace past its retention.\n\nRetention is a promise, so something has to keep it. This is the\nmanual trigger; a scheduled caller hits the same route.",
+        "operationId": "purge_graph_traces_internal_debug_graph_traces_purge_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Purge Graph Traces",
         "tags": [
           "internal-debug"
         ]

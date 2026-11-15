@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import inspect
 import json
+import logging
 import os
 import time
 import traceback
@@ -15,11 +16,19 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 
+from langgraph_metarec.wp8_trace.config import (
+    TraceConfigError,
+    graph_trace_enabled as graph_trace_flag,
+    validate_trace_config,
+)
 from langgraph_metarec.wp8_trace.models import (
     DEFAULT_PAGE_EVENTS,
     MAX_PAGE_EVENTS,
     GraphTraceV1,
 )
+from langgraph_metarec.wp8_trace.service import get_trace_store, resolve, trace_id_for
+from langgraph_metarec.wp8_trace.storage import TraceNotFound
+from langgraph_metarec.wp8_trace.topology import topology_definitions
 
 from .unit_registry import UnitSpec, register_default_debug_units
 
@@ -35,6 +44,9 @@ except Exception:
 
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+logger = logging.getLogger("metarec.debug.wp8")
 
 
 def _env_flag(name: str, default: bool = False) -> bool:
@@ -229,6 +241,11 @@ class BehaviorTestCreateRequest(BaseModel):
     confirm_message: str = "Yes, that's correct"
     max_wait_seconds: int = 90
     poll_interval_ms: int = 500
+    # WP8. Optional with a default, so a client that has never heard of graph
+    # tracing sends exactly what it sent before and gets exactly what it got
+    # before. Omitted means "no preference"; the server flag still decides
+    # whether anything is captured at all.
+    graph_trace_config: Optional[Dict[str, Any]] = None
 
 
 class BehaviorTrackRequest(BaseModel):
@@ -461,8 +478,11 @@ def create_debug_router(
     debug_enabled = _env_flag("DEBUG_UI_ENABLED", False)
     explain_enabled = _env_flag("DEBUG_LLM_EXPLAIN_ENABLED", True)
     # WP8 graph tracing. Off by default: with it off no trace is persisted and
-    # no existing response gains a field (WP8 brief, invariant 5).
-    graph_trace_enabled = _env_flag("DEBUG_GRAPH_TRACE_ENABLED", False)
+    # no existing response gains a field (WP8 brief, invariant 5). The flag is
+    # read through wp8_trace.config so the router and the library can never
+    # disagree about what "on" means.
+    graph_trace_enabled = graph_trace_flag()
+    trace_store = get_trace_store()
     # Auth is delegated to the app's real-user session via require_admin; the
     # arena no longer owns a token/session. cookie_name is reported by /config
     # so the frontend knows which app session cookie carries auth.
@@ -580,7 +600,49 @@ def create_debug_router(
         record_artifact(run_id, "task_status_final", timeout_status)
         return timeout_status
 
+    def trace_requested(req: BehaviorTestCreateRequest):
+        """The config for this run, or None when nothing should be captured.
+
+        Three gates, all of which must be open: the Debug Arena exists, the
+        server flag is on, and this run asked. A request cannot open the
+        second one.
+        """
+        if not graph_trace_enabled or req.graph_trace_config is None:
+            return None
+        try:
+            config = validate_trace_config(req.graph_trace_config)
+        except TraceConfigError:
+            return None
+        return config if config.enabled else None
+
+    async def open_trace(run_id: str, req: BehaviorTestCreateRequest) -> None:
+        config = trace_requested(req)
+        if config is None:
+            return
+        try:
+            await resolve(trace_store.start_trace(
+                trace_id_for(run_id), run_id,
+                config=config, definitions=topology_definitions(),
+            ))
+        except Exception as exc:  # tracing must never fail a debug run
+            logger.warning("wp8: could not open trace for run %s: %s", run_id, exc)
+
+    async def close_trace(run_id: str, req: BehaviorTestCreateRequest) -> None:
+        if trace_requested(req) is None:
+            return
+        rec = trace_storage.load(run_id) or {}
+        status = {
+            "completed": "completed",
+            "error": "failed",
+            "timeout": "cancelled",
+        }.get(rec.get("status"), "incomplete")
+        try:
+            await resolve(trace_store.finalize(trace_id_for(run_id), status))
+        except Exception as exc:
+            logger.warning("wp8: could not finalize trace for run %s: %s", run_id, exc)
+
     async def run_behavior_create(run_id: str, req: BehaviorTestCreateRequest, owner_user_id: str) -> None:
+        await open_trace(run_id, req)
         service = service_getter()
         # Run as the authenticated admin's real user so tasks persist through the
         # normal Postgres path (users FK satisfied). Conversation scope is a fresh
@@ -671,6 +733,11 @@ def create_debug_router(
                 data={"error": str(exc), "traceback": traceback.format_exc()},
             )
             trace_storage.update(run_id, status="error", error=str(exc))
+        finally:
+            # Sealed however the run ended, including a cancellation, so a
+            # poller is never left watching a trace that says "running" for
+            # ever (R11's finish condition).
+            await close_trace(run_id, req)
 
     async def run_behavior_track(run_id: str, req: BehaviorTrackRequest) -> None:
         try:
@@ -743,7 +810,21 @@ def create_debug_router(
     async def start_behavior(req: BehaviorTestCreateRequest, session: AuthSessionPayload = Depends(require_auth)):
         req.max_wait_seconds = min(req.max_wait_seconds, debug_exec_timeout_seconds)
         owner_user_id = session.user.id
-        rec = trace_storage.create_run("behavior_create", {**req.model_dump(), "owner_user_id": owner_user_id})
+        # Reject a malformed capture request before any work starts, with the
+        # reason code rather than a 500 from deeper in.
+        if req.graph_trace_config is not None:
+            if not graph_trace_enabled:
+                raise HTTPException(status_code=400, detail="graph_trace_disabled")
+            try:
+                validate_trace_config(req.graph_trace_config)
+            except TraceConfigError as exc:
+                raise HTTPException(status_code=400, detail=exc.code) from None
+        # A caller who sent no capture request stores exactly the fields it
+        # stored before: the new key is left out rather than written as null.
+        params = req.model_dump(exclude={"graph_trace_config"})
+        if req.graph_trace_config is not None:
+            params["graph_trace_config"] = req.graph_trace_config
+        rec = trace_storage.create_run("behavior_create", {**params, "owner_user_id": owner_user_id})
         jobs[rec["id"]] = asyncio.create_task(
             run_job_with_timeout(rec["id"], run_behavior_create(rec["id"], req, owner_user_id), label="Behavior create run")
         )
@@ -790,6 +871,21 @@ def create_debug_router(
         rec["job_running"] = bool(job and not job.done())
         return rec
 
+    def require_graph_trace() -> None:
+        """Both gates, in the order a caller can act on.
+
+        The Debug Arena being off is a 404: the route does not exist for you.
+        Tracing being off is a typed 400, never a 500, so a UI can tell
+        "turned off" from "broken".
+        """
+        require_enabled()
+        if not graph_trace_enabled:
+            raise HTTPException(status_code=400, detail="graph_trace_disabled")
+
+    def require_run(run_id: str) -> None:
+        if not trace_storage.load(run_id):
+            raise HTTPException(status_code=404, detail="Debug run not found")
+
     @router.get("/behavior-tests/{run_id}/graph-trace", response_model=GraphTraceV1)
     async def get_graph_trace(
         run_id: str,
@@ -797,20 +893,51 @@ def create_debug_router(
         limit: int = Query(DEFAULT_PAGE_EVENTS, ge=1, le=MAX_PAGE_EVENTS),
         _: AuthSessionPayload = Depends(require_auth),
     ):
-        """Paged graph trace for one debug run.
+        """One page of the graph trace for a debug run.
 
-        Stub (WP8 B0): the contract is frozen and reaches OpenAPI through
-        ``response_model``, but no store exists yet. Member B's B4/B5 replace
-        the body; the shape returned to callers does not change.
+        ``after_sequence`` is a cursor, not an offset: pass back the
+        ``next_after_sequence`` from the previous page. The same shape serves
+        an in-progress run and a finished one, so a poller calls this
+        unchanged from start to end.
         """
-        require_enabled()
-        if not graph_trace_enabled:
-            raise HTTPException(status_code=400, detail="graph_trace_disabled")
-        if not trace_storage.load(run_id):
-            raise HTTPException(status_code=404, detail="Debug run not found")
-        # A run that was not traced when it started cannot be reconstructed
-        # from coarse task events; say so rather than invent a path.
-        raise HTTPException(status_code=404, detail="trace_unavailable")
+        require_graph_trace()
+        require_run(run_id)
+        try:
+            return await resolve(
+                trace_store.read_page(
+                    trace_id_for(run_id), after_sequence=after_sequence, limit=limit
+                )
+            )
+        except TraceNotFound:
+            # The run exists but was never traced: it started before tracing
+            # was on, or it did not ask. A trace cannot be reconstructed from
+            # the coarse task events after the fact, so say so rather than
+            # invent a path.
+            raise HTTPException(status_code=404, detail="trace_unavailable") from None
+
+    @router.delete("/behavior-tests/{run_id}/graph-trace")
+    async def delete_graph_trace(
+        run_id: str,
+        _: AuthSessionPayload = Depends(require_auth),
+    ):
+        """Delete one trace ahead of its retention. Its events go with it."""
+        require_graph_trace()
+        require_run(run_id)
+        deleted = await resolve(trace_store.delete(trace_id_for(run_id)))
+        if not deleted:
+            raise HTTPException(status_code=404, detail="trace_unavailable")
+        return {"ok": True, "run_id": run_id, "deleted": True}
+
+    @router.post("/graph-traces/purge")
+    async def purge_graph_traces(_: AuthSessionPayload = Depends(require_auth)):
+        """Drop every trace past its retention.
+
+        Retention is a promise, so something has to keep it. This is the
+        manual trigger; a scheduled caller hits the same route.
+        """
+        require_graph_trace()
+        purged = await resolve(trace_store.purge_expired())
+        return {"ok": True, "purged": purged}
 
     @router.post("/behavior-tests/{run_id}/explain")
     async def explain_endpoint(run_id: str, payload: ExplainRequest, session: AuthSessionPayload = Depends(require_auth)):
