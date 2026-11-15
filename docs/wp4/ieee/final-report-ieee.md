@@ -864,7 +864,7 @@ The evaluator has 44 tests that need neither the data file nor the network. They
 
 ### The Sealed Test Split {#testsplit}
 
-On 9 November 2026, once the development work and the ablation were finished, I ran the evaluation on the test split once, with the weights, the thresholds and the code as they stood (commit `789f059`). I had not looked at any test result before that run, and I changed nothing afterwards. The evaluator needs an explicit flag for this (`--open-test-split`). The test fixture `eval/product_test_v1.jsonl` has a SHA-256 that starts with 683a0a30bc02f4ac, and it is not in the earlier checksum file `eval/checksums.sha256`. On the test split the past is train plus dev, every user is scored because nothing was tuned on it, and the cases are built the same way as the development cases: 100 candidates with seed 42, and the user's last 20 purchases as the query. The split has 443,817 cases from 117,207 users, and 31.0% of the cases have no history. Two things differ from the development run. The head cut-off is recomputed from train plus dev counts, and it comes out at 18 reviews instead of 12. And graded NDCG is not reported, because I never read the ratings of the test rows. I skipped the latency measurement, the labelled searches and the acceptance tests, since none of them depends on the split. {tab:t41} gives the main result.
+Once the development work and the ablation were finished, I ran the evaluation on the test split once, with the weights, the thresholds and the code as they stood (commit `789f059`). I had not looked at any test result before that run, and I changed nothing afterwards. The evaluator needs an explicit flag for this (`--open-test-split`). The test fixture `eval/product_test_v1.jsonl` has a SHA-256 that starts with 683a0a30bc02f4ac, and it is not in the earlier checksum file `eval/checksums.sha256`. On the test split the past is train plus dev, every user is scored because nothing was tuned on it, and the cases are built the same way as the development cases: 100 candidates with seed 42, and the user's last 20 purchases as the query. The split has 443,817 cases from 117,207 users, and 31.0% of the cases have no history. Two things differ from the development run. The head cut-off is recomputed from train plus dev counts, and it comes out at 18 reviews instead of 12. And graded NDCG is not reported, because I never read the ratings of the test rows. I skipped the latency measurement, the labelled searches and the acceptance tests, since none of them depends on the split. {tab:t41} gives the main result.
 
 %table t41 | Systems on the Sealed Test Split (443,817 Cases) | f
 | System | Recall@10 | NDCG@10 | MRR@10 |
@@ -956,11 +956,11 @@ On ranking quality the result is modest. M2 beats B1 by +0.81% NDCG@10 on held-o
 
 ## Status, Decisions and Handover {#status}
 
-### Guidance From Yanny and What I Did With It {#guidance}
+### What I Did With It {#guidance}
 
-Yanny, the project lead, gave guidance on the Project Plan and again in later meetings. {tab:t46} lists each point (paraphrased), what I did and where it is in this report. The first row covers the Plan-stage feedback, which {sec:decisions} lists point by point.
+{tab:t46} lists each point (paraphrased), what I did and where it is in this report. The first row covers the Plan-stage feedback, which {sec:decisions} lists point by point.
 
-%table t46 | Guidance From Yanny, What I Did and Where | f
+%table t46 | What I Did and Where | f
 | Guidance | What I did | Where |
 |---|---|---|
 | The twelve points on the Project Plan, and one correction (do not count on live MetaRec interaction data) | Recorded each as a decision with its status | {sec:decisions} |
@@ -974,7 +974,7 @@ Yanny, the project lead, gave guidance on the Project Plan and again in later me
 
 ### Decisions Recorded in the Project Plan {#decisions}
 
-The Project Plan (§6) records the decisions below, which come from the project lead's twelve points and one correction. For each one I give its status here. {sec:guidance} lists the later guidance.
+The Project Plan (§6) records the decisions below, which come from twelve points and one correction. For each one I give its status here. {sec:guidance} lists the later guidance.
 
 1. Dataset and cutoff: one mid-size category (not Electronics), 5-core filtered and frozen with checksums, with a chronological split in which the last 10% of the timeline is the locked test and the 10% before it is development. Done ({sec:dataset}).
 2. Frozen thresholds: a user-bootstrap 95% lower bound above zero, a point estimate of at least 3% relative conditional NDCG@10, and a 2% relative non-inferiority margin for the complex-query slice. Both are frozen and do not move once the locked test is opened. Status: the 3% is not met (+0.81% on the development set, {sec:retune}, and +1.87% on the test split, {sec:testsplit}). The complex-query slice uses a history-length proxy, on which M2 is non-inferior to B1 and +2.91% ahead on long histories ({sec:slices}).
@@ -1037,7 +1037,7 @@ python scripts/wp4_build_eval_cases.py --split test      # only when the test sp
 python -m eval.domain_ranker --domain product --fixture eval/product_test_v1.jsonl --systems generic classical domain_v1 --out artifacts/wp4_d5_test --open-test-split --skip-latency --skip-constraints --skip-acceptance-tests
 ```
 
-The code, the tests and the sources of this report are on the branch `feat/wp4-constraint-aware-product` of my fork, github.com/chuanhau93/Meta-Recommendation, which draft pull request #17 on github.com/MetaRecTeam/Meta-Recommendation points at. The D5 command writes `report.md`, `report.json`, `per_case.csv` and `per_case.npz`. The first two are small and are kept in git under `artifacts/wp4_d5_dev/`, and the per-case files are not (they are about 75 MB and rebuild from the fixed fixture). The report of this run names the commit it ran from.
+The code, the tests and the sources of this report are on the branch `feat/wp4-constraint-aware-product` of my fork (chuanhau93/Meta-Recommendation). Draft pull request #17 on the team repository (MetaRecTeam/Meta-Recommendation) points at that branch. The D5 command writes `report.md`, `report.json`, `per_case.csv` and `per_case.npz`. The first two are small and are kept in git under `artifacts/wp4_d5_dev/`, and the per-case files are not (they are about 75 MB and rebuild from the fixed fixture). The report of this run names the commit it ran from.
 
 ### Remaining Work and Handover {#remaining}
 
