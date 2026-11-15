@@ -8,6 +8,7 @@ from langgraph.graph import END, START, StateGraph
 
 from langgraph_metarec.nodes.domain import _keyword_score, classify_domain, detect_domains, domain_scores
 from langgraph_metarec.tool_registry import normalize_tag
+from langgraph_metarec.wp8_trace.invocation import TraceContext, invoke_with_wp8_trace
 
 
 DOMAIN_TOOL_TAGS: Dict[str, List[str]] = {
@@ -526,9 +527,11 @@ async def run_routing_graph(
     preferences: Optional[Dict[str, Any]] = None,
     domain_lock: Optional[str] = None,
     force_itinerary: bool = False,
+    trace_ctx: Optional[TraceContext] = None,
 ) -> DomainRoute:
     graph = build_routing_graph()
-    final_state = await graph.ainvoke(
+    final_state = await invoke_with_wp8_trace(
+        graph,
         {
             "query": query,
             "intent": intent,
@@ -540,7 +543,10 @@ async def run_routing_graph(
             "errors": [],
             "retry_count": 0,
             "max_retries": 1,
-        }
+        },
+        None,
+        trace_ctx,
+        graph_definition_id="routing-graph@v1",
     )
     route = final_state.get("route")
     if route is None:

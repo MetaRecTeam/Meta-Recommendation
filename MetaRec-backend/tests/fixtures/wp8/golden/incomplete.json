@@ -4,12 +4,17 @@
     "description": "The process dies mid-run; open runs stay unmatched and recovery marks the trace incomplete.",
     "source": {
       "experiment": "E3_service_hotel_chain",
-      "root_turn": 2,
+      "root_turns": [
+        2
+      ],
       "synthetic": "confirm_turn_task cut right after generic_graph's candidate_gather starts (process crash)"
     },
     "expected_trace_status": "incomplete",
     "truncated": false,
     "dropped_event_count": 0,
+    "turn_roots": [
+      "gi-01"
+    ],
     "graph_instances": [
       {
         "graph_instance_id": "gi-01",

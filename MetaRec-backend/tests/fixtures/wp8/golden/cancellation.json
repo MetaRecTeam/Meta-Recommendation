@@ -4,12 +4,17 @@
     "description": "Background task cancelled mid tool call; the request graph had already completed.",
     "source": {
       "experiment": "E9_background_cancel",
-      "root_turn": 2,
+      "root_turns": [
+        2
+      ],
       "synthetic": null
     },
     "expected_trace_status": "cancelled",
     "truncated": false,
     "dropped_event_count": 0,
+    "turn_roots": [
+      "gi-01"
+    ],
     "graph_instances": [
       {
         "graph_instance_id": "gi-01",

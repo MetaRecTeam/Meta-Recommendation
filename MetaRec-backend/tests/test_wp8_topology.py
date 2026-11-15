@@ -147,6 +147,20 @@ def test_drift_is_detected():
 
 
 @pytest.mark.backend_unit
+def test_fast_structure_check_agrees_with_the_full_extraction(monkeypatch):
+    from langgraph_metarec.wp8_trace import topology
+
+    for graph_id, (name, build) in _GRAPHS.items():
+        compiled = build()
+        assert topology.builder_structure(compiled) == registered_graph(graph_id).structure
+        assert matches_registered(compiled, graph_id)
+
+    # A graph without a readable builder falls back to the full extraction.
+    monkeypatch.setattr(topology, "builder_structure", lambda compiled: None)
+    assert matches_registered(_GRAPHS["routing-graph@v1"][1](), "routing-graph@v1")
+
+
+@pytest.mark.backend_unit
 def test_definition_ids_and_fingerprints_are_unique_and_stable():
     registered = [registered_graph(g) for g in graph_definition_ids()]
 
@@ -191,5 +205,13 @@ def test_graph_instance_has_exactly_the_seven_contract_fields():
         "graph_instance_id", "graph_definition_id", "parent_graph_instance_id",
         "parent_node_run_id", "namespace", "started_sequence", "ended_sequence",
     }
-    with pytest.raises(ValidationError):
-        GraphInstance.model_validate({**instance.model_dump(), "started_sequence": 0})
+    for broken in (
+        {"started_sequence": 0},
+        {"started_sequence": "1"},
+        {"started_sequence": 5, "ended_sequence": 4},
+        {"graph_instance_id": "find me a hotel"},
+        {"parent_node_run_id": "x" * 129},
+    ):
+        with pytest.raises(ValidationError):
+            GraphInstance.model_validate({**instance.model_dump(), **broken})
+    GraphInstance.model_validate({**instance.model_dump(), "started_sequence": 4, "ended_sequence": 4})

@@ -30,6 +30,9 @@ class RegisteredGraph:
     # of the node they leave from; they are edge evaluations, not node visits.
     routers: FrozenSet[str]
     fingerprint: str
+    # The builder structure the definition was extracted from; a compiled graph
+    # with the same structure has the same topology (see matches_registered).
+    structure: Optional[Tuple[Any, ...]] = None
 
 
 async def _never_called(*_args: Any, **_kwargs: Any) -> Any:
@@ -112,6 +115,33 @@ def edge_routers(compiled: Any) -> FrozenSet[str]:
     return frozenset(name for branches in _branch_ends(compiled).values() for name in branches)
 
 
+def _ends(ends: Any) -> Tuple[Tuple[str, str], ...]:
+    items = ends.items() if isinstance(ends, dict) else ((target, target) for target in ends or ())
+    return tuple(sorted((str(key), str(target)) for key, target in items))
+
+
+def builder_structure(compiled: Any) -> Optional[Tuple[Any, ...]]:
+    """Everything extract_definition reads, straight from the graph builder.
+
+    Microseconds instead of the ~0.4 ms of get_graph(), so the invocation
+    helper can check every traced call cheaply. None when the graph has no
+    builder to read.
+    """
+    builder = getattr(compiled, "builder", None)
+    if builder is None or not hasattr(builder, "nodes"):
+        return None
+    return (
+        tuple(sorted((name, _ends(getattr(spec, "ends", None))) for name, spec in builder.nodes.items())),
+        tuple(sorted(builder.edges)),
+        tuple(sorted((tuple(starts), end) for starts, end in getattr(builder, "waiting_edges", ()))),
+        tuple(sorted(
+            (source, router, _ends(getattr(spec, "ends", None)) if getattr(spec, "ends", None) else None)
+            for source, branches in _branch_ends(compiled).items()
+            for router, spec in branches.items()
+        )),
+    )
+
+
 def extract_definition(compiled: Any, graph_definition_id: str, name: str) -> GraphDefinition:
     """Read the possible topology of a compiled graph. Does not run it."""
     drawable = compiled.get_graph()
@@ -152,7 +182,8 @@ def registered_graph(graph_definition_id: str) -> RegisteredGraph:
         raise KeyError(f"unknown graph_definition_id: {graph_definition_id}") from None
     compiled = build()
     definition = extract_definition(compiled, graph_definition_id, name)
-    return RegisteredGraph(definition, edge_routers(compiled), topology_fingerprint(definition))
+    return RegisteredGraph(definition, edge_routers(compiled), topology_fingerprint(definition),
+                           builder_structure(compiled))
 
 
 def topology_definitions() -> List[GraphDefinition]:
@@ -162,5 +193,9 @@ def topology_definitions() -> List[GraphDefinition]:
 def matches_registered(compiled: Any, graph_definition_id: str) -> bool:
     """True when a compiled graph still has the registered topology."""
     registered = registered_graph(graph_definition_id)
+    structure = builder_structure(compiled)
+    if structure is not None and structure == registered.structure:
+        return True
+    # Different or unreadable builder: decide on the extracted topology itself.
     current = extract_definition(compiled, graph_definition_id, registered.definition.name)
     return topology_fingerprint(current) == registered.fingerprint

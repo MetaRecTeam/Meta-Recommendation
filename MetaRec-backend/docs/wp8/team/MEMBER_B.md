@@ -24,18 +24,33 @@ Full list with reasons in [DECISIONS.md](DECISIONS.md). In short:
    OpenAPI; run `scripts/export_openapi.py` and `npm run contract:gen`; commit
    the generated files and tell A.
 2. **Wrap the golden event lists into `GraphTraceV1` pages (H2).** A has
-   generated 10 cases from the real D0 runs in
+   generated 11 cases from the real D0 runs in
    [`tests/fixtures/wp8/golden/`](../../../tests/fixtures/wp8/golden/README.md)
-   — nested routing, the task outliving the request, the itinerary anchor,
+   — a whole two-turn debug run (`full_debug_run`, the shape a real trace
+   page has; R11), nested routing, the task outliving the request, the itinerary anchor,
    repeated domain graphs, caught and uncaught failure, cancellation, timeout,
    truncation and a crash. Each has a manifest with the instances, visited
    nodes and expected trace status your page needs.
 3. **Confirm the event sub-shapes (H3)** in
    [`models.py`](../../../langgraph_metarec/wp8_trace/models.py) — you own
    which values fill them.
-4. **Answer rules R1–R10** in [DECISIONS.md](DECISIONS.md): how cancellation
+4. **Answer rules R1–R15** in [DECISIONS.md](DECISIONS.md): how cancellation
    and failure are recorded, where `state_diff` and adapter metadata may
-   appear, who assigns `sequence`, and the trace status for each outcome.
+   appear, who assigns `sequence`, the trace status for each outcome, and
+   (added 3 Nov) one trace per debug run with a root per turn (R11), orphan
+   handling (R12), what explicit propagation means (R13), the guard test
+   (R14) and untraceable graphs (R15).
+5. **Start and seal the trace in the debug route (H7).** Build one
+   `TraceContext` per debug run, pass it to both `handle_user_request_async`
+   calls (A adds the parameter, H6), and call `collector.seal()` in the
+   job's `finally`. `new_trace_context(trace_id, debug_run_id, sink=...,
+   projector=..., config=...)` in `wp8_trace/collector.py` builds it.
+6. **Implement the projector and sink to R16** (`wp8_trace/interfaces.py`).
+   The collector already runs against `NullProjector` and
+   `InMemoryTraceSink` in `wp8_trace/stubs.py`; your real ones replace them.
+
+Also note X2/X3 in DECISIONS.md: contract numbers and booleans are now
+strict, and a graph-level `error` has `node_id: null`.
 
 Already available to build on: `GraphRunEventV1` and the topology models,
 JSON Schemas in [`contracts/wp8/`](../../../../contracts/wp8/) that encode the

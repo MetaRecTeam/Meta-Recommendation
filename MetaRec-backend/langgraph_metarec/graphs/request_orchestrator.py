@@ -24,6 +24,7 @@ from langgraph_metarec.state import (
     RuntimeErrorRecord,
     TaskStatusProjection,
 )
+from langgraph_metarec.wp8_trace.invocation import TraceContext, invoke_with_wp8_trace, trace_kwargs
 
 
 AnalyzeMessage = Callable[..., Awaitable[Any]]
@@ -1102,6 +1103,7 @@ def build_request_orchestrator_graph(
     adapters: RequestOrchestratorAdapters,
     *,
     checkpointer: Optional[Any] = None,
+    trace_ctx: Optional[TraceContext] = None,
 ):
     async def intention_node(state: RequestOrchestratorState) -> RequestOrchestratorState:
         runtime = GraphRuntimeState.from_checkpoint(state.get("runtime"))
@@ -1335,6 +1337,7 @@ def build_request_orchestrator_graph(
             preferences=preferences,
             domain_lock=state.get("domain_lock"),
             force_itinerary=bool(state.get("itinerary_mode")),
+            **trace_kwargs(trace_ctx),
         )
         runtime.routing_route = _route_to_dict(route, state.get("domain_lock"))
         if runtime.collect_confirm_state is not None:
@@ -1657,6 +1660,7 @@ async def run_request_orchestrator(
     itinerary_mode: bool = False,
     hitl_state: Optional[Dict[str, Any]] = None,
     checkpointer: Optional[Any] = None,
+    trace_ctx: Optional[TraceContext] = None,
 ) -> GraphRuntimeState:
     thread_id = conversation_thread_id(user_id, conversation_id, branch_id)
     owner = None
@@ -1665,7 +1669,7 @@ async def run_request_orchestrator(
         active_checkpointer = await owner.aget()
     else:
         active_checkpointer = checkpointer
-    graph = build_request_orchestrator_graph(adapters, checkpointer=active_checkpointer)
+    graph = build_request_orchestrator_graph(adapters, checkpointer=active_checkpointer, trace_ctx=trace_ctx)
     config = {"configurable": {"thread_id": thread_id}}
     try:
         stored = await graph.aget_state(config)
@@ -1718,7 +1722,8 @@ async def run_request_orchestrator(
                     **state_updates,
                 }
 
-        final_state = await graph.ainvoke(
+        final_state = await invoke_with_wp8_trace(
+            graph,
             {
                 "runtime": runtime.to_checkpoint(),
                 "conversation_history": conversation_history or [],
@@ -1729,6 +1734,8 @@ async def run_request_orchestrator(
                 "itinerary_mode": itinerary_mode,
             },
             config,
+            trace_ctx,
+            graph_definition_id="request-orchestrator@v1",
         )
         return GraphRuntimeState.from_checkpoint(final_state["runtime"])
     finally:

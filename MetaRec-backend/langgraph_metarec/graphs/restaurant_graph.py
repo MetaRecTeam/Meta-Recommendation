@@ -12,6 +12,7 @@ from typing import Any, Awaitable, Callable, Dict, Iterable, List, Optional, Tup
 from langgraph.graph import END, START, StateGraph
 
 from langgraph_metarec.tool_registry import DEFAULT_TOOL_REGISTRY, ToolRegistry
+from langgraph_metarec.wp8_trace.invocation import TraceContext, invoke_with_wp8_trace
 
 
 ProgressCallback = Callable[[Dict[str, Any]], Awaitable[None] | None]
@@ -618,6 +619,7 @@ async def run_restaurant_graph(
     tool_tags: Optional[List[str]] = None,
     adapters: Optional[RestaurantGraphAdapters] = None,
     progress_callback: Optional[ProgressCallback] = None,
+    trace_ctx: Optional[TraceContext] = None,
 ) -> RestaurantGraphResult:
     graph = build_restaurant_graph(
         client=client,
@@ -626,7 +628,8 @@ async def run_restaurant_graph(
         adapters=adapters,
         progress_callback=progress_callback,
     )
-    final_state = await graph.ainvoke(
+    final_state = await invoke_with_wp8_trace(
+        graph,
         {
             "query": query,
             "preferences": preferences,
@@ -644,7 +647,10 @@ async def run_restaurant_graph(
             "progress_events": [],
             "metadata": {},
             "errors": [],
-        }
+        },
+        None,
+        trace_ctx,
+        graph_definition_id="restaurant-domain@v1",
     )
     return RestaurantGraphResult(
         plan_calls=final_state.get("plan_calls", []),

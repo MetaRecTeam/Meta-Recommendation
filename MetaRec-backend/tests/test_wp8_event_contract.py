@@ -102,6 +102,12 @@ INVALID = [
     ("user text in an id", lambda: _with("node_start", run_id="find me a hotel")),
     ("bad graph_definition_id", lambda: _with("node_start", graph_definition_id="Request Orchestrator")),
     ("redaction is always present", lambda: _with("node_start", redaction=None)),
+    # numbers and flags are not coerced, as in the schema
+    ("sequence is not a string", lambda: _with("node_start", sequence="17")),
+    ("sequence is not a boolean", lambda: _with("node_start", sequence=True)),
+    ("duration is not a string", lambda: _with("graph_end", duration_ms="42.8")),
+    ("stored_bytes is not a string", lambda: _with("node_start", redaction={**VALID["node_start"]["redaction"], "stored_bytes": "10"})),
+    ("retryable is a boolean", lambda: _with("root_graph_error", error={**VALID["root_graph_error"]["error"], "retryable": 1})),
     # required/null matrix
     ("runnable_type must fit the event", lambda: _with("node_start", runnable_type="graph")),
     ("graph lifecycle has no node_id", lambda: _with("root_graph_start", node_id="intention")),
@@ -116,6 +122,7 @@ INVALID = [
     ("error event carries an error", lambda: _with("node_error_cancelled", error=None)),
     ("error event status", lambda: _with("node_error_cancelled", status="completed")),
     ("node-level error needs node_id", lambda: _with("node_error_cancelled", node_id=None)),
+    ("graph-level error has no node_id", lambda: _with("root_graph_error", node_id="routing")),
     ("trace_truncated has no run", lambda: _with("trace_truncated", run_id="r0")),
     ("trace_truncated is a trace_system event", lambda: _with("trace_truncated", runnable_type="graph")),
     ("starts have no duration", lambda: _with("node_start", duration_ms=1.0)),

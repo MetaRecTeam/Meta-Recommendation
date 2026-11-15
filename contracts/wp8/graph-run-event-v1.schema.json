@@ -1466,6 +1466,29 @@
     {
       "if": {
         "properties": {
+          "event_type": {
+            "const": "error"
+          },
+          "runnable_type": {
+            "const": "graph"
+          }
+        },
+        "required": [
+          "event_type",
+          "runnable_type"
+        ]
+      },
+      "then": {
+        "properties": {
+          "node_id": {
+            "type": "null"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
           "graph_instance_id": {
             "type": "string"
           }

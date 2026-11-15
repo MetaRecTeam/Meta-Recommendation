@@ -26,6 +26,7 @@ from llm_service import analyze_user_message, generate_confirmation_message, gen
 
 # 偏好合并（profile/会话 基线 与 新提取偏好 的 meaningful 合并）
 from langgraph_metarec.nodes.preferences import merge_preferences
+from langgraph_metarec.wp8_trace.invocation import TraceContext, trace_kwargs
 # 显式菜系/菜品意图（混合推荐：命名了具体食物时按其收窄）
 from langgraph_metarec.nodes.food_intent import (
     empty_food_intent,
@@ -1753,6 +1754,7 @@ class MetaRecService:
         tool_tags: Optional[List[str]],
         branch_id: Optional[str],
         route: Optional[Dict[str, Any]] = None,
+        trace_ctx: Optional[TraceContext] = None,
     ):
         """Background-task entrypoint that scopes LLM usage to this task (so the
         ranking / gather-reasoner calls are attributed and flushed)."""
@@ -1767,6 +1769,7 @@ class MetaRecService:
                 tool_tags,
                 branch_id,
                 route,
+                **trace_kwargs(trace_ctx),
             )
 
     def _run_task_graph_compatible(
@@ -1780,6 +1783,7 @@ class MetaRecService:
         tool_tags: Optional[List[str]],
         branch_id: Optional[str],
         route: Optional[Dict[str, Any]] = None,
+        trace_ctx: Optional[TraceContext] = None,
     ):
         task_runner = self.run_recommendation_task_graph
         parameters = inspect.signature(task_runner).parameters
@@ -1796,6 +1800,8 @@ class MetaRecService:
             kwargs["branch_id"] = branch_id
         if "route" in parameters:
             kwargs["route"] = route
+        if "trace_ctx" in parameters:
+            kwargs.update(trace_kwargs(trace_ctx))
         return task_runner(**kwargs)
 
     async def _execute_restaurant_domain_task(
@@ -1808,6 +1814,7 @@ class MetaRecService:
         tool_tags: Optional[List[str]],
         progress_callback,
         conversation_context: Optional[str] = None,
+        trace_ctx: Optional[TraceContext] = None,
     ) -> RecommendationResult:
         from langgraph_metarec.graphs.restaurant_graph import (
             RestaurantGraphAdapters,
@@ -1843,6 +1850,7 @@ class MetaRecService:
                     widen_once=self._widen_food_intent_search,
                 ),
                 progress_callback=progress_callback,
+                **trace_kwargs(trace_ctx),
             )
         except Exception as exc:
             # 绝不把"无候选/管线异常"变成硬失败：降级为带说明的空结果，让前端给出
@@ -1948,6 +1956,7 @@ class MetaRecService:
         use_online_agent: bool,
         tool_tags: Optional[List[str]],
         progress_callback,
+        trace_ctx: Optional[TraceContext] = None,
     ) -> RecommendationResult:
         from langgraph_metarec.graphs.generic_graph import (
             GenericGraphAdapters,
@@ -1979,6 +1988,7 @@ class MetaRecService:
                 tool_tags=tool_tags,
                 progress_callback=progress_callback,
                 adapters=GenericGraphAdapters(reasoner=_gather_reasoner),
+                **trace_kwargs(trace_ctx),
             )
         except Exception as exc:
             import logging
@@ -2057,6 +2067,7 @@ class MetaRecService:
         tool_tags: Optional[List[str]] = None,
         branch_id: Optional[str] = None,
         route: Optional[Dict[str, Any]] = None,
+        trace_ctx: Optional[TraceContext] = None,
     ) -> None:
         from langgraph_metarec.graphs.task_graph import TaskGraphAdapters, run_task_graph
         from langgraph_metarec.state import DomainGraphResult
@@ -2192,6 +2203,7 @@ class MetaRecService:
                         tool_tags=task_tool_tags,
                         progress_callback=scoped_progress_callback,
                         conversation_context=combined_context,
+                        **trace_kwargs(trace_ctx),
                     )
 
                 # Explicit request preferences win over profile slice defaults.
@@ -2218,6 +2230,7 @@ class MetaRecService:
                     use_online_agent=use_online_agent,
                     tool_tags=task_tool_tags,
                     progress_callback=scoped_progress_callback,
+                    **trace_kwargs(trace_ctx),
                 )
 
             if active_route.get("mode") == "multi_domain":
@@ -3168,6 +3181,7 @@ class MetaRecService:
             task_id=task_id,
             query=query,
             checkpointer=await self.runtime_checkpointer.aget(),
+            **trace_kwargs(trace_ctx),
         )
     
     async def process_recommendation_task(
@@ -3327,6 +3341,7 @@ class MetaRecService:
         tool_tags: Optional[List[str]] = None,
         branch_id: Optional[str] = None,
         route: Optional[Dict[str, Any]] = None,
+        trace_ctx: Optional[TraceContext] = None,
     ) -> str:
         task_id = new_uuid()
         conversation_deleted = False
@@ -3398,6 +3413,7 @@ class MetaRecService:
                 tool_tags,
                 branch_id,
                 route,
+                **trace_kwargs(trace_ctx),
             )
         )
         self._running_tasks[task_id] = task
@@ -3916,6 +3932,7 @@ class MetaRecService:
         domain_lock: Optional[str],
         itinerary_mode: bool,
         hitl_state: Optional[Dict[str, Any]],
+        trace_ctx: Optional[TraceContext] = None,
     ) -> Dict[str, Any]:
         from langgraph_metarec.graphs.request_orchestrator import (
             RequestOrchestratorAdapters,
@@ -4012,6 +4029,7 @@ class MetaRecService:
                 tool_tags,
                 branch_id,
                 route,
+                **trace_kwargs(trace_ctx),
             )
 
         def extract_preferences_adapter(preference_query: str) -> Dict[str, Any]:
@@ -4066,6 +4084,7 @@ class MetaRecService:
                 use_online_agent=False,
                 tool_tags=["#place", "#hotel"],
                 progress_callback=None,
+                **trace_kwargs(trace_ctx),
             )
             broad_candidates = [item.model_dump() for item in result.items[:8]]
             return [*exact_candidates, *broad_candidates]
@@ -4092,6 +4111,7 @@ class MetaRecService:
             itinerary_mode=itinerary_mode,
             hitl_state=hitl_state,
             checkpointer=await self.runtime_checkpointer.aget(),
+            **trace_kwargs(trace_ctx),
         )
         if self.profile_repository is not None and runtime.intent_result and runtime.intent_result.profile_updates:
             raw_updates: Dict[str, Any] = {}
@@ -4127,6 +4147,8 @@ class MetaRecService:
         domain_lock: Optional[str] = None,
         itinerary_mode: bool = False,
         hitl_state: Optional[Dict[str, Any]] = None,
+        *,
+        trace_ctx: Optional[TraceContext] = None,
     ) -> Dict[str, Any]:
         """
         异步处理用户请求的统一入口函数（使用 LLM 进行意图识别）
@@ -4142,6 +4164,9 @@ class MetaRecService:
             user_id: 用户ID
             conversation_history: 对话历史（可选）
             session_id: 会话ID（可选）
+            trace_ctx: WP8 graph trace context, passed only by the internal debug
+                route for an admin's traced behaviour test; None (the default)
+                leaves this call exactly as it was.
             
         Returns:
             包含以下字段的字典：
@@ -4170,6 +4195,7 @@ class MetaRecService:
                 domain_lock=domain_lock,
                 itinerary_mode=itinerary_mode,
                 hitl_state=hitl_state,
+                **trace_kwargs(trace_ctx),
             )
 
 

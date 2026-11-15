@@ -4,12 +4,17 @@
     "description": "Multi-domain confirm turn: two generic_graph instances under one domain_graph_dispatch run.",
     "source": {
       "experiment": "E11_multi_domain_siblings",
-      "root_turn": 2,
+      "root_turns": [
+        2
+      ],
       "synthetic": null
     },
     "expected_trace_status": "completed",
     "truncated": false,
     "dropped_event_count": 0,
+    "turn_roots": [
+      "gi-01"
+    ],
     "graph_instances": [
       {
         "graph_instance_id": "gi-01",

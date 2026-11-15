@@ -4,12 +4,17 @@
     "description": "The event cap is reached: one trace_truncated marker, the rest dropped and counted.",
     "source": {
       "experiment": "E3_service_hotel_chain",
-      "root_turn": 2,
+      "root_turns": [
+        2
+      ],
       "synthetic": "confirm_turn_task cut at a 11-event cap plus one trace_truncated marker"
     },
     "expected_trace_status": "completed",
     "truncated": true,
     "dropped_event_count": 17,
+    "turn_roots": [
+      "gi-01"
+    ],
     "graph_instances": [
       {
         "graph_instance_id": "gi-01",

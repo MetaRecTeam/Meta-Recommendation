@@ -25,11 +25,11 @@ paged `GraphTraceV1` API.
 |---|---|---|
 | Topology registry | `langgraph_metarec/wp8_trace/topology.py` | One versioned definition per compiled graph (`request-orchestrator@v1`, `routing-graph@v1`, `task-graph@v1`, `generic-domain@v1`, `restaurant-domain@v1`; see [GRAPH_EXECUTION_FLOW §4](../GRAPH_EXECUTION_FLOW.md#4-topology-ids-suggested-graph_definition_id--node_id-mapping)). Extract nodes and normal/conditional edges from the compiled graph; give conditional edges a stable safe label. Snapshot-test each definition so a node rename forces a version bump. |
 | Single-invocation helper | `wp8_trace/invocation.py` | `invoke_with_wp8_trace(graph, input, config, trace_ctx, *, graph_definition_id)`: copy and merge the collector and WP8 metadata into `config` without touching `configurable.thread_id` or other business keys, then `await graph.ainvoke(...)` **once**. With no or disabled `trace_ctx` it is exactly `graph.ainvoke(input, config)`. |
-| Runner plumbing | the five files in `langgraph_metarec/graphs/`, `service.py` | Route all five `ainvoke` sites through the helper. `request_orchestrator` and `task_graph` already pass config (merge). `routing_graph`, `generic_graph` and `restaurant_graph` pass none today, so add an optional `config`/`trace_ctx` parameter and thread it from the caller. |
+| Runner plumbing | the five files in `langgraph_metarec/graphs/`, `service.py` | Route all five `ainvoke` sites through the helper. `request_orchestrator` and `task_graph` already pass config (merge). `routing_graph`, `generic_graph` and `restaurant_graph` pass none today, so add an optional `config`/`trace_ctx` parameter and thread it from the caller. The entry point is yours too ([H6](DECISIONS.md)): an optional keyword-only `trace_ctx` on `handle_user_request_async`, which B's debug route passes for both turns of a debug run. |
 | Explicit task hand-off | `service.py` `create_task_async` → `run_recommendation_task_graph` → `run_task_graph` | Carry `trace_ctx` and the parent node run explicitly into the background task. Today the link survives only because `asyncio.create_task` copies contextvars (E6a); with a fresh context it breaks (E6b). |
 | Callback collector | `wp8_trace/callbacks.py` | A `BaseCallbackHandler` mapping `on_chain_start/end/error` (and tool/LLM callbacks if any appear) to `graph_*`, `node_*` and `error` drafts. Track open lifecycles by `run_id`, monotonic start time and observed `parent_run_id`. |
 | Adapter-event mapping | `wp8_trace/adapters.py` | Accept typed WP5 LLM-attempt and WP7 tool-scope/tool-health events while a trace is active and map them to `llm_*` (`llm_attempt_adapter`), `policy_*` (`tool_scope_adapter`) and `tool_*`, parented to the current node run. A no-op when tracing is off; it can never block or alter the source operation. |
-| Guard test | `tests/test_wp8_integration.py` | Scan production code for `.ainvoke(` and fail if any call bypasses the helper. |
+| Guard test | `tests/test_wp8_integration.py` | AST scan of production code ([R14](DECISIONS.md)): any `ainvoke`/`invoke`/`astream`/`stream`/`astream_events`/`astream_log`/`abatch`/`batch` attribute outside the helper fails, as does a registered graph without exactly one helper call site; planted bypasses (direct, streaming, aliased) must be caught. |
 
 ### Rules that are easy to get wrong
 
@@ -44,9 +44,12 @@ These come from the D0 probe ([../parentage-baseline/REPORT.md](../parentage-bas
 - **Cancellation:** cancel and timeout arrive as `chain_error` with
   `CancelledError`. Map that class to status `cancelled`; other exceptions to
   `error`. Errors close the same `run_id`, innermost first.
-- **Completion:** the task graph outlives the request graph. A trace is
-  complete only when every open lifecycle has closed (or the job is terminal
-  and the rest become `incomplete`); root `graph_end` is not the end.
+- **Completion:** a debug run is one trace with one root per service turn
+  (query, then auto-confirm; [R11](DECISIONS.md)), and the task graph
+  outlives the second root. A trace is complete only when the debug route
+  has sealed it **and** every open lifecycle has closed (or the job is
+  terminal and the rest become `incomplete`); a root's `graph_end` is not
+  the end.
 - **Caught failures:** in E7 `generic_graph` fails but its ancestors and the
   task report success. Carry nested error counts upward so the UI can show
   them.
@@ -54,8 +57,12 @@ These come from the D0 probe ([../parentage-baseline/REPORT.md](../parentage-bas
   *conversation* `thread_id` and the parent's `checkpoint_ns`. Never derive
   task or instance identity from it; use your own `graph_instance_id`.
 - **Parents:** take `parent_run_id` from the callback; never attach a child to
-  the root or to a graph because its parent is unknown — mark it `incomplete`
-  or drop it with accounting.
+  the root or to a graph because its parent is unknown. An orphan and its
+  subtree are withheld and counted, and the trace ends `incomplete`
+  ([R12](DECISIONS.md)); starts keep status `running` (R5).
+- **Tracing never breaks the run:** a graph the helper cannot trace
+  (unregistered ID, changed topology) runs once untraced and the trace ends
+  `incomplete` ([R15](DECISIONS.md)).
 - **Safety boundary:** pass raw node input/update and exceptions only to
   `SafeProjector`; emit only what it returns. Never put raw values in drafts.
 - **Two invocations of one definition** under one node (E11) get two
@@ -68,11 +75,12 @@ These come from the D0 probe ([../parentage-baseline/REPORT.md](../parentage-bas
 - A side-effect counter node runs exactly once with tracing off, on, failing
   and cancelled; recommendation output and public response are byte-identical
   off vs on.
-- Deterministic fixtures (simple branch, nested routing, task hand-off,
-  itinerary anchor, repeated domain graphs, a synthetic parallel graph,
+- Deterministic fixtures (a full two-turn debug run, simple branch, nested
+  routing, task hand-off, itinerary anchor, repeated domain graphs, a
+  synthetic parallel graph,
   adapter tool/LLM stubs, exception, timeout, cancellation) produce exactly
-  the expected visited nodes and lifecycle counts, one root, valid parents,
-  no cycles.
+  the expected visited nodes and lifecycle counts, one root per turn, valid
+  parents, no cycles.
 - `test_task_handoff_parent_depends_on_inherited_context` in
   `tests/test_wp8_parentage_baseline.py` is deliberately updated: with WP8
   propagation, the fresh-context hand-off **still links**.

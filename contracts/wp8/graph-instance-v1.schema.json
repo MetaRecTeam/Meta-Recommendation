@@ -22,12 +22,13 @@
       "type": "string"
     },
     "graph_instance_id": {
-      "minLength": 1,
+      "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
       "title": "Graph Instance Id",
       "type": "string"
     },
     "namespace": {
       "items": {
+        "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
         "type": "string"
       },
       "title": "Namespace",
@@ -36,6 +37,7 @@
     "parent_graph_instance_id": {
       "anyOf": [
         {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
           "type": "string"
         },
         {
@@ -47,6 +49,7 @@
     "parent_node_run_id": {
       "anyOf": [
         {
+          "pattern": "^[A-Za-z0-9._:@/-]{1,128}$",
           "type": "string"
         },
         {

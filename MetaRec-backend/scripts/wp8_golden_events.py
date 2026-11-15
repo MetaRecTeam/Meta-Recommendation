@@ -1,11 +1,13 @@
 """Build the WP8 golden event lists from the real D0 probe recordings.
 
-Each case is one request turn recorded by scripts/wp8_parentage_probe.py
+Each case is one or more request turns recorded by scripts/wp8_parentage_probe.py
 (docs/wp8/parentage-baseline/data/), converted into GraphRunEventV1 events the
 way the collector is meant to: edge routers dropped, graphs named from the
 topology registry, a failed or cancelled run closed by one `error` event on
-its own run_id. Two cases (truncation, crash) are derived from a real turn and
-marked synthetic. Values were never recorded, so summaries, diffs and
+its own run_id. A debug run's query and auto-confirm turns share one trace,
+each with its own root graph (DECISIONS.md R11); `full_debug_run` shows both.
+Two cases (truncation, crash) are derived from a real turn and marked
+synthetic. Values were never recorded, so summaries, diffs and
 metadata are null and redaction is empty; Member B's projector fills those.
 
 Usage (from MetaRec-backend/):
@@ -18,7 +20,7 @@ import sys
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Tuple
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BACKEND_DIR))
@@ -42,24 +44,27 @@ DEFINITION_BY_GRAPH = {
 }
 ROUTERS = frozenset().union(*(registered_graph(g).routers for g in graph_definition_ids()))
 
-# case -> (D0 experiment, 1-based root turn, expected trace status, description)
+# case -> (D0 experiment, 1-based root turns, expected trace status, description)
 CASES = {
-    "query_turn_routing": ("E3_service_hotel_chain", 1, "completed",
+    "full_debug_run": ("E3_service_hotel_chain", (1, 2), "completed",
+                       "A whole debug run: the query turn and the auto-confirm turn are two root "
+                       "request graphs in one trace; the task graph outlives the second."),
+    "query_turn_routing": ("E3_service_hotel_chain", (1,), "completed",
                            "Hotel query turn: routing_graph nested under the orchestrator's routing node."),
-    "confirm_turn_task": ("E3_service_hotel_chain", 2, "completed",
+    "confirm_turn_task": ("E3_service_hotel_chain", (2,), "completed",
                           "Confirm turn: task_graph under domain_dispatch outlives the request graph; "
                           "generic_graph under domain_graph_dispatch."),
-    "itinerary_anchor": ("E4_itinerary_anchor", 1, "completed",
+    "itinerary_anchor": ("E4_itinerary_anchor", (1,), "completed",
                          "Itinerary turn: generic_graph nested under domain_dispatch before any task exists."),
-    "repeated_domain_graphs": ("E11_multi_domain_siblings", 2, "completed",
+    "repeated_domain_graphs": ("E11_multi_domain_siblings", (2,), "completed",
                                "Multi-domain confirm turn: two generic_graph instances under one domain_graph_dispatch run."),
-    "caught_failure": ("E7_domain_failure_caught", 2, "completed",
+    "caught_failure": ("E7_domain_failure_caught", (2,), "completed",
                        "generic_graph fails, the service catches it, ancestors and the task report success."),
-    "uncaught_failure": ("E8_routing_failure_uncaught", 1, "failed",
+    "uncaught_failure": ("E8_routing_failure_uncaught", (1,), "failed",
                          "routing_graph fails and the error closes every enclosing run, innermost first."),
-    "cancellation": ("E9_background_cancel", 2, "cancelled",
+    "cancellation": ("E9_background_cancel", (2,), "cancelled",
                      "Background task cancelled mid tool call; the request graph had already completed."),
-    "timeout": ("E10_request_timeout", 1, "cancelled",
+    "timeout": ("E10_request_timeout", (1,), "cancelled",
                 "The request times out while the intention node waits on the LLM."),
 }
 TRUNCATE_AFTER = 11  # ordinary events kept before the trace_truncated marker
@@ -77,13 +82,13 @@ def _descendants(runs: Dict[str, Dict[str, Any]], root_id: str) -> set:
     return keep
 
 
-def convert(experiment: str, root_index: int, case: str) -> List[Dict[str, Any]]:
+def convert(experiment: str, turns: Tuple[int, ...], case: str) -> List[Dict[str, Any]]:
     recorded = json.loads((D0_DATA / f"{experiment}.events.json").read_text())
     runs = build_runs(recorded)
     roots = sorted((r for r in runs.values() if r["parent_run_id"] is None), key=lambda r: r["start_ms"])
-    root = roots[root_index - 1]
-    tree = _descendants(runs, root["run_id"])
-    t0 = root["start_ms"]
+    selected = [roots[turn - 1] for turn in turns]
+    tree = set().union(*(_descendants(runs, root["run_id"]) for root in selected))
+    t0 = selected[0]["start_ms"]
 
     run_ids: Dict[str, str] = {}
     instance_of: Dict[str, str] = {}      # graph run -> graph_instance_id
@@ -218,6 +223,7 @@ def manifest(case: str, events: List[Dict[str, Any]], *, source: Dict[str, Any],
         "expected_trace_status": status,
         "truncated": any(e["event_type"] == "trace_truncated" for e in events),
         "dropped_event_count": dropped,
+        "turn_roots": [i["graph_instance_id"] for i in instances if i["parent_node_run_id"] is None],
         "graph_instances": instances,
         "visited_nodes_by_instance": visited,
         "lifecycle_counts": dict(sorted(Counter(e["event_type"] for e in events).items())),
@@ -228,9 +234,9 @@ def manifest(case: str, events: List[Dict[str, Any]], *, source: Dict[str, Any],
 
 def build() -> Dict[str, Dict[str, Any]]:
     out: Dict[str, Dict[str, Any]] = {}
-    for case, (experiment, root_index, status, description) in CASES.items():
-        events = convert(experiment, root_index, case)
-        source = {"experiment": experiment, "root_turn": root_index, "synthetic": None}
+    for case, (experiment, turns, status, description) in CASES.items():
+        events = convert(experiment, turns, case)
+        source = {"experiment": experiment, "root_turns": list(turns), "synthetic": None}
         out[case] = {"manifest": manifest(case, events, source=source, status=status, description=description),
                      "events": events}
 

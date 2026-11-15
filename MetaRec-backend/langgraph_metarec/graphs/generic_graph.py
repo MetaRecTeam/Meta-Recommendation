@@ -11,6 +11,7 @@ from langgraph.graph import END, START, StateGraph
 
 from langgraph_metarec.genres import detect_genres_in_text
 from langgraph_metarec.tool_registry import DEFAULT_TOOL_REGISTRY, ToolRegistry
+from langgraph_metarec.wp8_trace.invocation import TraceContext, invoke_with_wp8_trace
 
 
 ProgressCallback = Callable[[Dict[str, Any]], Awaitable[None] | None]
@@ -957,9 +958,11 @@ async def run_generic_domain_graph(
     tool_tags: Optional[List[str]] = None,
     adapters: Optional[GenericGraphAdapters] = None,
     progress_callback: Optional[ProgressCallback] = None,
+    trace_ctx: Optional[TraceContext] = None,
 ) -> GenericGraphResult:
     graph = build_generic_domain_graph(adapters=adapters, progress_callback=progress_callback)
-    final_state = await graph.ainvoke(
+    final_state = await invoke_with_wp8_trace(
+        graph,
         {
             "query": query,
             "domain": domain,
@@ -973,7 +976,10 @@ async def run_generic_domain_graph(
             "progress_events": [],
             "metadata": {},
             "errors": [],
-        }
+        },
+        None,
+        trace_ctx,
+        graph_definition_id="generic-domain@v1",
     )
     return GenericGraphResult(
         executions=final_state.get("executions", []),

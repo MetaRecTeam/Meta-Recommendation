@@ -4,12 +4,17 @@
     "description": "Confirm turn: task_graph under domain_dispatch outlives the request graph; generic_graph under domain_graph_dispatch.",
     "source": {
       "experiment": "E3_service_hotel_chain",
-      "root_turn": 2,
+      "root_turns": [
+        2
+      ],
       "synthetic": null
     },
     "expected_trace_status": "completed",
     "truncated": false,
     "dropped_event_count": 0,
+    "turn_roots": [
+      "gi-01"
+    ],
     "graph_instances": [
       {
         "graph_instance_id": "gi-01",

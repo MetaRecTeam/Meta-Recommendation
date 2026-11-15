@@ -24,7 +24,7 @@ def _terminal(events):
 @pytest.mark.backend_unit
 def test_every_planned_case_exists():
     assert set(CASES) == {
-        "query_turn_routing", "confirm_turn_task", "itinerary_anchor", "repeated_domain_graphs",
+        "full_debug_run", "query_turn_routing", "confirm_turn_task", "itinerary_anchor", "repeated_domain_graphs",
         "caught_failure", "uncaught_failure", "cancellation", "timeout", "truncation", "incomplete",
     }
 
@@ -60,8 +60,11 @@ def test_trace_structure_is_sound(name):
     assert [e["sequence"] for e in events] == list(range(1, len(events) + 1))
     assert len({e["trace_id"] for e in events}) == 1
 
+    # One root per service turn (DECISIONS.md R11), always the request graph.
     roots = [e for e in lifecycle if e["event_type"] == "graph_start" and e["parent_run_id"] is None]
-    assert len(roots) == 1
+    assert [r["graph_instance_id"] for r in roots] == CASES[name]["manifest"]["turn_roots"]
+    assert len(roots) == len(CASES[name]["manifest"]["source"]["root_turns"])
+    assert {r["graph_definition_id"] for r in roots} == {"request-orchestrator@v1"}
 
     started = {}
     for e in lifecycle:
@@ -104,6 +107,22 @@ def test_task_outlives_the_request_graph():
                     if e["event_type"] == "graph_end" and e["graph_definition_id"] == "task-graph@v1")
 
     assert task_end > root_end
+
+
+@pytest.mark.backend_unit
+def test_a_debug_run_is_one_trace_with_a_root_per_turn():
+    events = CASES["full_debug_run"]["events"]
+    roots = [e for e in events if e["parent_run_id"] is None and e["event_type"] in ("graph_start", "graph_end")]
+
+    assert [(e["event_type"], e["graph_instance_id"]) for e in roots] == [
+        ("graph_start", "gi-01"), ("graph_end", "gi-01"), ("graph_start", roots[2]["graph_instance_id"]),
+        ("graph_end", roots[2]["graph_instance_id"]),
+    ], "turn 2 starts after turn 1 ends; the turns are siblings, not parent and child"
+    assert events[-1]["sequence"] > roots[-1]["sequence"], "the task outlives the second root, so it is not the end"
+
+    def shape(case):
+        return [(e["event_type"], e["graph_definition_id"], e["node_id"], e["status"]) for e in CASES[case]["events"]]
+    assert shape("full_debug_run") == shape("query_turn_routing") + shape("confirm_turn_task")
 
 
 @pytest.mark.backend_unit

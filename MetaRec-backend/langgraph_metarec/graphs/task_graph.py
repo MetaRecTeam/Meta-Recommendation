@@ -8,6 +8,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph_metarec.checkpointing import RuntimeCheckpointer, task_thread_id
 from langgraph_metarec.itinerary_snapshot import sanitize_planning_snapshot
 from langgraph_metarec.state import GraphRuntimeState, ProgressEvent, RuntimeErrorRecord, TaskStatusProjection
+from langgraph_metarec.wp8_trace.invocation import TraceContext, invoke_with_wp8_trace
 
 
 ProgressCallback = Callable[[Dict[str, Any]], Awaitable[None]]
@@ -165,6 +166,7 @@ async def run_task_graph(
     task_id: str,
     query: str,
     checkpointer: Optional[Any] = None,
+    trace_ctx: Optional[TraceContext] = None,
 ) -> GraphRuntimeState:
     owner = None
     if checkpointer is None:
@@ -185,7 +187,9 @@ async def run_task_graph(
         runtime.task_id = task_id
         runtime.task_thread_id = task_tid
         runtime.query = query
-        final_state = await graph.ainvoke({"runtime": runtime.to_checkpoint()}, config)
+        final_state = await invoke_with_wp8_trace(
+            graph, {"runtime": runtime.to_checkpoint()}, config, trace_ctx, graph_definition_id="task-graph@v1"
+        )
         return GraphRuntimeState.from_checkpoint(final_state["runtime"])
     finally:
         if owner is not None:

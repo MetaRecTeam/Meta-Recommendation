@@ -14,6 +14,7 @@ script produces, so regenerate rather than editing JSON.
 
 | Case | Source | Shows | Expected trace status |
 |---|---|---|---|
+| `full_debug_run` | E3, turns 1+2 | a whole debug run: query turn and auto-confirm turn as two root request graphs in one trace (R11); the task outlives the second root | completed |
 | `query_turn_routing` | E3, turn 1 | `routing_graph` nested under the orchestrator's `routing` node | completed |
 | `confirm_turn_task` | E3, turn 2 | `task_graph` under `domain_dispatch` ending **after** the request graph; `generic_graph` under `domain_graph_dispatch` | completed |
 | `itinerary_anchor` | E4, turn 1 | `generic_graph` under `domain_dispatch` before any task exists | completed |
@@ -25,14 +26,16 @@ script produces, so regenerate rather than editing JSON.
 | `truncation` | E3 turn 2, synthetic | an 11-event cap, one `trace_truncated` marker, 17 events dropped | completed, truncated |
 | `incomplete` | E3 turn 2, synthetic | process crash after `candidate_gather` starts; 6 runs left open | incomplete |
 
-Each file is `{"manifest": …, "events": […]}`. The manifest lists the graph
-instances (with parent instance and parent node run), the visited nodes per
-instance, lifecycle counts, unmatched starts, error count and the expected
-trace status.
+Each file is `{"manifest": …, "events": […]}`. The manifest lists the turns
+it was cut from (`source.root_turns`), the root instance of each turn
+(`turn_roots`), the graph instances (with parent instance and parent node
+run), the visited nodes per instance, lifecycle counts, unmatched starts,
+error count and the expected trace status. The single-turn cases are slices of
+a debug run; a real debug-run trace looks like `full_debug_run`.
 
 **What these are not.** The D0 listener never recorded values, so summaries,
 state diffs and metadata are `null` and redaction lists are empty. Member B's
 redaction pipeline fills those; privacy fixtures with seeded values are
 separate. Expected statuses and the error-event shape are proposals recorded
 in [`docs/wp8/team/DECISIONS.md`](../../../../docs/wp8/team/DECISIONS.md)
-(R1, R2, R8); the files change if those decisions change.
+(R1, R2, R8, R11); the files change if those decisions change.

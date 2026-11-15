@@ -173,6 +173,7 @@ From the D0 probe over the real graphs ([../parentage-baseline/REPORT.md](../par
 | Tool and LLM calls fire no native callbacks | Their events come only from the WP5/WP7 adapter sink | A |
 | Inherited callback metadata carries the conversation `thread_id` | Never derive identity from inherited metadata | A |
 | Two `generic_graph` instances can share one parent node run (E11) | One `graph_instance_id` per run; diff counts invocations | A (ids), B (diff) |
+| A behaviour-test debug run makes two service calls (query turn, auto-confirm turn) | One trace per debug run with one root per turn; finish only when the route has sealed the trace and every lifecycle has closed (DECISIONS R11) | A (status), B (route seals) |
 
 ## 6. Non-negotiable invariants
 
@@ -198,25 +199,36 @@ These are the seams where A's and B's code meet. Names are proposals.
 ```python
 # A provides — wp8_trace/invocation.py
 async def invoke_with_wp8_trace(graph, input, config, trace_ctx, *, graph_definition_id: str): ...
-    # merges collector + trace metadata into a copy of config, calls graph.ainvoke ONCE;
-    # trace_ctx None or disabled -> plain graph.ainvoke(input, config)
+    # sets run_name = graph_definition_id and adds the collector unless inherited,
+    # applies an explicit hand-off parent, calls graph.ainvoke ONCE;
+    # trace_ctx None or disabled -> plain graph.ainvoke; a graph it cannot trace
+    # runs once untraced and the collector's on_untraced_graph() is told (DECISIONS R15)
+    # (implemented: langgraph_metarec/wp8_trace/invocation.py)
+
+def trace_kwargs(trace_ctx) -> dict: ...
+    # {"trace_ctx": ctx} while tracing is on, else {}; every runner and service
+    # method forwards the context with **trace_kwargs(ctx) (M4)
 
 @dataclass(frozen=True)
 class TraceContext:              # A provides; created by B's route, carried by A's plumbing
     trace_id: str
     debug_run_id: str
-    config: GraphTraceConfigV1
-    sink: "TraceEventSink"       # B's store
-    projector: "SafeProjector"   # B's redaction
+    collector: BaseCallbackHandler   # A's collector
+    enabled: bool = True
+    parent_run_id: UUID | None = None  # explicit parent for hand-offs that lose context
+    config: GraphTraceConfigV1 | None = None
+    sink: "TraceEventSink" | None = None       # B's store
+    projector: "SafeProjector" | None = None   # B's redaction
 
-# B provides — wp8_trace/redaction.py
+# B provides — wp8_trace/redaction.py (protocol in wp8_trace/interfaces.py, DECISIONS R16)
 class SafeProjector(Protocol):
-    def summarize(self, value) -> Summary | None: ...
-    def node_state_diff(self, graph_definition_id, node_id, node_input, node_update) -> StateDiff | None: ...
-    def safe_error(self, exc: BaseException) -> SafeError: ...
-    def metadata(self, raw: dict) -> dict: ...
+    policy_id: str
+    def project(self, *, event_type, runnable_type, graph_definition_id, node_id,
+                node_input=None, output=None, error=None, raw_name=None) -> Projection: ...
+    # Projection: input_summary, output_summary, state_diff, metadata, error,
+    # redacted_paths, truncated_paths — one call per event
 
-# B provides — wp8_trace/storage.py
+# B provides — wp8_trace/storage.py (protocol in wp8_trace/interfaces.py; stand-ins in stubs.py)
 class TraceEventSink(Protocol):
     def append(self, trace_id: str, draft: DraftEvent) -> AppendResult: ...   # assigns sequence atomically; accepted | truncated | dropped
     def open_instance(self, trace_id: str, instance: GraphInstance) -> None: ...
@@ -249,8 +261,8 @@ against it before integrating.
 
 | Evidence (acceptance row) | Owner | Where |
 |---|---|---|
-| Five-runner guard test catches a new `ainvoke` bypass | A | `test_wp8_integration.py` |
-| Fixture fidelity: visited nodes, lifecycle counts, one root, valid parents, no cycles, contiguous sequence | A | `test_wp8_collector.py`, `tests/fixtures/wp8/` |
+| Five-runner guard test catches a new `ainvoke`/streaming bypass (DECISIONS R14) | A | `test_wp8_integration.py` |
+| Fixture fidelity: visited nodes, lifecycle counts, one root per turn, valid parents, no cycles, contiguous sequence | A | `test_wp8_collector.py`, `tests/fixtures/wp8/` |
 | Side-effect counter = 1 (off / on / error / cancel); byte-identical output off vs on | A | `test_wp8_integration.py` |
 | 50 concurrent traces, no cross-trace leakage | A | `test_wp8_integration.py` (uses B's store) |
 | 100 paired warm runs: median ≤ 5 %, p95 ≤ 10 % overhead; no-op path separately | A | `scripts/` benchmark |

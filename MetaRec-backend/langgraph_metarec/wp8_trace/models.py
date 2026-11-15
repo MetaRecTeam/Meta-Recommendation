@@ -32,6 +32,15 @@ class _Strict(BaseModel):
     model_config = ConfigDict(extra="forbid", frozen=True)
 
 
+# Numbers and booleans are strict, as in the JSON Schema: "17", true or 1 for
+# a flag are rejected rather than coerced.
+StrictCount = Annotated[int, Field(strict=True, ge=0)]
+StrictSequence = Annotated[int, Field(strict=True, ge=1)]
+StrictNonNegFloat = Annotated[float, Field(strict=True, ge=0, allow_inf_nan=False)]
+StrictBool = Annotated[bool, Field(strict=True)]
+SafeId = Annotated[str, Field(pattern=r"^[A-Za-z0-9._:@/-]{1,128}$")]
+
+
 class TopologyNode(_Strict):
     node_id: str = Field(min_length=1)
     label: str = Field(min_length=1)
@@ -59,13 +68,20 @@ class GraphDefinition(_Strict):
 class GraphInstance(_Strict):
     """One execution of one graph definition inside a trace."""
 
-    graph_instance_id: str = Field(min_length=1)
+    graph_instance_id: SafeId
     graph_definition_id: str = Field(pattern=GRAPH_DEFINITION_ID_PATTERN)
-    parent_graph_instance_id: Optional[str]
-    parent_node_run_id: Optional[str]
-    namespace: List[str]
-    started_sequence: int = Field(ge=1)
-    ended_sequence: Optional[int] = Field(ge=1)
+    parent_graph_instance_id: Optional[SafeId]
+    parent_node_run_id: Optional[SafeId]
+    namespace: List[SafeId]
+    started_sequence: StrictSequence
+    ended_sequence: Optional[StrictSequence]
+
+    @model_validator(mode="after")
+    def _ends_after_it_starts(self) -> "GraphInstance":
+        # Python-only: JSON Schema cannot compare two fields.
+        if self.ended_sequence is not None and self.ended_sequence < self.started_sequence:
+            raise ValueError("ended_sequence cannot precede started_sequence")
+        return self
 
 
 # ---------------------------------------------------------------------------
@@ -83,7 +99,6 @@ RunnableType = Literal[
     "llm_attempt_adapter", "tool_scope_adapter", "trace_system",
 ]
 
-SafeId = Annotated[str, Field(pattern=r"^[A-Za-z0-9._:@/-]{1,128}$")]
 BoundedStr = Annotated[str, Field(max_length=MAX_STRING_CHARS)]
 BoundedStrList = Annotated[List[BoundedStr], Field(max_length=MAX_COLLECTION_ITEMS)]
 SafeIdList = Annotated[List[SafeId], Field(max_length=MAX_COLLECTION_ITEMS)]
@@ -154,10 +169,10 @@ UtcDatetime = Annotated[
 
 class PayloadSummary(_Strict):
     keys: BoundedStrList
-    bytes: int = Field(ge=0)
+    bytes: StrictCount
     value_types: Optional[Annotated[Dict[BoundedStr, BoundedStr], Field(max_length=MAX_COLLECTION_ITEMS)]] = None
-    item_count: Optional[int] = Field(default=None, ge=0)
-    omitted_count: Optional[int] = Field(default=None, ge=0)
+    item_count: Optional[StrictCount] = None
+    omitted_count: Optional[StrictCount] = None
 
 
 class ChangedValue(_Strict):
@@ -189,8 +204,8 @@ class LlmAttempt(_Strict):
     policy_leg: Optional[SafeId]
     outcome: Optional[SafeId]
     validation_status: Optional[SafeId]
-    total_tokens: Optional[int] = Field(ge=0)
-    cost_usd: Optional[float] = Field(ge=0, allow_inf_nan=False)
+    total_tokens: Optional[StrictCount]
+    cost_usd: Optional[StrictNonNegFloat]
     pricing_snapshot_id: Optional[SafeId]
     provider_price_table_version: Optional[SafeId]
 
@@ -224,7 +239,7 @@ class EventMetadata(_Strict):
     domain: Optional[SafeId] = None
     tool: Optional[SafeId] = None
     model: Optional[SafeId] = None
-    attempt: Optional[int] = Field(default=None, ge=1)
+    attempt: Optional[StrictSequence] = None
     task_id: Optional[SafeId] = None
     llm_attempt: Optional[LlmAttempt] = None
     tool_scope: Optional[ToolScope] = None
@@ -235,14 +250,14 @@ class SafeError(_Strict):
     code: SafeId
     error_class: SafeId
     safe_message: BoundedStr
-    retryable: bool
+    retryable: StrictBool
 
 
 class RedactionInfo(_Strict):
     policy_id: SafeId
     redacted_paths: BoundedStrList
     truncated_paths: BoundedStrList
-    stored_bytes: int = Field(ge=0)
+    stored_bytes: StrictCount
 
 
 # event_type -> the runnable_type values it may carry
@@ -299,6 +314,7 @@ def _matrix_json_schema() -> List[Dict[str, Any]]:
     rules += [
         _when({"event_type": {"const": "error"}, "runnable_type": {"not": {"const": "graph"}}},
               {"node_id": _NOT_NULL, "parent_run_id": _NOT_NULL}),
+        _when({"event_type": {"const": "error"}, "runnable_type": {"const": "graph"}}, {"node_id": _NULL}),
         _when({"graph_instance_id": {"type": "string"}}, {"graph_definition_id": _NOT_NULL}),
         _when({"parent_graph_instance_id": {"type": "string"}}, {"parent_run_id": _NOT_NULL}),
     ]
@@ -321,9 +337,9 @@ class GraphRunEventV1(_Strict):
     event_id: SafeId
     trace_id: SafeId
     debug_run_id: SafeId
-    sequence: int = Field(ge=1)
+    sequence: StrictSequence
     timestamp_utc: UtcDatetime
-    monotonic_offset_ms: float = Field(ge=0, allow_inf_nan=False)
+    monotonic_offset_ms: StrictNonNegFloat
     event_type: EventType
     status: EventStatus
     graph_definition_id: Optional[Annotated[str, Field(pattern=GRAPH_DEFINITION_ID_PATTERN)]]
@@ -333,7 +349,7 @@ class GraphRunEventV1(_Strict):
     run_id: Optional[SafeId]
     parent_run_id: Optional[SafeId]
     runnable_type: RunnableType
-    duration_ms: Optional[float] = Field(ge=0, allow_inf_nan=False)
+    duration_ms: Optional[StrictNonNegFloat]
     input_summary: Optional[PayloadSummary]
     output_summary: Optional[PayloadSummary]
     state_diff: Optional[StateDiff]
@@ -375,7 +391,9 @@ class GraphRunEventV1(_Strict):
             need("error")
             if self.status not in ("error", "cancelled"):
                 problems.append("error events have status error or cancelled")
-            if self.runnable_type != "graph":
+            if self.runnable_type == "graph":
+                forbid("node_id", "a graph-level failure")
+            else:
                 need("node_id")
                 need("parent_run_id")
 

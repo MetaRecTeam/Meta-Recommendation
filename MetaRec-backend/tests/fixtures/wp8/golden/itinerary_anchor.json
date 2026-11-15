@@ -4,12 +4,17 @@
     "description": "Itinerary turn: generic_graph nested under domain_dispatch before any task exists.",
     "source": {
       "experiment": "E4_itinerary_anchor",
-      "root_turn": 1,
+      "root_turns": [
+        1
+      ],
       "synthetic": null
     },
     "expected_trace_status": "completed",
     "truncated": false,
     "dropped_event_count": 0,
+    "turn_roots": [
+      "gi-01"
+    ],
     "graph_instances": [
       {
         "graph_instance_id": "gi-01",

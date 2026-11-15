@@ -4,12 +4,17 @@
     "description": "Hotel query turn: routing_graph nested under the orchestrator's routing node.",
     "source": {
       "experiment": "E3_service_hotel_chain",
-      "root_turn": 1,
+      "root_turns": [
+        1
+      ],
       "synthetic": null
     },
     "expected_trace_status": "completed",
     "truncated": false,
     "dropped_event_count": 0,
+    "turn_roots": [
+      "gi-01"
+    ],
     "graph_instances": [
       {
         "graph_instance_id": "gi-01",

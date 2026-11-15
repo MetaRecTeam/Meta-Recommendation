@@ -4,12 +4,17 @@
     "description": "The request times out while the intention node waits on the LLM.",
     "source": {
       "experiment": "E10_request_timeout",
-      "root_turn": 1,
+      "root_turns": [
+        1
+      ],
       "synthetic": null
     },
     "expected_trace_status": "cancelled",
     "truncated": false,
     "dropped_event_count": 0,
+    "turn_roots": [
+      "gi-01"
+    ],
     "graph_instances": [
       {
         "graph_instance_id": "gi-01",

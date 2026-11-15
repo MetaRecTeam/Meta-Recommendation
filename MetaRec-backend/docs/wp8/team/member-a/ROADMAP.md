@@ -53,7 +53,8 @@ build against the stub named in the step and swap it in later.
    (`scripts/wp8_export_schemas.py`) with a parity test; TypeScript parity
    once the trace route is in OpenAPI (joint with **[B]**).
 6. Golden trace fixtures (success, nested, repeated, failure, cancellation,
-   truncation, incomplete) as `GraphTraceV1` pages — joint with **[B]**,
+   truncation, incomplete, and `full_debug_run` with both turns of one debug
+   run, [R11](../DECISIONS.md)) as `GraphTraceV1` pages — joint with **[B]**,
    needs B's page model.
 
 **Done when:** contract tests accept every valid event and golden fixture and
@@ -62,16 +63,24 @@ over-cap value).
 
 ### M3 · Single-invocation helper (D2) — target 15 Nov
 
-1. `TraceContext` (trace/debug-run IDs, config, sink, projector, parent
-   instance and node run).
+1. `TraceContext` (trace/debug-run IDs, collector, enabled flag, explicit
+   `parent_run_id` for hand-offs, and B's config, sink and projector).
 2. `invoke_with_wp8_trace(graph, input, config, trace_ctx, *, graph_definition_id)`:
-   - no `trace_ctx` / disabled → exactly `graph.ainvoke(input, config)`;
-   - otherwise copy-merge callbacks and WP8 metadata; never replace
-     `configurable.thread_id` or other business keys; `ainvoke` once;
-   - stamp the graph name / `graph_definition_id` (all graphs report
-     `"LangGraph"` today).
-3. Unit tests on a fake graph: config merge preserves keys, caller's dict not
-   mutated, side-effect counter = 1 (off, on, error, cancel).
+   - no `trace_ctx` / disabled → exactly the runner's old call;
+   - otherwise set only `run_name` (= `graph_definition_id`; every graph
+     reports `"LangGraph"` today) and add the collector to `callbacks` unless
+     it is already inherited; never pass `metadata` or `configurable`,
+     because LangChain replaces explicit keys wholesale and that would drop
+     the inherited parent and checkpoint namespace; `ainvoke` once;
+   - an explicit hand-off parent applies whatever form the callbacks take;
+   - a graph it cannot trace (unregistered ID, changed topology) runs once
+     untraced and is reported to the collector, never refused
+     ([R15](../DECISIONS.md)).
+3. Tests: config merge preserves keys, caller's config not mutated, nested
+   calls keep the inherited parent and namespace, explicit parent links
+   across a fresh or copied context and for every callbacks form, side-effect
+   counter = 1 (off/on × ok/error/cancel and for untraceable graphs),
+   checkpoints unchanged.
 
 **Done when:** helper tests pass with a no-op collector.
 
@@ -81,13 +90,31 @@ over-cap value).
    config/`trace_ctx` parameter (default keeps today's call exactly).
 2. `request_orchestrator`, `task_graph`: route their existing config through
    the helper (merge).
-3. Thread `trace_ctx` from `service.py` to every nested call site
+3. Service entry ([H6](../DECISIONS.md)): optional keyword-only `trace_ctx`
+   on `MetaRecService.handle_user_request_async` (default `None`, no HTTP
+   change), threaded to `run_request_orchestrator`.
+4. Thread `trace_ctx` from `service.py` to every nested call site
    (routing node, task domain dispatch, itinerary anchor).
-4. Guard test: scan production code for `.ainvoke(` outside the helper.
-5. Existing graph/service tests unchanged and green; outputs byte-identical
+5. Guard test as defined in [R14](../DECISIONS.md): AST scan for
+   `ainvoke`/`invoke`/`astream`/`stream`/`astream_events`/`astream_log`/
+   `abatch`/`batch` attributes outside the helper, one helper call site per
+   registered `graph_definition_id`, planted-bypass cases (direct, streaming,
+   aliased).
+6. Existing graph/service tests unchanged and green; outputs byte-identical
    with tracing off.
 
-**Done when:** guard test passes and fails on a planted bypass.
+**Done when:** guard test passes and fails on each planted bypass; a debug
+run with a trace context reaches all five runners through the helper.
+
+*As built:* every runner and service method on the debug path takes an
+optional keyword-only `trace_ctx` and forwards it with `**trace_kwargs(ctx)`,
+which is `{}` while tracing is off, so untraced calls keep their exact
+arguments. Nodes reach it by closure (`build_request_orchestrator_graph(...,
+trace_ctx=)`, the service's adapter closures); it never enters graph state or
+config. The task path (`create_task_async` → `run_task_graph` → domain graphs)
+already carries `trace_ctx`, so M6 step 1 is only the explicit hand-off
+parent. `_refine_itinerary_slot_unlocked` (the itinerary refine endpoint) is
+not reachable from a debug run and passes none.
 
 ### M5 · Callback collector (D2) — target 29 Nov
 
@@ -95,29 +122,56 @@ over-cap value).
    the registry for node IDs and router names.
 2. Pair start/end by `run_id`; monotonic durations; error reuses the run's
    `run_id`; `CancelledError` → `cancelled`.
-3. Unknown parent → `incomplete` (or drop with accounting), never reparented.
+3. Unknown parent → orphan ([R12](../DECISIONS.md)): withhold the orphan
+   and its subtree, count them in `dropped_event_count`, mark the trace for
+   `incomplete`; never reparent. A parentless graph is a turn root only if it
+   is `request-orchestrator@v1` and the trace is not sealed (R11).
 4. One `graph_instance_id` per graph run; `open_instance`/`close_instance`
    calls on the sink.
 5. Every value goes through `SafeProjector` **[B]** — stub: a projector that
    returns `None` summaries and no diff.
 6. Drafts go to `TraceEventSink` **[B]** — stub: in-memory list sink.
-7. Re-run the D0 experiments (`tests/wp8_probe_support.py`) through the
-   collector and compare parent structure with the baseline.
+7. `seal()` (called by B's route, [H7](../DECISIONS.md)) and
+   `on_untraced_graph(graph_definition_id, reason)` (called by the helper,
+   [R15](../DECISIONS.md)).
+8. Re-run the D0 experiments (`tests/wp8_probe_support.py`) through the
+   collector and compare parent structure with the baseline, including
+   `full_debug_run` (two turns into one collector).
 
 **Done when:** collector fixtures give the exact expected nodes and lifecycle
-counts, one root, valid parents, no cycles, no router "nodes".
+counts, one root per turn, valid parents, no cycles, no router "nodes".
+
+*As built:* `wp8_trace/collector.py` (`TraceCollector`, `new_trace_context`),
+`interfaces.py` (`DraftEvent`, `AppendResult`, `Projection`, the projector and
+sink protocols, [R16](../DECISIONS.md)) and `stubs.py` (`NullProjector`,
+`InMemoryTraceSink`). Native tool/LLM callbacks map to metadata-only child
+spans of their node (none fire in MetaRec today). Other runnables inside a
+node, such as routers or a `RunnableLambda`, emit nothing; their children
+attach to the node. Live replays of D0 E3, E4 and E7–E11 match nine golden
+cases event for event, parents included. Not yet: the capture flags in
+`GraphTraceConfigV1` (`child_events: none`, `state_diff: none`) are applied
+once B's config model exists (M8); trace status and `finalize` are M6.
 
 ### M6 · Task hand-off + trace completion (D2) — target 6 Dec
 
-1. Pass `trace_ctx` explicitly through `create_task_async` →
-   `run_recommendation_task_graph` → `run_task_graph`.
+1. At `create_task_async`, read the `domain_dispatch` node run id and pass
+   `trace_ctx.handoff(node_run_id)` into the background task (M4 already
+   carries `trace_ctx` along `create_task_async` →
+   `run_recommendation_task_graph` → `run_task_graph`).
 2. Update `test_task_handoff_parent_depends_on_inherited_context`: a
    fresh-context hand-off must now **still link**.
-3. Trace status: `running` until every open lifecycle closes; terminal job
-   with open runs → `incomplete`. Root `graph_end` is not completion.
+3. Trace status ([R11](../DECISIONS.md)): `running` until the trace is
+   sealed **and** every open lifecycle has closed; a turn root's `graph_end`
+   is not completion (turn 2 or the task may still run). Terminal job with
+   open runs → `incomplete`; any orphan or untraced graph → `incomplete`
+   (R8, R12, R15).
 4. Nested error counts on ancestors (caught failures, E7).
+5. Hand-off applies the explicit parent whatever callbacks the call carries
+   (the helper already does this from M3).
 
-**Done when:** E3/E6b/E7/E9 fixtures show the expected status and parents.
+**Done when:** E3/E6b/E7/E9 fixtures and `full_debug_run` show the expected
+status and parents; the trace stays `running` between turn 1's root end and
+turn 2, and after turn 2's root end while the task runs.
 
 ### M7 · WP5/WP7 adapter events (D2) — target 13 Dec
 
@@ -125,9 +179,12 @@ counts, one root, valid parents, no cycles, no router "nodes".
    a trace is active; no-op otherwise; cannot block the caller.
 2. Map to `llm_*` (`llm_attempt_adapter`), `policy_*`
    (`tool_scope_adapter`), `tool_*`; parent = current node run.
+3. No WP5/WP7 code is in this repository yet ([H8](../DECISIONS.md)): build
+   and test against fake typed events matching `LlmAttempt`, `ToolScope` and
+   `ToolHealth`; wire the real sources when they land.
 
 **Done when:** fake adapter events appear under the right node with the right
-`runnable_type`.
+`runnable_type`; WP5/WP7 owners have confirmed the shapes (H8).
 
 ### M8 · Integration + capture evidence (D2–D3) — target 24 Jan
 
@@ -135,6 +192,11 @@ counts, one root, valid parents, no cycles, no router "nodes".
 2. Exact-once and byte-identical off/on on the full fake recommendation path.
 3. 50 concurrent traced requests: no cross-trace parents, instances,
    sequences or state.
+
+4. Interim report inputs (joint, due 25 Jan): propagation inventory (from
+   `GRAPH_EXECUTION_FLOW.md` + R13), runtime rows of the risk register, and
+   the collector side of the threat model (what reaches the projector, R12
+   withholding). These D0 items are not written yet.
 
 **Done when:** these three suites pass in CI; interim-report evidence ready.
 
@@ -172,7 +234,7 @@ render tests cover selection, keyboard, states and raw-JSON fallback.
 
 ## Evaluation and handover
 
-### M12 · Evidence (D5) — target 7 Mar
+### M12 · Evidence (D6 evaluation, run in the D5 phase) — target 7 Mar
 
 1. Fidelity fixture matrix (branch, nested, task hand-off, itinerary anchor,
    repeated, synthetic parallel, adapter stubs, exception, timeout, cancel).

@@ -4,12 +4,17 @@
     "description": "routing_graph fails and the error closes every enclosing run, innermost first.",
     "source": {
       "experiment": "E8_routing_failure_uncaught",
-      "root_turn": 1,
+      "root_turns": [
+        1
+      ],
       "synthetic": null
     },
     "expected_trace_status": "failed",
     "truncated": false,
     "dropped_event_count": 0,
+    "turn_roots": [
+      "gi-01"
+    ],
     "graph_instances": [
       {
         "graph_instance_id": "gi-01",
