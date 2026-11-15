@@ -53,3 +53,8 @@ MetaRec-ui/.vite
 # 日志
 *.log
 logs
+
+# Large backend data/eval files (several GB). compose.yaml bind-mounts
+# ./MetaRec-backend over /app/backend at runtime, so they need not be baked into the image.
+MetaRec-backend/data
+MetaRec-backend/eval/*.jsonl
