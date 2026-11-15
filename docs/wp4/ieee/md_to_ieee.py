@@ -1,13 +1,14 @@
 """Authored report markdown -> two-column IEEE-style .docx.
 Custom markers: %author, %affil, %abstract, %keywords, %table key | caption | c|f, %eq key | text, %references,
 figures ![fig:key|caption|c|f|path](path), cross references {sec:k} {secn:k} {fig:k} {tab:k} {app:X} {cite:N} {eq:k}."""
+import json
 import re
 import sys
 from pathlib import Path
 
 from docx import Document
 from docx.enum.section import WD_SECTION
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_ALIGN_VERTICAL, WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH, WD_TAB_ALIGNMENT
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -16,6 +17,10 @@ from docx.shared import Cm, Pt, RGBColor
 SRC = Path(sys.argv[1])
 OUT = sys.argv[2]
 ROOT = Path(sys.argv[3])  # folder the figure paths are relative to
+
+# Hand formatting captured from the edited Word file by extract_word_overlay.py (optional): cells centred vertically.
+_ov = Path(__file__).with_name("word-format-overlay.json")
+OVERLAY = json.loads(_ov.read_text(encoding="utf8")) if _ov.exists() else {}
 
 PAGE_W, PAGE_H = 21.0, 29.7
 MARGIN_LR = 1.6
@@ -491,6 +496,14 @@ def render_table(b):
             cell.width = Cm(widths[c])
     for c, col in enumerate(t.columns):
         col.width = Cm(widths[c])
+    for ri in OVERLAY.get(b["key"], {}).get("allow_split", []):
+        if ri < len(t.rows):
+            for cs in t.rows[ri]._tr.get_or_add_trPr().findall(qn("w:cantSplit")):
+                cs.getparent().remove(cs)
+    for ri, cols in OVERLAY.get(b["key"], {}).get("valign_center", {}).items():
+        for ci in cols:
+            if int(ri) < len(t.rows) and ci < len(t.rows[int(ri)].cells):
+                t.rows[int(ri)].cells[ci].vertical_alignment = WD_ALIGN_VERTICAL.CENTER
     sp = new_par(before=0, after=4)
     sp.paragraph_format.line_spacing = Pt(4)
 

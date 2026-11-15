@@ -36,7 +36,7 @@ The research question in the proposal is whether a constraint-first hybrid of co
 | Each M2 component removed, the rest re-tuned | None hurts accuracy. Without `collaborative`, M2 falls level with B1 (-0.02%). Without `tail_adjustment`, accuracy is unchanged (-0.05%, interval includes 0) but catalogue coverage drops from 70.3% to 62.4% | {sec:ablation} |
 | Sealed test split (opened once, weights unchanged) | M2 against B1, NDCG@10 +1.87% (95% interval +1.70% to +2.04%); +3.20% on long histories; the 3% target is **not** met | {sec:testsplit} |
 
-Sections {secn:pipeline} to {secn:freeze} give the full D0 audit. After that come the frozen dataset (D1, {sec:dataset}), the baselines (D2, {sec:baselines}), the M2 ranker (D3, {sec:m2}), its integration into the live path (D4, {sec:live}) and the one-command evaluation (D5, {sec:eval}). {sec:discussion} and {sec:conclusion} say what the results mean, and {sec:status} lists the decisions, the limits and what is left. The proposal defines the D0 scope as: *trace router → product tool parameters → providers/enrichment → normalisation/deduplication → generic rank → strict API/UI; reproduce B0; audit item feedback, IDs, prices and missing fields; freeze contracts, dataset/category, split and constraint fixtures.* {tab:t02} shows where each deliverable stands.
+Sections {secn:pipeline} to {secn:freeze} give the full D0 audit. After that come the frozen dataset (D1, {sec:dataset}), the baselines (D2, {sec:baselines}), the M2 ranker (D3, {sec:m2}), its integration into the live path (D4, {sec:live}) and the one-command evaluation (D5, {sec:eval}). {sec:discussion} and {sec:conclusion} say what the results mean, and {sec:status} lists the decisions, the limits and what is left. The proposal defines the D0 scope as: *trace router → product tool parameters → providers / enrichment → normalisation / deduplication → generic rank → strict API / UI; reproduce B0; audit item feedback, IDs, prices and missing fields; freeze contracts, dataset / category, split and constraint fixtures.* {tab:t02} shows where each deliverable stands.
 
 %table t02 | Progress by Deliverable | f
 | Deliverable | Status | Where |
@@ -374,7 +374,7 @@ A word that occurs several times in the history text is counted once for every o
 | compatible | 1 | 1 | 3 | 3.327 | 43, 58, 66 |
 | multi | 1 | 1 | 1 | 4.195 | 56 |
 | to | 1 | 1 | 3 | 3.327 | 27, 37, 100 |
-| **pack** | 1, 2, 3 | **3** | 24 | 1.139 | 2, 12, 13, 15, 20, 22, 24, 28, 38, 39, 41, 42, 45, 46, 47, 52, 56, 60, 63, 66, 69, 74, 79, 90 |
+| pack | 1, 2, 3 | **3** | 24 | 1.139 | 2, 12, 13, 15, 20, 22, 24, 28, 38, 39, 41, 42, 45, 46, 47, 52, 56, 60, 63, 66, 69, 74, 79, 90 |
 | 11 | 2 | 1 | 3 | 3.327 | 9, 18, 56 |
 | **24** | 2, 3 | **3** | 1 | 4.195 | 36 |
 | 5 | 2 | 1 | 15 | 1.708 | 10, 12, 18, 19, 23, 24, 28, 34, 39, 41, 45, 48, 56, 57, 93 |
@@ -654,6 +654,24 @@ The tail adjustment is the interesting case. Removing it costs -0.05% (interval 
 
 Without the tail adjustment the head share rises from 91.5% to 94.9% and the coverage falls from 70.3% to 62.4%, so it is what keeps M2 from showing the same few items to everyone. On the complex slice it is worth 0.8 points (+2.09% against B1 instead of +2.91%). I therefore kept it. Removing popularity gives full coverage, but it halves accuracy, so that is not a useful trade. The live weights did not change as a result of this ablation.
 
+### Re-Tuning on Five Folds of Users (15 November 2026) {#crossval}
+
+One question the ablation leaves open is whether the gain depends on which users the weights were tuned on. M2's weights were tuned on 1 in 10 development users and scored on the other 9 in 10, and that is a single split. So I repeated the tuning five times (`scripts/wp4_m2_cv.py`). I shuffled the 149,788 development users with seed 42 and cut them into five groups of about 29,958. For each group I searched every weighting in steps of 0.05 (10,626 of them) on the other four groups, with the same objective as before (NDCG@10), and then scored the best weighting and B1 on the group that had been left out. B1 is the BM25 weight 0.25 used everywhere else. The split is by user and not by case, so no user is in both the tuning set and the scoring set, and a random split of cases would let later purchases leak into the tuning. Only development cases were used and the test split was not read. {tab:t45} gives the result.
+
+%table t45 | M2 Against B1 in Five Folds of Users (Development Cases) | f
+| Fold | Users scored | NDCG@10 M2 | NDCG@10 B1 | Gain over B1 | Tuned weights (text, attribute, collaborative, popularity, tail) |
+|---|---|---|---|---|---|
+| 0 | 29,958 | 0.2347 | 0.2326 | +0.88% | 0.25, 0, 0.05, 0.65, 0.05 |
+| 1 | 29,958 | 0.2353 | 0.2330 | +1.00% | 0.20, 0, 0.05, 0.65, 0.10 |
+| 2 | 29,958 | 0.2357 | 0.2343 | +0.61% | 0.20, 0, 0.05, 0.70, 0.05 |
+| 3 | 29,957 | 0.2400 | 0.2381 | +0.80% | 0.20, 0, 0.05, 0.65, 0.10 |
+| 4 | 29,957 | 0.2378 | 0.2362 | +0.69% | 0.20, 0, 0.05, 0.70, 0.05 |
+| **Mean** | | **0.2367** | **0.2348** | **+0.79% (SD 0.15)** | |
+
+M2 beats B1 in all five folds, by between +0.61% and +1.00%, and the mean gain is +0.79%. The single 1-in-10 split gave +0.81%, so that figure was not a lucky draw of users. The tuned weights are also close to the live ones. Collaborative is 0.05 in every fold, text is 0.20 in four folds and 0.25 in one, popularity is 0.65 in three folds and 0.70 in two, the tail adjustment is 0.05 or 0.10, and `attribute_match` is 0 every time. Fold 0 picked exactly the live weights. I did not change the live weights because of this.
+
+The check has limits. Any two folds share three quarters of their tuning users, so the five gains are not independent, and the SD of 0.15 is a rough spread, not a confidence interval. B1's weight was chosen on all development users, which if anything favours B1. The 3% target is not reached in any fold. The cases, the sampled metrics and the random negatives are the same as before, so this says nothing about real queries. The run took about 11 hours on the laptop CPU, almost all of it scoring the 10,626 weightings on each fold.
+
 ### Finishing D3: Eligibility First, the Missing-Price Policy, the Fallback, and Tests {#finishing}
 
 D3 asks for a hard-constraint engine, the hybrid score, a cold fallback, reason codes and ablations. I built the score, the cold fallback, the reason codes and the ablations earlier. This step added what was still missing and tested all of it (`langgraph_metarec/product_ranker_m2.py`, `tests/wp4/test_product_ranker_m2.py`). It has five parts.
@@ -884,7 +902,7 @@ That is also the honest summary of the contribution. On accuracy against a stron
 
 The head and tail result is a trade-off and not a clear win. M2 is 1.29% worse than B1 on head targets and much better on tail ones, with more of the catalogue shown. Whether that is wanted depends on the product. For a search with a budget it probably is, because the item the user wants is often not the most reviewed one, but I have no live data to say so.
 
-The sealed test split supports this reading. M2's lead over B1 is +1.87% there (+1.70% to +2.04%), larger than on the development set and with the same pattern across slices, so the gain is not an artefact of tuning on the development set ({sec:testsplit}). The 3% target is still not met. Taking each component out in turn ({sec:ablation}) shows that none hurts accuracy, that the history-affinity part is what puts M2 above B1, and that the tail adjustment earns its place through exposure and not through accuracy.
+The sealed test split supports this reading. M2's lead over B1 is +1.87% there (+1.70% to +2.04%), larger than on the development set and with the same pattern across slices, so the gain is not an artefact of tuning on the development set ({sec:testsplit}). Re-tuning the weights on five folds of users gives the same picture, a gain of +0.79% on average that is positive in all five folds ({sec:crossval}). The 3% target is still not met. Taking each component out in turn ({sec:ablation}) shows that none hurts accuracy, that the history-affinity part is what puts M2 above B1, and that the tail adjustment earns its place through exposure and not through accuracy.
 
 ### Where M2 Still Falls Short {#failures}
 
@@ -915,7 +933,7 @@ Hou et al. {cite:1} is the source of the dataset. The proposal lists the pretrai
 - Synthetic queries. A case has no real search query. The "query" is the user's recent purchases, and the complex-query slice is a stand-in made from the length of that text. The live system receives a real query, which the offline numbers do not cover.
 - Easy negatives. The 99 negatives are random items the user never touched, so most of them are unrelated to the user. Harder negatives, such as items from the same category, would probably lower every score and could change the order of the systems.
 - One category. All results are from `Office_Products`. A category with more brand and price variation might favour M2's attributes and gate more.
-- Tuning. M2's weights were tuned on 1 in 10 users and scored on the other 9 in 10. B1's weight was chosen on all development users, which if anything favours B1. The top ten weightings are within 0.0010 NDCG@10 of each other, so the weights are not pinned down.
+- Tuning. M2's weights were tuned on 1 in 10 users and scored on the other 9 in 10. B1's weight was chosen on all development users, which if anything favours B1. The top ten weightings are within 0.0010 NDCG@10 of each other, so the weights are not pinned down. Re-tuning on five folds of users ({sec:crossval}) gave a gain over B1 of +0.61% to +1.00% in every fold, so the result does not hinge on that one split. The folds share most of their tuning users, though, and their spread is not an interval.
 - Intervals. The bootstrap covers which users are in the sample. It does not cover the random negatives, the choice of weights, or the 15 labelled searches, which I labelled by hand and which are too few for a rate.
 - Prices and providers. Prices and result lists change between runs ({sec:prices}), so the live result will differ from any frozen one. The live path has been tested against frozen candidate pools and not against the real provider.
 - Rules on text. The hard rules match candidate text and not validated attributes ({sec:livelimits}). The zero-violator result on the 15 searches therefore says that the rules do what they state. It does not say that every product that passes truly has the required feature.
