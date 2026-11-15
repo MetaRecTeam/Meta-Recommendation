@@ -272,45 +272,23 @@ class InMemoryTraceStore:
             if record is None:
                 raise TraceNotFound(trace_id)
 
-            remaining = [e for e in record.events if e.sequence > after_sequence]
-            page: List[GraphRunEventV1] = []
-            page_bytes = 0
-            for event in remaining[:limit]:
-                size = event.redaction.stored_bytes or len(event.model_dump_json().encode("utf-8"))
-                if page and page_bytes + size > MAX_PAGE_BYTES:
-                    break
-                page.append(event)
-                page_bytes += size
-
-            last = page[-1].sequence if page else after_sequence
-            has_more = len(remaining) > len(page)
-            return GraphTraceV1(
-                schema_version="graph-trace/1.0",
+            page, last, has_more = select_page(
+                record.events, after_sequence=after_sequence, limit=limit
+            )
+            return build_page(
                 trace_id=record.trace_id,
                 debug_run_id=record.debug_run_id,
                 status=record.status,
-                config_snapshot=TraceConfigSnapshot(
-                    redaction_policy_id=record.config.redaction_policy_id,
-                    capture=record.config.capture,
-                    limits=record.config.limits,
-                    retention_days=record.config.retention_days,
-                ),
-                topology=TraceTopology(
-                    definitions=list(record.definitions),
-                    instances=list(record.instances.values()),
-                ),
+                config=record.config,
+                definitions=record.definitions,
+                instances=list(record.instances.values()),
                 events=page,
-                event_window=EventWindow(
-                    after_sequence=after_sequence,
-                    returned=len(page),
-                    next_after_sequence=last,
-                    has_more=has_more,
-                ),
+                after_sequence=after_sequence,
+                next_after_sequence=last,
+                has_more=has_more,
                 summary=self._summary(record),
-                redaction_summary=RedactionSummary(
-                    redacted_value_count=record.redacted_value_count,
-                    truncated_value_count=record.truncated_value_count,
-                ),
+                redacted_value_count=record.redacted_value_count,
+                truncated_value_count=record.truncated_value_count,
                 truncated=record.truncated,
                 dropped_event_count=record.dropped_event_count,
                 created_at=record.created_at,
@@ -318,23 +296,10 @@ class InMemoryTraceStore:
             )
 
     def _summary(self, record: _TraceRecord) -> TraceSummary:
-        started = record.started_at or record.created_at
-        completed = record.completed_at if record.status != "running" else None
-        duration = None
-        if completed is not None:
-            duration = max((completed - started).total_seconds() * 1000.0, 0.0)
-        visited = {
-            (e.graph_instance_id, e.node_id)
-            for e in record.events
-            if e.event_type == "node_start" and e.node_id is not None
-        }
-        errors = sum(1 for e in record.events if e.event_type == "error")
-        return TraceSummary(
-            started_at=started,
-            completed_at=completed,
-            duration_ms=duration,
-            visited_nodes=len(visited),
-            error_count=errors,
+        return summarize(
+            record.events,
+            started_at=record.started_at or record.created_at,
+            completed_at=record.completed_at if record.status != "running" else None,
         )
 
     # -- administration ----------------------------------------------------
@@ -378,3 +343,111 @@ class InMemoryTraceStore:
                     record.completed_at = self._clock()
                     count += 1
             return count
+
+
+def select_page(
+    events: List[GraphRunEventV1],
+    *,
+    after_sequence: int,
+    limit: int,
+    max_page_bytes: int = MAX_PAGE_BYTES,
+) -> tuple[List[GraphRunEventV1], int, bool]:
+    """The events for one page, the cursor to pass next, and whether more remain.
+
+    A page is capped by bytes as well as by count, so a page of large events
+    returns fewer than ``limit`` rather than an oversized response. At least
+    one event is always returned when any remain, otherwise a single event
+    larger than the page budget would stall the cursor forever.
+    """
+    remaining = [event for event in events if event.sequence > after_sequence]
+    page: List[GraphRunEventV1] = []
+    page_bytes = 0
+    for event in remaining[:limit]:
+        size = event.redaction.stored_bytes or len(event.model_dump_json().encode("utf-8"))
+        if page and page_bytes + size > max_page_bytes:
+            break
+        page.append(event)
+        page_bytes += size
+    last = page[-1].sequence if page else after_sequence
+    return page, last, len(remaining) > len(page)
+
+
+def build_page(
+    *,
+    trace_id: str,
+    debug_run_id: str,
+    status: TraceStatus,
+    config: GraphTraceConfigV1,
+    definitions: Iterable[GraphDefinition],
+    instances: Iterable[GraphInstance],
+    events: List[GraphRunEventV1],
+    after_sequence: int,
+    next_after_sequence: int,
+    has_more: bool,
+    summary: TraceSummary,
+    redacted_value_count: int,
+    truncated_value_count: int,
+    truncated: bool,
+    dropped_event_count: int,
+    created_at: datetime,
+    expires_at: datetime,
+) -> GraphTraceV1:
+    """One page, in the contract shape. Every store returns pages through here.
+
+    Two stores that build the page separately will drift apart in some corner
+    nobody tests. There is one builder, so they cannot.
+    """
+    return GraphTraceV1(
+        schema_version="graph-trace/1.0",
+        trace_id=trace_id,
+        debug_run_id=debug_run_id,
+        status=status,
+        config_snapshot=TraceConfigSnapshot(
+            redaction_policy_id=config.redaction_policy_id,
+            capture=config.capture,
+            limits=config.limits,
+            retention_days=config.retention_days,
+        ),
+        topology=TraceTopology(definitions=list(definitions), instances=list(instances)),
+        events=events,
+        event_window=EventWindow(
+            after_sequence=after_sequence,
+            returned=len(events),
+            next_after_sequence=next_after_sequence,
+            has_more=has_more,
+        ),
+        summary=summary,
+        redaction_summary=RedactionSummary(
+            redacted_value_count=redacted_value_count,
+            truncated_value_count=truncated_value_count,
+        ),
+        truncated=truncated,
+        dropped_event_count=dropped_event_count,
+        created_at=created_at,
+        expires_at=expires_at,
+    )
+
+
+def summarize(
+    events: Iterable[GraphRunEventV1],
+    *,
+    started_at: datetime,
+    completed_at: Optional[datetime],
+) -> TraceSummary:
+    """Whole-trace counts. Shared so both stores count the same things."""
+    events = list(events)
+    duration = None
+    if completed_at is not None:
+        duration = max((completed_at - started_at).total_seconds() * 1000.0, 0.0)
+    visited = {
+        (event.graph_instance_id, event.node_id)
+        for event in events
+        if event.event_type == "node_start" and event.node_id is not None
+    }
+    return TraceSummary(
+        started_at=started_at,
+        completed_at=completed_at,
+        duration_ms=duration,
+        visited_nodes=len(visited),
+        error_count=sum(1 for event in events if event.event_type == "error"),
+    )
